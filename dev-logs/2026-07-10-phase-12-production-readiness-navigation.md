@@ -1,0 +1,24 @@
+### Phase 12: Production Readiness + App Navigation
+
+- **Timestamp:** 2026-07-10
+- **Mode:** Agent
+- **Persona(s) Active:** 🏗️ Tech Lead + ⚙️ Backend Engineer + 🖥️ Frontend Engineer + 🧪 QA Engineer
+- **Files Modified/Created:**
+  - `.env.example` — Updated to production-oriented defaults for app URL, secure session settings, and websocket URLs.
+  - `resources/js/components/layout/MainLayout.jsx` — Replaced the simple header with a persistent authenticated shell.
+  - `resources/js/components/layout/Sidebar.jsx` — Added the authenticated sidebar navigation.
+  - `resources/js/components/layout/Topbar.jsx` — Added the authenticated top bar with user display and logout action.
+  - `resources/js/components/ui/NavLink.jsx` — Added a reusable active-state navigation link primitive.
+  - `resources/js/components/layout/GuestLayout.jsx` — Added a public navigation header for guest pages.
+  - `resources/js/pages/classrooms/_sections/ClassroomManagementSection.jsx` — Added refetch-on-mount behavior for teacher classroom/session queries.
+  - `resources/js/pages/classroom-browser/_sections/ClassroomBrowserSection.jsx` — Added refetch-on-mount behavior for public classroom/session queries.
+  - `resources/js/pages/classroom-browser/_sections/ClassroomDetailPanel.jsx` — Added refetch-on-mount behavior for learner session/auth queries.
+- **Issues Encountered:**
+  - The first patch attempt failed on `.env.example` because the file contains duplicated `BROADCAST_CONNECTION` and `SESSION_DOMAIN` entries, which made the diff context too broad.
+  - The teacher classroom list initially appeared stale in the browser after reload, even though the API returned the correct classrooms.
+- **Resolution:**
+  - Split the edits into smaller patches and cleaned the production example env values without changing the actual local `.env`.
+  - Added a persistent authenticated app shell with a sidebar and top bar, plus a public guest header.
+  - Forced the classroom and session queries to refetch on mount so the app shell and pages show current data after navigation or reload.
+- **QA Checklist Result:** ✅ All pass. `npm run build` passed after the navigation shell and refetch changes. Browser verification showed the authenticated layout with sidebar and topbar rendering correctly, and the teacher classroom workspace refreshed to show `6 active classrooms` with live session rows after the refetch tweak.
+- **Next Steps:** Production readiness and navigation shell work is complete for the current phase. Any follow-up can focus on deployment-specific secrets, domains, or final visual polish, awaiting your approval.

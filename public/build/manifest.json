@@ -1,0 +1,248 @@
+{
+  "_Button-CGVAhYMw.js": {
+    "file": "assets/Button-CGVAhYMw.js",
+    "name": "Button",
+    "imports": [
+      "resources/js/app.jsx"
+    ]
+  },
+  "_GuestLayout-DQLabvjP.js": {
+    "file": "assets/GuestLayout-DQLabvjP.js",
+    "name": "GuestLayout",
+    "imports": [
+      "resources/js/app.jsx"
+    ]
+  },
+  "_InputLabel-BqK7CxMX.js": {
+    "file": "assets/InputLabel-BqK7CxMX.js",
+    "name": "InputLabel",
+    "imports": [
+      "resources/js/app.jsx"
+    ]
+  },
+  "_MainLayout-DsanzHTK.js": {
+    "file": "assets/MainLayout-DsanzHTK.js",
+    "name": "MainLayout",
+    "imports": [
+      "resources/js/app.jsx"
+    ]
+  },
+  "_PrimaryButton-4ORjM1Uq.js": {
+    "file": "assets/PrimaryButton-4ORjM1Uq.js",
+    "name": "PrimaryButton",
+    "imports": [
+      "resources/js/app.jsx",
+      "_Button-CGVAhYMw.js"
+    ]
+  },
+  "_TextInput-D_xRnOf6.js": {
+    "file": "assets/TextInput-D_xRnOf6.js",
+    "name": "TextInput",
+    "imports": [
+      "resources/js/app.jsx"
+    ]
+  },
+  "_authApi-DPiJwTbT.js": {
+    "file": "assets/authApi-DPiJwTbT.js",
+    "name": "authApi",
+    "imports": [
+      "resources/js/app.jsx"
+    ]
+  },
+  "_classroomApi-1THTcxDU.js": {
+    "file": "assets/classroomApi-1THTcxDU.js",
+    "name": "classroomApi",
+    "imports": [
+      "resources/js/app.jsx"
+    ]
+  },
+  "_useSessionChannel-jYmYrUBL.js": {
+    "file": "assets/useSessionChannel-jYmYrUBL.js",
+    "name": "useSessionChannel",
+    "imports": [
+      "resources/js/app.jsx"
+    ]
+  },
+  "resources/js/app.jsx": {
+    "file": "assets/app-ZomOLeDL.js",
+    "name": "app",
+    "src": "resources/js/app.jsx",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/pages/classroom-browser/_sections/ClassroomBrowserSection.jsx",
+      "resources/js/pages/classroom-browser/_sections/ClassroomDetailPanel.jsx",
+      "resources/js/pages/classroom-browser/page.jsx",
+      "resources/js/pages/classrooms/_sections/ClassroomManagementSection.jsx",
+      "resources/js/pages/classrooms/_sections/ConfirmActionModal.jsx",
+      "resources/js/pages/classrooms/_sections/MaterialUploadSection.jsx",
+      "resources/js/pages/classrooms/page.jsx",
+      "resources/js/pages/login/_sections/AuthFormSection.jsx",
+      "resources/js/pages/login/page.jsx",
+      "resources/js/pages/profile/Edit.jsx",
+      "resources/js/pages/register/page.jsx"
+    ],
+    "css": [
+      "assets/app-Bu8Vd32u.css"
+    ]
+  },
+  "resources/js/pages/classroom-browser/_sections/ClassroomBrowserSection.jsx": {
+    "file": "assets/ClassroomBrowserSection-DBWb3fMQ.js",
+    "name": "ClassroomBrowserSection",
+    "src": "resources/js/pages/classroom-browser/_sections/ClassroomBrowserSection.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_Button-CGVAhYMw.js",
+      "_useSessionChannel-jYmYrUBL.js",
+      "_TextInput-D_xRnOf6.js",
+      "_classroomApi-1THTcxDU.js",
+      "resources/js/pages/classroom-browser/_sections/ClassroomDetailPanel.jsx",
+      "_authApi-DPiJwTbT.js"
+    ]
+  },
+  "resources/js/pages/classroom-browser/_sections/ClassroomDetailPanel.jsx": {
+    "file": "assets/ClassroomDetailPanel-D_RNO7Yh.js",
+    "name": "ClassroomDetailPanel",
+    "src": "resources/js/pages/classroom-browser/_sections/ClassroomDetailPanel.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_Button-CGVAhYMw.js",
+      "_useSessionChannel-jYmYrUBL.js",
+      "_authApi-DPiJwTbT.js"
+    ]
+  },
+  "resources/js/pages/classroom-browser/page.jsx": {
+    "file": "assets/page-5bdD1w69.js",
+    "name": "page",
+    "src": "resources/js/pages/classroom-browser/page.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "resources/js/pages/classroom-browser/_sections/ClassroomBrowserSection.jsx",
+      "_Button-CGVAhYMw.js",
+      "_useSessionChannel-jYmYrUBL.js",
+      "_TextInput-D_xRnOf6.js",
+      "_classroomApi-1THTcxDU.js",
+      "resources/js/pages/classroom-browser/_sections/ClassroomDetailPanel.jsx",
+      "_authApi-DPiJwTbT.js"
+    ]
+  },
+  "resources/js/pages/classrooms/_sections/ClassroomManagementSection.jsx": {
+    "file": "assets/ClassroomManagementSection-BI_VNSM4.js",
+    "name": "ClassroomManagementSection",
+    "src": "resources/js/pages/classrooms/_sections/ClassroomManagementSection.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_Button-CGVAhYMw.js",
+      "_InputLabel-BqK7CxMX.js",
+      "_useSessionChannel-jYmYrUBL.js",
+      "_TextInput-D_xRnOf6.js",
+      "_classroomApi-1THTcxDU.js",
+      "resources/js/pages/classrooms/_sections/ConfirmActionModal.jsx",
+      "resources/js/pages/classrooms/_sections/MaterialUploadSection.jsx"
+    ]
+  },
+  "resources/js/pages/classrooms/_sections/ConfirmActionModal.jsx": {
+    "file": "assets/ConfirmActionModal-Cs5gcRRH.js",
+    "name": "ConfirmActionModal",
+    "src": "resources/js/pages/classrooms/_sections/ConfirmActionModal.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_Button-CGVAhYMw.js"
+    ]
+  },
+  "resources/js/pages/classrooms/_sections/MaterialUploadSection.jsx": {
+    "file": "assets/MaterialUploadSection-dFs0kS9V.js",
+    "name": "MaterialUploadSection",
+    "src": "resources/js/pages/classrooms/_sections/MaterialUploadSection.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_Button-CGVAhYMw.js",
+      "_InputLabel-BqK7CxMX.js",
+      "_classroomApi-1THTcxDU.js",
+      "resources/js/pages/classrooms/_sections/ConfirmActionModal.jsx"
+    ]
+  },
+  "resources/js/pages/classrooms/page.jsx": {
+    "file": "assets/page-BdofUsXh.js",
+    "name": "page",
+    "src": "resources/js/pages/classrooms/page.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_MainLayout-DsanzHTK.js",
+      "resources/js/pages/classrooms/_sections/ClassroomManagementSection.jsx",
+      "_Button-CGVAhYMw.js",
+      "_InputLabel-BqK7CxMX.js",
+      "_useSessionChannel-jYmYrUBL.js",
+      "_TextInput-D_xRnOf6.js",
+      "_classroomApi-1THTcxDU.js",
+      "resources/js/pages/classrooms/_sections/ConfirmActionModal.jsx",
+      "resources/js/pages/classrooms/_sections/MaterialUploadSection.jsx"
+    ]
+  },
+  "resources/js/pages/login/_sections/AuthFormSection.jsx": {
+    "file": "assets/AuthFormSection-Btzs0myP.js",
+    "name": "AuthFormSection",
+    "src": "resources/js/pages/login/_sections/AuthFormSection.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_InputLabel-BqK7CxMX.js",
+      "_PrimaryButton-4ORjM1Uq.js",
+      "_TextInput-D_xRnOf6.js",
+      "_authApi-DPiJwTbT.js",
+      "_Button-CGVAhYMw.js"
+    ]
+  },
+  "resources/js/pages/login/page.jsx": {
+    "file": "assets/page-BDh1WbjT.js",
+    "name": "page",
+    "src": "resources/js/pages/login/page.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_GuestLayout-DQLabvjP.js",
+      "resources/js/pages/login/_sections/AuthFormSection.jsx",
+      "_InputLabel-BqK7CxMX.js",
+      "_PrimaryButton-4ORjM1Uq.js",
+      "_Button-CGVAhYMw.js",
+      "_TextInput-D_xRnOf6.js",
+      "_authApi-DPiJwTbT.js"
+    ]
+  },
+  "resources/js/pages/profile/Edit.jsx": {
+    "file": "assets/Edit-Dt5tO7Cw.js",
+    "name": "Edit",
+    "src": "resources/js/pages/profile/Edit.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_MainLayout-DsanzHTK.js",
+      "_InputLabel-BqK7CxMX.js",
+      "_TextInput-D_xRnOf6.js",
+      "_PrimaryButton-4ORjM1Uq.js",
+      "_Button-CGVAhYMw.js"
+    ]
+  },
+  "resources/js/pages/register/page.jsx": {
+    "file": "assets/page-U5qgw7W9.js",
+    "name": "page",
+    "src": "resources/js/pages/register/page.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_GuestLayout-DQLabvjP.js",
+      "resources/js/pages/login/_sections/AuthFormSection.jsx",
+      "_InputLabel-BqK7CxMX.js",
+      "_PrimaryButton-4ORjM1Uq.js",
+      "_Button-CGVAhYMw.js",
+      "_TextInput-D_xRnOf6.js",
+      "_authApi-DPiJwTbT.js"
+    ]
+  }
+}

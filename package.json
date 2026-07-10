@@ -21,6 +21,8 @@
     },
     "dependencies": {
         "@reduxjs/toolkit": "^2.11.2",
+        "laravel-echo": "^2.3.7",
+        "pusher-js": "^8.5.0",
         "react-redux": "^9.2.0"
     }
 }

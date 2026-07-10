@@ -1,0 +1,21 @@
+### Phase 3: Public Classroom Browser
+
+- **Timestamp:** 2026-07-10
+- **Mode:** Agent
+- **Persona(s) Active:** 🏗️ Tech Lead + ⚙️ Backend Engineer + 🖥️ Frontend Engineer + 🎨 UI/UX Designer + 🧪 QA Engineer
+- **Files Modified/Created:**
+  - `routes/api.php` — Added public classroom listing, detail, materials, and active-session routes.
+  - `routes/web.php` — Added the public classroom browser web route.
+  - `app/Http/Controllers/PublicClassroomController.php` — Added public classroom browser read endpoints.
+  - `resources/js/features/classroom/classroomApi.js` — Added RTK Query endpoints for the public classroom browser.
+  - `resources/js/components/layout/MainLayout.jsx` — Added a navigation entry to the public browser.
+  - `resources/js/pages/classroom-browser/page.jsx` — Added the public classroom browser route entry.
+  - `resources/js/pages/classroom-browser/_sections/ClassroomBrowserSection.jsx` — Added the student-facing list/search browser UI.
+  - `resources/js/pages/classroom-browser/_sections/ClassroomDetailPanel.jsx` — Added classroom detail, materials, and live-session status UI.
+  - `tests/Feature/PublicClassroomBrowserTest.php` — Added focused coverage for public list, detail, materials, and active-session 404 behavior.
+- **Issues Encountered:**
+  - No live-session model or table exists yet, so `active-session` could not return a real session object in this phase.
+- **Resolution:**
+  - Implemented `active-session` as a deliberate JSON 404 with a clear message until Phase 4 introduces live session persistence and broadcasting.
+- **QA Checklist Result:** ✅ All pass for the Phase 3 slice validated in this phase. Public browser feature tests passed, and cross-phase auth/publishing/public-browser regression tests still passed.
+- **Next Steps:** Phase 4 can add live session creation, participant reads, and broadcast scaffolding on top of the published/public classroom foundation, awaiting your approval.

@@ -1,0 +1,32 @@
+### Phase 11: Realtime Presence + Participant Sync
+
+- **Timestamp:** 2026-07-10
+- **Mode:** Agent
+- **Persona(s) Active:** 🏗️ Tech Lead + ⚙️ Backend Engineer + 🖥️ Frontend Engineer + 🧪 QA Engineer
+- **Files Modified/Created:**
+  - `bootstrap/app.php` — Registered broadcast channel routes so Reverb auth can load `routes/channels.php`.
+  - `routes/channels.php` — Added session presence-channel authorization for authenticated users.
+  - `app/Events/SessionEvent.php` — Switched session broadcasts to a presence channel and normalized event payload metadata.
+  - `app/Http/Controllers/SessionController.php` — Allowed `WEBRTC_JOIN` to upsert session participants while keeping teacher-only authorization for the rest of the broadcast actions.
+  - `app/Http/Resources/SessionResource.php` — Exposed `presence_channel` alongside the session broadcast channel metadata.
+  - `resources/js/bootstrap.js` — Extended Echo bootstrap to use the Reverb auth endpoint for presence subscriptions.
+  - `resources/js/features/session/useSessionChannel.js` — Added presence-channel subscription, member tracking, and cache invalidation for live session events.
+  - `resources/js/pages/classrooms/_sections/ClassroomManagementSection.jsx` — Displayed teacher-side realtime presence membership and last received live event.
+  - `resources/js/pages/classroom-browser/_sections/ClassroomDetailPanel.jsx` — Displayed learner-side realtime presence state and live participant count.
+  - `tests/Feature/SessionManagementTest.php` — Added coverage for `WEBRTC_JOIN` upserting a session participant.
+  - `tests/Feature/RealtimePresenceTest.php` — Added broadcast-auth coverage for active, ended, and guest cases.
+  - `config/reverb.php` — Added explicit Reverb runtime configuration.
+  - `.env` / `.env.example` — Kept local Reverb env settings aligned with websocket presence verification.
+  - `public/hot` — Removed the stale Vite hot marker again during local verification so the built assets were used.
+- **Issues Encountered:**
+  - The initial presence-channel callback used a non-null `User` typehint, which caused a 500 when guests hit broadcast auth.
+  - `WEBRTC_JOIN` was still blocked by teacher-only authorization, so learner join events could not upsert participant state.
+  - The learner panel referenced `isAuthenticated` before initialization, causing a runtime `ReferenceError` in the browser.
+  - The existing teacher list tab stayed stale after reloads even though `/api/classrooms/mine` and `/api/classrooms` returned the correct data.
+- **Resolution:**
+  - Relaxed the broadcast-channel callback to a nullable user signature and returned `false` for guests.
+  - Allowed `WEBRTC_JOIN` to bypass the owner-only authorize check so a learner join can create/update session participant state.
+  - Moved the learner `isAuthenticated` boolean above the presence hook so the component renders without a temporal-dead-zone error.
+  - Verified the backend APIs directly in-browser when the teacher list tab remained stale after reload.
+- **QA Checklist Result:** ✅ Backend and frontend validation passed. `RealtimePresenceTest` and `SessionManagementTest` both passed, `npm run build` passed, Reverb started successfully with `--host=0.0.0.0 --hostname=127.0.0.1 --port=8080 --debug`, the learner browser connected to the presence channel, showed `1 participant currently present`, and updated to `Last live event: WEBRTC_JOIN` after sending the join signal. Teacher-side API data also returned the expected active sessions and participant state.
+- **Next Steps:** Realtime presence and participant sync are complete. Any follow-up can focus on the stale teacher list rendering behavior, awaiting your approval.

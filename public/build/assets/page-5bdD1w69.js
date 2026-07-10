@@ -1,0 +1,1 @@
+import{j as o}from"./app-ZomOLeDL.js";import r from"./ClassroomBrowserSection-DBWb3fMQ.js";import"./Button-CGVAhYMw.js";import"./useSessionChannel-jYmYrUBL.js";import"./TextInput-D_xRnOf6.js";import"./classroomApi-1THTcxDU.js";import"./ClassroomDetailPanel-D_RNO7Yh.js";import"./authApi-DPiJwTbT.js";function f(){return o.jsx(r,{})}export{f as default};

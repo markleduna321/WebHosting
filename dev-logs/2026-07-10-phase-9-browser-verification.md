@@ -1,0 +1,28 @@
+### Phase 9: Browser Verification Pass
+
+- **Timestamp:** 2026-07-10
+- **Mode:** Agent
+- **Persona(s) Active:** 🏗️ Tech Lead + 🧪 QA Engineer + ⚙️ Backend Engineer + 🖥️ Frontend Engineer
+- **Files Modified/Created:**
+  - `.env` — Aligned local APP/session/API host settings with `127.0.0.1`, and switched local session/cache/queue runtime to browser-safe file/sync settings.
+  - `app/Providers/AppServiceProvider.php` — Added MySQL-compatible default string length to unblock real local migrations during browser verification.
+  - `routes/api.php` — Added `web` middleware to the SPA-style auth and protected browser API groups so session-backed API requests have a live session store.
+  - `routes/web.php` — Repointed root and dashboard to actual existing Inertia pages in the lowercase `pages/.../page.jsx` structure.
+  - `app/Http/Controllers/ProfileController.php` — Repointed the profile Inertia page to the actual lowercase page path.
+  - `resources/js/store/index.js` — Added shared XSRF header forwarding for RTK Query requests using Laravel's `XSRF-TOKEN` cookie.
+- **Issues Encountered:**
+  - The browser initially failed on a runtime database/session error because the local `.env` expected DB-backed Laravel sessions against an incomplete MySQL schema.
+  - The local DB schema was partially present but Laravel's migration ledger was empty.
+  - MySQL rejected Laravel's default utf8mb4 cache-table key length until the app set a shorter default string length.
+  - The root, dashboard, and profile routes still referenced Breeze-style or uppercase Inertia page names that do not exist in this repo.
+  - The SPA auth API routes were not running with session middleware.
+  - The shared RTK Query client was not forwarding `X-XSRF-TOKEN`, which caused browser auth CSRF failures after session middleware was restored.
+- **Resolution:**
+  - Repaired the local runtime host/session settings and switched the local browser verification path to file-backed sessions/cache with sync queues.
+  - Recorded the already-present base user migration in the migrations ledger, then ran the remaining migrations.
+  - Added `Schema::defaultStringLength(191)` for local MySQL compatibility.
+  - Fixed route-to-page mismatches for `/`, `/dashboard`, and `/profile`.
+  - Added `web` middleware to the browser-facing API auth/protected groups.
+  - Added XSRF header forwarding in the shared RTK Query base query.
+- **QA Checklist Result:** ✅ All pass for the browser-verification fix slice. Real browser checks passed for registration, authenticated profile access, classroom publishing, public classroom discovery, live session visibility, raise-hand interaction, and session chat. Focused regression tests also passed after the runtime fixes.
+- **Next Steps:** Step 2 can proceed to actual Reverb runtime setup and websocket verification, awaiting your approval.

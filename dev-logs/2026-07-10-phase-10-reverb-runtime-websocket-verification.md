@@ -1,0 +1,29 @@
+### Phase 10: Reverb Runtime Setup + Websocket Verification
+
+- **Timestamp:** 2026-07-10
+- **Mode:** Agent
+- **Persona(s) Active:** 🏗️ Tech Lead + ⚙️ Backend Engineer + 🖥️ Frontend Engineer + 🧪 QA Engineer
+- **Files Modified/Created:**
+  - `composer.json` / `composer.lock` — Installed `laravel/reverb` for the websocket server runtime.
+  - `package.json` / `package-lock.json` — Installed `laravel-echo` and `pusher-js` for the browser websocket client.
+  - `config/reverb.php` — Added the Reverb server/application configuration.
+  - `.env` — Enabled `BROADCAST_CONNECTION=reverb` and added local Reverb + Vite websocket env settings.
+  - `.env.example` — Documented the Reverb runtime env block for future local setups.
+  - `app/Http/Controllers/SessionController.php` — Split broadcast transport scheme from client websocket URL generation so stored `ws_url` remains `ws://...` while Reverb uses HTTP-side config.
+  - `resources/js/bootstrap.js` — Bootstrapped Laravel Echo with the Reverb broadcaster.
+  - `resources/js/features/session/useSessionChannel.js` — Added a session-channel listener hook that invalidates RTK Query cache on live events and exposes listener status to the UI.
+  - `resources/js/pages/classrooms/_sections/ClassroomManagementSection.jsx` — Surfaced teacher-side Reverb listener status and last received live event.
+  - `resources/js/pages/classroom-browser/_sections/ClassroomDetailPanel.jsx` — Surfaced learner-side Reverb listener status and last received live event.
+  - `tests/Feature/SessionManagementTest.php` — Added coverage for the generated websocket URL contract.
+  - `public/hot` — Removed a stale Vite hot-file marker so Laravel served the newly built assets during browser verification.
+- **Issues Encountered:**
+  - The repo had placeholder Reverb env values and broadcast stubs, but no actual Reverb package, no Echo client, and no channel subscription wiring.
+  - The existing `REVERB_SCHEME` value was acting as both the broadcast transport scheme and the client websocket scheme, which would produce an incorrect stored session `ws_url` once Reverb used normal HTTP config.
+  - Browser verification was briefly blocked by a stale `public/hot` file that pointed Laravel at a dead Vite dev server on `[::1]:5173`.
+- **Resolution:**
+  - Installed Reverb on Laravel and Echo/Pusher-compatible websocket client packages on the frontend.
+  - Added Reverb config and local env wiring, then separated HTTP-side Reverb config from browser websocket URL generation.
+  - Bootstrapped Echo globally and added a focused `useSessionChannel` hook that updates the existing RTK Query-driven UI instead of introducing a second client state path.
+  - Removed the stale hot-file marker, rebuilt frontend assets, and verified realtime delivery in-browser.
+- **QA Checklist Result:** ✅ All pass for the Phase 10 slice. Focused frontend build passed. `SessionManagementTest` passed. Final regression run for `PublicClassroomBrowserTest|SessionManagementTest` passed. Browser verification succeeded with Reverb listener connection on teacher and learner pages, teacher-side `CHAT_MESSAGE` reception, learner-side `WEBRTC_JOIN` reception, and cross-page teacher receipt of the learner `WEBRTC_JOIN` event.
+- **Next Steps:** Reverb runtime setup is complete. The next phase can build on live websocket-backed classroom behavior, awaiting your approval.

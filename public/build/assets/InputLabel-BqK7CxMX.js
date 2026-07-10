@@ -1,0 +1,1 @@
+import{j as e}from"./app-ZomOLeDL.js";function a({message:t="",className:r=""}){return t?e.jsx("p",{className:`text-sm text-red-600 ${r}`,children:t}):null}function l({htmlFor:t,value:r,className:n=""}){return e.jsx("label",{htmlFor:t,className:`block font-medium text-sm text-gray-700 ${n}`,children:r})}export{l as I,a};
