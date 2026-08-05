@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 
 const VARIANT_CLASSES = {
     primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
@@ -13,7 +13,7 @@ const SIZE_CLASSES = {
     lg: 'px-4 py-3 text-base',
 };
 
-const Button = forwardRef(function Button({
+export default function Button({
     variant = 'primary',
     size = 'md',
     children,
@@ -21,7 +21,7 @@ const Button = forwardRef(function Button({
     loading = false,
     disabled = false,
     ...props
-}, ref) {
+}) {
     const variantClass = VARIANT_CLASSES[variant] || VARIANT_CLASSES.primary;
     const sizeClass = SIZE_CLASSES[size] || SIZE_CLASSES.md;
     const isDisabled = disabled || loading;
@@ -31,7 +31,6 @@ const Button = forwardRef(function Button({
     return (
         <button
             {...props}
-            ref={ref}
             disabled={isDisabled}
             className={`inline-flex items-center justify-center rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 ${variantClass} ${sizeClass} ${className}`}
         >
@@ -42,6 +41,4 @@ const Button = forwardRef(function Button({
             <span>{children}</span>
         </button>
     );
-});
-
-export default Button;
+}

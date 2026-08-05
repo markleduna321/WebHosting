@@ -1,21 +1,16 @@
-import React, { useState } from 'react';
-import { usePage } from '@inertiajs/react';
-import Sidebar from './Sidebar';
-import Topbar from './Topbar';
+import React from 'react';
 
 export default function MainLayout({ children }) {
-	const { props } = usePage();
-	const [sidebarOpen, setSidebarOpen] = useState(false);
-	const user = props?.auth?.user;
-
 	return (
-		<div className="min-h-screen bg-slate-950 text-slate-100">
-			<Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} user={user} />
-			<Topbar user={user} onMenuClick={() => setSidebarOpen(true)} />
-			<main className="lg:pl-72">
-				<div className="mx-auto min-h-[calc(100vh-4rem)] max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-					{children}
+		<div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+			<header className="bg-white dark:bg-gray-800 shadow">
+				<div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+					<h1 className="text-lg font-semibold">App</h1>
 				</div>
+			</header>
+
+			<main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+				{children}
 			</main>
 		</div>
 	);

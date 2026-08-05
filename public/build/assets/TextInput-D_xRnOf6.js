@@ -1,1 +1,0 @@
-import{j as e}from"./app-ZomOLeDL.js";function p({id:r,className:t="",type:n="text",value:o,onChange:s,...u}){return e.jsx("input",{id:r,type:n,value:o,onChange:s,className:`border rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 w-full ${t}`,...u})}export{p as T};
