@@ -7,10 +7,10 @@ import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import store from './store';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'AsuraHost';
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
+    title: (title) => `${title} ${appName}`,
     resolve: (name) =>
         resolvePageComponent(
             `./pages/${name}.jsx`,

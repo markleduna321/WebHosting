@@ -3,16 +3,58 @@ import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 
 // Move static data out of the render pipeline entirely
 const PLANS = [
-  { name: "Starter", subtitle: "For your very first site", price: "₱49", features: ["1 Website", "5 GB SSD Storage", "50 GB Bandwidth", "Free SSL", "Student Support"], popular: false },
-  { name: "Student", subtitle: "Coursework and portfolios", price: "₱99", features: ["3 Websites", "15 GB SSD Storage", "100 GB Bandwidth", "Free SSL", "Free Domain", "Student Support"], popular: false },
-  { name: "Student Pro", subtitle: "Everything a busy student needs", price: "₱199", features: ["10 Websites", "30 GB SSD Storage", "Unlimited Bandwidth", "Free SSL", "Free Domain", "Email Accounts", "Website Builder", "Priority Support"], popular: true },
-  { name: "Developer", subtitle: "Ship real apps with Git", price: "₱299", features: ["Unlimited Websites", "50 GB SSD Storage", "Unlimited Bandwidth", "Free SSL", "Free Domain", "Git Integration", "Database Support", "Developer Tools"], popular: false },
-  { name: "Project Hosting", subtitle: "Capstones and org platforms", price: "₱399", features: ["Unlimited Websites", "100 GB SSD Storage", "Unlimited Bandwidth", "Free SSL", "Multiple Databases", "Git & Deployment Tools", "Advanced Support"], popular: false },
+  {
+    name: "Student",
+    subtitle: "For your very first site",
+    price: "₱129",
+    billingNote: "/month",
+    annualNote: "or ₱1,000 billed annually",
+    features: [
+      "1 Site",
+      "1 Free Subdomain",
+      "50MB NVMe Storage",
+      "1 MySQL Database (50MB)",
+      "Automated Git Push Sync",
+      "Free SSL",
+    ],
+    popular: false,
+    cta: "Choose Plan",
+  },
+  {
+    name: "Pro",
+    subtitle: "For growing student projects",
+    price: "₱249",
+    billingNote: "/month",
+    annualNote: "or ₱2,200 billed annually",
+    features: [
+      "3 Sites",
+      "1 Free Subdomain",
+      "200MB NVMe Storage",
+      "1 MySQL Database (100MB)",
+      "Automated Git Push Sync",
+      "VS Code AI Extension (BYOK)",
+      "Free SSL",
+    ],
+    popular: true,
+    cta: "Choose Plan",
+  },
+  {
+    name: "Enterprise",
+    subtitle: "For organizations and capstone teams",
+    price: "Custom",
+    billingNote: "",
+    annualNote: "Contact for pricing",
+    features: [
+      "Free Domain (1 Year)",
+      "Automated Git + Priority Sync",
+    ],
+    popular: false,
+    cta: "Contact Sales",
+  },
 ];
 
 const EXTENDED_PLANS = [...PLANS, ...PLANS, ...PLANS];
 const TOTAL_COUNT = PLANS.length;
-const AUTOPLAY_MS = 4500;
 
 // Reusable Check Icon
 const CheckIcon = () => (
@@ -42,8 +84,15 @@ const PlanCard = memo(({ plan, isActive, isSelected, onSelect, onFocusCard, card
         </div>
 
         <div className="my-6 border-b border-slate-100 dark:border-slate-800 pb-6">
-          <span className="text-4xl font-black text-slate-900 dark:text-white">{plan.price}</span>
-          <span className="text-slate-400 dark:text-slate-500 text-sm font-medium ml-1">/month</span>
+          <div>
+            <span className="text-4xl font-black text-slate-900 dark:text-white">{plan.price}</span>
+            {plan.billingNote && (
+              <span className="text-slate-400 dark:text-slate-500 text-sm font-medium ml-1">{plan.billingNote}</span>
+            )}
+          </div>
+          {plan.annualNote && (
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">{plan.annualNote}</p>
+          )}
         </div>
 
         <ul className="space-y-4 mb-8 flex-grow">
@@ -63,7 +112,7 @@ const PlanCard = memo(({ plan, isActive, isSelected, onSelect, onFocusCard, card
             }`}
           >
             {isSelected && <CheckIcon />}
-            {isSelected ? "Selected" : "Choose Plan"}
+            {isSelected ? "Selected" : plan.cta}
           </button>
         </div>
       </div>
@@ -77,7 +126,6 @@ export default function HostPlan() {
   const [withTransition, setWithTransition] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState(null);
 
-  const isHovering = useRef(false);
   const isAnimating = useRef(false);
   const centerOffsetRef = useRef(Math.floor((3 - 1) / 2));
 
@@ -152,13 +200,6 @@ export default function HostPlan() {
     if (!withTransition) isAnimating.current = false;
   }, [withTransition]);
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      if (!isHovering.current) goNext();
-    }, AUTOPLAY_MS);
-    return () => clearInterval(id);
-  }, [goNext]);
-
   const handleSelectPlan = useCallback((planName) => {
     setSelectedPlan((prev) => (prev === planName ? null : planName));
   }, []);
@@ -183,8 +224,6 @@ export default function HostPlan() {
 
       <div
         className="relative"
-        onMouseEnter={() => { isHovering.current = true; }}
-        onMouseLeave={() => { isHovering.current = false; }}
       >
         <button
           type="button"

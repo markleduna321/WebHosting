@@ -43,6 +43,7 @@ export default function NavBarSection() {
         { name: "Features", href: "features" },
         { name: "Partners", href: "partners" },
         { name: "About Us", href: "about-us" },
+        
     ];
 
     const handleNavClick = (e, id) => {
@@ -71,7 +72,7 @@ export default function NavBarSection() {
                             Host
                         </span>
                     </span>
-                </Link>
+                </Link> 
 
                 <nav className="hidden lg:flex items-center space-x-14 text-sm font-medium text-slate-600 dark:text-slate-300">
                     {navLinks.map((link) => (
@@ -91,20 +92,20 @@ export default function NavBarSection() {
                     <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
 
                     {/* Log In Link */}
-                    <a
+                    <Link
                         href="/login"
                         className="text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors"
                     >
                         Log In
-                    </a>
+                    </Link>
 
                     {/* Sign Up CTA Button */}
-                    <a
+                    <Link
                         href="/register"
                         className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium px-5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
                     >
                         Sign Up
-                    </a>
+                    </Link>
                 </div>
 
                 {/* Mobile Right Controls (Toggle + Hamburger) */}
@@ -200,20 +201,20 @@ export default function NavBarSection() {
                     </nav>
 
                     <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex flex-col space-y-3">
-                        <a
+                        <Link
                             href="/login"
                             onClick={() => setIsMenuOpen(false)}
                             className="text-base font-medium text-slate-700 dark:text-slate-200"
                         >
                             Log In
-                        </a>
-                        <a
+                        </Link>
+                        <Link
                             href="/register"
                             onClick={() => setIsMenuOpen(false)}
                             className="w-full text-center bg-blue-600 dark:bg-blue-500 text-white font-medium py-2 rounded-xl"
                         >
                             Sign Up
-                        </a>
+                        </Link>
                     </div>
                 </div>
             )}
