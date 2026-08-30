@@ -1,6 +1,6 @@
 import { useState } from "react";
-import SidebarSection from "./_section/sidebar-section";
-import TopbarSection from "./_section/topbar-section";
+import SidebarSection from "./_sections/sidebar-section";
+import TopbarSection from "./_sections/topbar-section";
 
 export default function Layout({ children, title, subtitle }) {
     const [desktopCollapsed, setDesktopCollapsed] = useState(false);

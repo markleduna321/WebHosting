@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Hash;
 
 class TestUserSeeder extends Seeder
 {
-    /**
-     * Seed a known dummy account for local login testing.
-     */
     public function run(): void
     {
         User::updateOrCreate(
@@ -18,6 +15,17 @@ class TestUserSeeder extends Seeder
             [
                 'name' => 'Test User',
                 'password' => Hash::make('password'),
+                'role' => 'user',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Test Administrator',
+                'password' => Hash::make('password'),
+                'role' => 'administrator',
                 'email_verified_at' => now(),
             ]
         );

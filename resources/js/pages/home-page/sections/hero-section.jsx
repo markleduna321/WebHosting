@@ -153,7 +153,7 @@ export default function HeroSection() {
 
                             {/* Full-Height Scaled Image */}
                             <img
-                                src="/images/hero-hosting.jpg"
+                                src="/images/asura-server.webp"
                                 alt="Hosting Service Illustration"
                                 className="w-full h-auto max-h-[70vh] object-cover rounded-2xl transform transition-transform duration-500 group-hover:scale-[1.01] shadow-2xl"
                             />
