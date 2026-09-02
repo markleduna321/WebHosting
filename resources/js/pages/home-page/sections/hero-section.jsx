@@ -16,7 +16,10 @@ function DodgingBadge({ children, className }) {
         const dodgeThreshold = 140;
 
         if (distance < dodgeThreshold && distance > 0) {
-            const force = Math.pow((dodgeThreshold - distance) / dodgeThreshold, 1.5);
+            const force = Math.pow(
+                (dodgeThreshold - distance) / dodgeThreshold,
+                1.5,
+            );
             const maxDodgeDistance = 35;
 
             const pushX = -(deltaX / distance) * force * maxDodgeDistance;
@@ -47,13 +50,15 @@ function DodgingBadge({ children, className }) {
 
 export default function HeroSection() {
     return (
-        <section id="home" className="relative w-full min-h-screen h-[100dvh] scroll-mt-16 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white flex items-center justify-center transition-colors duration-200 overflow-hidden font-sans py-12 lg:py-0">
+        <section
+            id="home"
+            className="relative w-full min-h-screen h-[100dvh] scroll-mt-16 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white flex items-center justify-center transition-colors duration-200 overflow-hidden font-sans py-12 lg:py-0"
+        >
             {/* Background Decorative Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/10 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none -z-0" />
 
             {/* Full Width & Maximized Grid Container */}
             <div className="max-w-[1500px] w-full mx-auto px-4 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10 my-auto">
-                
                 {/* Left Column: Text & CTAs */}
                 <div className="lg:col-span-6 space-y-6 lg:space-y-8 text-center lg:text-left pr-0 lg:pr-4">
                     {/* Top Badge */}
@@ -131,11 +136,10 @@ export default function HeroSection() {
                 {/* Right Column: Full-height Responsive Visual Container */}
                 <div className="lg:col-span-6 w-full flex justify-center items-center h-full">
                     <div className="relative w-full group">
-                        
                         {/* Glow */}
                         <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/20 to-indigo-500/20 dark:from-blue-600/20 dark:to-indigo-600/20 rounded-3xl blur-3xl transition-all group-hover:blur-[100px]" />
 
-                        <div className="relative rounded-3xl w-full flex items-center justify-center">
+                        <div className="relative rounded-3xl w-full h-[200px] sm:h-[300px] md:h-[400px] lg:h-[50vh] flex items-center justify-center overflow-hidden">
                             {/* Dodging Badge 1 */}
                             <DodgingBadge className="top-2 left-2 sm:top-4 sm:left-4 px-4 py-2.5 text-xs sm:text-sm">
                                 <div className="p-2 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 rounded-xl">
@@ -152,10 +156,13 @@ export default function HeroSection() {
                             </DodgingBadge>
 
                             {/* Full-Height Scaled Image */}
-                            <img
-                                src="/images/asura-server.webp"
+                            <video
+                                src="/video/hero.mp4"
                                 alt="Hosting Service Illustration"
-                                className="w-full h-auto max-h-[70vh] object-cover rounded-2xl transform transition-transform duration-500 group-hover:scale-[1.01] shadow-2xl"
+                                className="w-full h-full object-cover rounded-2xl shadow-2xl"
+                                autoPlay
+                                loop
+                                muted
                             />
 
                             {/* Dodging Badge 2 */}
@@ -175,7 +182,6 @@ export default function HeroSection() {
                         </div>
                     </div>
                 </div>
-
             </div>
         </section>
     );
