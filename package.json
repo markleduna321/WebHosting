@@ -21,6 +21,7 @@
     },
     "dependencies": {
         "@reduxjs/toolkit": "^2.11.2",
+        "classnames": "^2.5.1",
         "framer-motion": "^13.1.1",
         "lucide-react": "^1.34.0",
         "react-redux": "^9.2.0"

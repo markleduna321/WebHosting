@@ -89,6 +89,27 @@ export default function NavBarSection() {
 
                 {/* Desktop Right Actions */}
                 <div className="hidden lg:flex items-center space-x-5 text-sm font-medium">
+                    {/* Enterprise Link */}
+                    <Link
+                        href="/enterprise"
+                        className="flex items-center space-x-1.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                        <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            strokeWidth="2"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                            />
+                        </svg>
+                        <span>Enterprise</span>
+                    </Link>
+
                     <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
 
                     {/* Log In Link */}
@@ -201,6 +222,26 @@ export default function NavBarSection() {
                     </nav>
 
                     <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex flex-col space-y-3">
+                        <Link
+                            href="/enterprise"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex items-center space-x-1.5 text-base font-medium text-slate-600 dark:text-slate-300"
+                        >
+                            <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                strokeWidth="2"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                />
+                            </svg>
+                            <span>Enterprise</span>
+                        </Link>
                         <Link
                             href="/login"
                             onClick={() => setIsMenuOpen(false)}

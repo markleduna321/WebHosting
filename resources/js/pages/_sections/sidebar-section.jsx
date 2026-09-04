@@ -14,14 +14,8 @@ import {
     ChevronDown,
     X,
     Globe,
-    Link2,
-    Rocket,
     BookOpen,
-    Settings,
-    Search,
-    FolderOpen,
     Database,
-    ChevronLeftSquare,
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
@@ -124,24 +118,23 @@ const ADMIN_NAV_GROUPS = [
     },
 ];
 
-const USER_NAV_LINKS = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutGrid },
-    { name: "Hosting Plan", href: "/hosting", icon: Server },
+const USER_NAV_GROUPS = [
     {
-        name: "Website",
-        href: "/websites",
-        icon: Globe,
-        children: [
-            { name: "Files", href: "/websites/files", icon: FolderOpen },
-            { name: "Databases", href: "/websites/databases", icon: Database },
+        label: "Workspace",
+        links: [
+            { name: "Dashboard",        href: "/dashboard",        icon: LayoutGrid },
+            { name: "Sites & Domains",  href: "/site-domain",    icon: Globe },
+            { name: "Files & Database", href: "/files-database",   icon: Database },
+            { name: "Account & Billing",href: "/account-billing",  icon: CreditCard },
         ],
     },
-    { name: "Domains", href: "/domains", icon: Link2 },
-    { name: "Deployments", href: "/deployments", icon: Rocket },
-    { name: "Billing", href: "/billing", icon: CreditCard },
-    { name: "Knowledge Base", href: "/knowledge-base", icon: BookOpen },
-    { name: "Support", href: "/support", icon: LifeBuoy },
-    { name: "Account Settings", href: "/account/settings", icon: Settings },
+    {
+        label: "More",
+        links: [
+            { name: "Hosting Plan",   href: "/hosting",        icon: Server },
+            { name: "Knowledge Base", href: "/knowledge-base", icon: BookOpen },
+        ],
+    },
 ];
 
 export default function SidebarSection({
@@ -176,25 +169,10 @@ export default function SidebarSection({
         setOpenGroup((prev) => (prev === name ? null : name));
     };
 
-    // User sidebar: any number of menus can be open at once
+    // User sidebar: any number of menus can be open at once (kept for future use)
     const [openMenus, setOpenMenus] = useState({});
 
-    useEffect(() => {
-        const next = {};
-        USER_NAV_LINKS.forEach((link) => {
-            if (link.children) {
-                const childActive = link.children.some((child) =>
-                    isLinkActive(child.href),
-                );
-                if (childActive || isLinkActive(link.href)) {
-                    next[link.name] = true;
-                }
-            }
-        });
-        setOpenMenus((prev) => ({ ...prev, ...next }));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [url]);
-
+    // eslint-disable-next-line no-unused-vars
     const toggleMenu = (name) => {
         setOpenMenus((prev) => ({ ...prev, [name]: !prev[name] }));
     };
@@ -361,10 +339,10 @@ export default function SidebarSection({
     );
 
     const userContent = (
-        <div className="flex h-full flex-col bg-white border-r border-gray-100">
+        <div className="flex h-full flex-col bg-white border-r border-gray-200">
             {/* Brand Header */}
             <div
-                className={`flex items-center h-16 shrink-0 border-b border-gray-100 ${
+                className={`flex items-center h-16 shrink-0 border-b border-gray-200 ${
                     collapsed ? "justify-center px-2" : "justify-between px-5"
                 }`}
             >
@@ -379,7 +357,7 @@ export default function SidebarSection({
                         className="w-8 h-8 object-contain shrink-0"
                     />
                     {!collapsed && (
-                        <span className="text-2xl font-extrabold text-slate-900 ">
+                        <span className="text-2xl font-extrabold text-slate-900">
                             Asura<span className="text-blue-600">Host</span>
                         </span>
                     )}
@@ -394,127 +372,73 @@ export default function SidebarSection({
                 </button>
             </div>
 
-            {/* Search */}
-            {!collapsed && (
-                <div className="px-4 pt-4">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <input
-                            type="text"
-                            placeholder="Search"
-                            className="w-full rounded-full border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm text-slate-700 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
+            {/* Nav Groups */}
+            <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+                {USER_NAV_GROUPS.map((group) => (
+                    <div key={group.label}>
+                        {/* Section label */}
+                        {!collapsed && (
+                            <p className="mb-1.5 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                                {group.label}
+                            </p>
+                        )}
+
+                        <div className="space-y-0.5">
+                            {group.links.map((link) => {
+                                const Icon = link.icon;
+                                const isActive = isLinkActive(link.href);
+
+                                return (
+                                    <Link
+                                        key={link.name}
+                                        href={link.href}
+                                        onClick={onCloseMobile}
+                                        title={collapsed ? link.name : undefined}
+                                        className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                                            collapsed ? "justify-center px-2" : ""
+                                        } ${
+                                            isActive
+                                                ? "bg-slate-100 text-slate-900"
+                                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                                        }`}
+                                    >
+                                        <Icon
+                                            className={`w-4 h-4 shrink-0 ${
+                                                isActive
+                                                    ? "text-slate-700"
+                                                    : "text-slate-400"
+                                            }`}
+                                        />
+                                        {!collapsed && (
+                                            <>
+                                                <span className="truncate flex-1">
+                                                    {link.name}
+                                                </span>
+                                                {isActive && (
+                                                    <ChevronRight className="w-4 h-4 shrink-0 text-slate-400" />
+                                                )}
+                                            </>
+                                        )}
+                                    </Link>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
-            )}
-
-            {/* Nav Links */}
-            <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-                {USER_NAV_LINKS.map((link) => {
-                    const Icon = link.icon;
-                    const hasChildren = !!link.children;
-                    const isActive = isLinkActive(link.href);
-                    const isOpen = !!openMenus[link.name];
-
-                    if (hasChildren) {
-                        return (
-                            <div key={link.name}>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        if (collapsed) return;
-                                        toggleMenu(link.name);
-                                    }}
-                                    title={collapsed ? link.name : undefined}
-                                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                                        collapsed ? "justify-center px-2" : ""
-                                    } ${
-                                        isActive
-                                            ? "bg-blue-50 text-blue-600"
-                                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                                    }`}
-                                >
-                                    <Icon className="w-5 h-5 shrink-0" />
-                                    {!collapsed && (
-                                        <>
-                                            <span className="truncate flex-1 text-left">
-                                                {link.name}
-                                            </span>
-                                            <ChevronDown
-                                                className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
-                                                    isOpen ? "rotate-180" : ""
-                                                }`}
-                                            />
-                                        </>
-                                    )}
-                                </button>
-
-                                {!collapsed && isOpen && (
-                                    <div className="mt-1 ml-4 pl-4 border-l border-slate-200 space-y-1">
-                                        {link.children.map((child) => {
-                                            const ChildIcon = child.icon;
-                                            const childActive = isLinkActive(
-                                                child.href,
-                                            );
-                                            return (
-                                                <Link
-                                                    key={child.name}
-                                                    href={child.href}
-                                                    onClick={onCloseMobile}
-                                                    className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                                                        childActive
-                                                            ? "bg-blue-50 text-blue-600"
-                                                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                                                    }`}
-                                                >
-                                                    <ChildIcon className="w-4 h-4 shrink-0" />
-                                                    <span className="truncate">
-                                                        {child.name}
-                                                    </span>
-                                                </Link>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    }
-
-                    return (
-                        <Link
-                            key={link.name}
-                            href={link.href}
-                            onClick={onCloseMobile}
-                            title={collapsed ? link.name : undefined}
-                            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                                collapsed ? "justify-center px-2" : ""
-                            } ${
-                                isActive
-                                    ? "bg-blue-50 text-blue-600"
-                                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                            }`}
-                        >
-                            <Icon className="w-5 h-5 shrink-0" />
-                            {!collapsed && (
-                                <span className="truncate">{link.name}</span>
-                            )}
-                        </Link>
-                    );
-                })}
+                ))}
             </nav>
 
             {/* Log out */}
-            <div className="border-t border-gray-100 p-3">
+            <div className="border-t border-gray-200 p-3">
                 <Link
                     href="/logout"
                     method="post"
                     as="button"
                     title={collapsed ? "Log out" : undefined}
-                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors ${
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-colors ${
                         collapsed ? "justify-center px-2" : ""
                     }`}
                 >
-                    <LogOut className="w-5 h-5 shrink-0" />
+                    <LogOut className="w-4 h-4 shrink-0 text-slate-400" />
                     {!collapsed && <span>Log out</span>}
                 </Link>
             </div>
