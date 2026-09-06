@@ -9,13 +9,12 @@ import {
     Handshake,
     BarChart3,
     LogOut,
-    ChevronLeft,
-    ChevronRight,
     ChevronDown,
     X,
     Globe,
     BookOpen,
     Database,
+    PanelLeftClose,
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
@@ -122,16 +121,16 @@ const USER_NAV_GROUPS = [
     {
         label: "Workspace",
         links: [
-            { name: "Dashboard",        href: "/dashboard",        icon: LayoutGrid },
-            { name: "Sites & Domains",  href: "/site-domain",    icon: Globe },
-            { name: "Files & Database", href: "/files-database",   icon: Database },
-            { name: "Account & Billing",href: "/account-billing",  icon: CreditCard },
+            { name: "Dashboard", href: "/dashboard", icon: LayoutGrid },
+            { name: "Sites & Domains", href: "/site-domain", icon: Globe },
+            { name: "Files & Database", href: "/files-database", icon: Database },
+            { name: "Account & Billing", href: "/account-billing", icon: CreditCard },
         ],
     },
     {
         label: "More",
         links: [
-            { name: "Hosting Plan",   href: "/hosting",        icon: Server },
+            { name: "Hosting Plan", href: "/hosting", icon: Server },
             { name: "Knowledge Base", href: "/knowledge-base", icon: BookOpen },
         ],
     },
@@ -147,85 +146,104 @@ export default function SidebarSection({
     const isAdministrator = props?.auth?.user?.role === "administrator";
     const isLinkActive = (href) => url === href || url.startsWith(`${href}/`);
 
-    // Admin sidebar: only one group open at a time
+    const isExpanded = !collapsed;
+
+    // Admin sidebar accordion state
     const [openGroup, setOpenGroup] = useState(() => {
         const activeGroup = ADMIN_NAV_GROUPS.find((group) =>
-            group.children.some((child) => isLinkActive(child.href)),
+            group.children.some((child) => isLinkActive(child.href))
         );
         return activeGroup ? activeGroup.name : null;
     });
 
     useEffect(() => {
         const activeGroup = ADMIN_NAV_GROUPS.find((group) =>
-            group.children.some((child) => isLinkActive(child.href)),
+            group.children.some((child) => isLinkActive(child.href))
         );
         if (activeGroup) {
             setOpenGroup(activeGroup.name);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [url]);
 
     const toggleGroup = (name) => {
         setOpenGroup((prev) => (prev === name ? null : name));
     };
 
-    // User sidebar: any number of menus can be open at once (kept for future use)
-    const [openMenus, setOpenMenus] = useState({});
-
-    // eslint-disable-next-line no-unused-vars
-    const toggleMenu = (name) => {
-        setOpenMenus((prev) => ({ ...prev, [name]: !prev[name] }));
-    };
-
     const adminContent = (
-        <div className="flex h-full flex-col bg-slate-900 border-r border-slate-800">
-            {/* Brand Header */}
+        <div className="flex h-full flex-col bg-slate-900 border-r border-slate-800 text-slate-100">
+            {/* Header / Brand & Toggle */}
             <div
-                className={`flex items-center h-16 shrink-0 border-b border-slate-800 transition-all duration-300 ${
-                    collapsed ? "justify-center px-2" : "justify-between px-5"
+                className={`flex items-center h-16 shrink-0 px-3.5 border-b border-slate-800/80 ${
+                    collapsed ? "justify-center" : "justify-between"
                 }`}
             >
-                <Link
-                    href="/"
-                    className="flex items-center gap-2.5 min-w-0"
-                    onClick={onCloseMobile}
-                >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center">
+                {collapsed ? (
+                    /* Collapsed State: Logo acts as Expand trigger */
+                    <button
+                        type="button"
+                        onClick={onToggleCollapse}
+                        aria-label="Expand sidebar"
+                        className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-800 transition-colors flex items-center justify-center"
+                    >
                         <img
                             src="/images/asura-logo.png"
-                            alt="AsuraTech Host"
-                            className="h-9 w-9"
+                            alt="Expand Sidebar"
+                            className="h-7 w-7 object-contain"
                         />
-                    </div>
-                    {!collapsed && (
-                        <div className="min-w-0 transition-opacity duration-300">
-                            <p className="text-lg font-bold text-white truncate">
-                                AsuraTech Host
-                            </p>
-                            <p className="text-[10px] font-semibold tracking-widest text-blue-400">
-                                ADMIN PORTAL
-                            </p>
+                    </button>
+                ) : (
+                    /* Expanded State: Logo + Text on LEFT, Close Button on RIGHT */
+                    <>
+                        <Link
+                            href="/"
+                            className="flex items-center gap-2.5 min-w-0"
+                            onClick={onCloseMobile}
+                        >
+                            <img
+                                src="/images/asura-logo.png"
+                                alt="AsuraTech Host"
+                                className="h-7 w-7 object-contain shrink-0"
+                            />
+                            <div className="min-w-0 transition-opacity duration-200">
+                                <p className="text-sm font-bold text-white truncate leading-tight">
+                                    AsuraTech Host
+                                </p>
+                                <p className="text-[9px] font-bold tracking-wider text-blue-400">
+                                    ADMIN PORTAL
+                                </p>
+                            </div>
+                        </Link>
+
+                        <div className="flex items-center">
+                            <button
+                                type="button"
+                                onClick={onToggleCollapse}
+                                aria-label="Collapse sidebar"
+                                className="hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                            >
+                                <PanelLeftClose className="w-5 h-5" />
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={onCloseMobile}
+                                className="lg:hidden p-1.5 rounded-md text-slate-400 hover:bg-slate-800"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
                         </div>
-                    )}
-                </Link>
-                <button
-                    type="button"
-                    onClick={onCloseMobile}
-                    aria-label="Close sidebar"
-                    className="lg:hidden p-1.5 rounded-md text-slate-400 hover:bg-slate-800 transition-colors duration-200"
-                >
-                    <X className="w-5 h-5" />
-                </button>
+                    </>
+                )}
             </div>
 
-            {/* Nav Links */}
-            <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+            {/* Navigation Body */}
+            <nav className="flex-1 overflow-y-auto px-2.5 py-4 space-y-1">
                 <Link
                     href={DASHBOARD_LINK.href}
                     title={collapsed ? DASHBOARD_LINK.name : undefined}
                     onClick={onCloseMobile}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors duration-200 ${
-                        collapsed ? "justify-center px-2" : ""
+                    className={`flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-colors ${
+                        collapsed ? "justify-center px-2" : "px-3"
                     } ${
                         isLinkActive(DASHBOARD_LINK.href)
                             ? "bg-blue-600 text-white"
@@ -233,9 +251,7 @@ export default function SidebarSection({
                     }`}
                 >
                     <DASHBOARD_LINK.icon className="w-5 h-5 shrink-0" />
-                    {!collapsed && (
-                        <span className="truncate">{DASHBOARD_LINK.name}</span>
-                    )}
+                    {isExpanded && <span className="truncate">{DASHBOARD_LINK.name}</span>}
                 </Link>
 
                 <div className="pt-2 space-y-1">
@@ -243,7 +259,7 @@ export default function SidebarSection({
                         const Icon = group.icon;
                         const isOpen = openGroup === group.name;
                         const isGroupActive = group.children.some((child) =>
-                            isLinkActive(child.href),
+                            isLinkActive(child.href)
                         );
 
                         return (
@@ -251,26 +267,29 @@ export default function SidebarSection({
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        if (collapsed) return;
-                                        toggleGroup(group.name);
+                                        if (collapsed) {
+                                            onToggleCollapse();
+                                        } else {
+                                            toggleGroup(group.name);
+                                        }
                                     }}
                                     title={collapsed ? group.name : undefined}
-                                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold hover:bg-slate-800 transition-colors duration-200 ${
-                                        isGroupActive
-                                            ? "text-blue-400"
-                                            : "text-slate-100"
-                                    } ${collapsed ? "justify-center px-2" : ""}`}
+                                    className={`flex w-full items-center gap-3 rounded-lg py-2.5 text-sm font-medium hover:bg-slate-800 transition-colors ${
+                                        collapsed ? "justify-center px-2" : "px-3"
+                                    } ${isGroupActive ? "text-blue-400" : "text-slate-300"}`}
                                 >
                                     <Icon
-                                        className={`w-4 h-4 shrink-0 transition-colors duration-200 ${isGroupActive ? "text-blue-400" : "text-slate-400"}`}
+                                        className={`w-5 h-5 shrink-0 ${
+                                            isGroupActive ? "text-blue-400" : "text-slate-400"
+                                        }`}
                                     />
-                                    {!collapsed && (
+                                    {isExpanded && (
                                         <>
                                             <span className="truncate flex-1 text-left">
                                                 {group.name}
                                             </span>
                                             <ChevronDown
-                                                className={`w-4 h-4 shrink-0 text-slate-400 transition-transform duration-300 ease-in-out ${
+                                                className={`w-4 h-4 shrink-0 text-slate-400 transition-transform duration-200 ${
                                                     isOpen ? "rotate-180" : ""
                                                 }`}
                                             />
@@ -278,40 +297,25 @@ export default function SidebarSection({
                                     )}
                                 </button>
 
-                                {!collapsed && (
-                                    <div
-                                        className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
-                                            isOpen
-                                                ? "grid-rows-[1fr]"
-                                                : "grid-rows-[0fr]"
-                                        }`}
-                                    >
-                                        <div className="overflow-hidden">
-                                            <div className="mt-1 ml-5 pl-4 border-l border-slate-800 space-y-1">
-                                                {group.children.map((child) => {
-                                                    const childActive =
-                                                        isLinkActive(
-                                                            child.href,
-                                                        );
-                                                    return (
-                                                        <Link
-                                                            key={child.name}
-                                                            href={child.href}
-                                                            onClick={
-                                                                onCloseMobile
-                                                            }
-                                                            className={`block truncate rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 ${
-                                                                childActive
-                                                                    ? "text-blue-400 font-semibold"
-                                                                    : "text-slate-400 hover:text-blue-400"
-                                                            }`}
-                                                        >
-                                                            {child.name}
-                                                        </Link>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
+                                {isExpanded && isOpen && (
+                                    <div className="mt-1 ml-4 pl-3 border-l border-slate-800 space-y-1">
+                                        {group.children.map((child) => {
+                                            const childActive = isLinkActive(child.href);
+                                            return (
+                                                <Link
+                                                    key={child.name}
+                                                    href={child.href}
+                                                    onClick={onCloseMobile}
+                                                    className={`block truncate rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                                                        childActive
+                                                            ? "text-blue-400 font-semibold bg-slate-800/50"
+                                                            : "text-slate-400 hover:text-white hover:bg-slate-800/30"
+                                                    }`}
+                                                >
+                                                    {child.name}
+                                                </Link>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>
@@ -320,19 +324,19 @@ export default function SidebarSection({
                 </div>
             </nav>
 
-            {/* Log out */}
-            <div className="border-t border-slate-800 p-3">
+            {/* Logout Footer */}
+            <div className="border-t border-slate-800/80 p-2.5">
                 <Link
                     href="/logout"
                     method="post"
                     as="button"
                     title={collapsed ? "Log out" : undefined}
-                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors duration-200 ${
-                        collapsed ? "justify-center px-2" : ""
+                    className={`flex w-full items-center gap-3 rounded-lg py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-red-400 transition-colors ${
+                        collapsed ? "justify-center px-2" : "px-3"
                     }`}
                 >
                     <LogOut className="w-5 h-5 shrink-0" />
-                    {!collapsed && <span>Log out</span>}
+                    {isExpanded && <span>Log out</span>}
                 </Link>
             </div>
         </div>
@@ -340,50 +344,76 @@ export default function SidebarSection({
 
     const userContent = (
         <div className="flex h-full flex-col bg-white border-r border-gray-200">
-            {/* Brand Header */}
+            {/* Header / Brand & Toggle */}
             <div
-                className={`flex items-center h-16 shrink-0 border-b border-gray-200 ${
-                    collapsed ? "justify-center px-2" : "justify-between px-5"
+                className={`flex items-center h-16 shrink-0 px-3.5 border-b border-gray-100 ${
+                    collapsed ? "justify-center" : "justify-between"
                 }`}
             >
-                <Link
-                    href="/"
-                    className="flex items-center gap-2 min-w-0"
-                    onClick={onCloseMobile}
-                >
-                    <img
-                        src="/images/asura-logo.png"
-                        alt="AsuraTechHost Logo"
-                        className="w-8 h-8 object-contain shrink-0"
-                    />
-                    {!collapsed && (
-                        <span className="text-2xl font-extrabold text-slate-900">
-                            Asura<span className="text-blue-600">Host</span>
-                        </span>
-                    )}
-                </Link>
-                <button
-                    type="button"
-                    onClick={onCloseMobile}
-                    aria-label="Close sidebar"
-                    className="lg:hidden p-1.5 rounded-md text-slate-500 hover:bg-slate-100"
-                >
-                    <X className="w-5 h-5" />
-                </button>
+                {collapsed ? (
+                    /* Collapsed State: Logo acts as Expand trigger */
+                    <button
+                        type="button"
+                        onClick={onToggleCollapse}
+                        aria-label="Expand sidebar"
+                        className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors flex items-center justify-center"
+                    >
+                        <img
+                            src="/images/asura-logo.png"
+                            alt="Expand Sidebar"
+                            className="h-7 w-7 object-contain"
+                        />
+                    </button>
+                ) : (
+                    /* Expanded State: Logo + Text on LEFT, Close Button on RIGHT */
+                    <>
+                        <Link
+                            href="/"
+                            className="flex items-center gap-2 min-w-0"
+                            onClick={onCloseMobile}
+                        >
+                            <img
+                                src="/images/asura-logo.png"
+                                alt="AsuraHost Logo"
+                                className="w-7 h-7 object-contain shrink-0"
+                            />
+                            <span className="text-lg font-bold text-slate-900 truncate">
+                                Asura<span className="text-blue-600">Host</span>
+                            </span>
+                        </Link>
+
+                        <div className="flex items-center">
+                            <button
+                                type="button"
+                                onClick={onToggleCollapse}
+                                aria-label="Collapse sidebar"
+                                className="hidden lg:flex p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                            >
+                                <PanelLeftClose className="w-5 h-5" />
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={onCloseMobile}
+                                className="lg:hidden p-1.5 rounded-md text-slate-500 hover:bg-slate-100"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </>
+                )}
             </div>
 
-            {/* Nav Groups */}
-            <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+            {/* Navigation Body */}
+            <nav className="flex-1 overflow-y-auto px-2.5 py-4 space-y-6">
                 {USER_NAV_GROUPS.map((group) => (
                     <div key={group.label}>
-                        {/* Section label */}
-                        {!collapsed && (
-                            <p className="mb-1.5 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        {isExpanded && (
+                            <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                                 {group.label}
                             </p>
                         )}
-
-                        <div className="space-y-0.5">
+                        <div className="space-y-1">
                             {group.links.map((link) => {
                                 const Icon = link.icon;
                                 const isActive = isLinkActive(link.href);
@@ -394,30 +424,21 @@ export default function SidebarSection({
                                         href={link.href}
                                         onClick={onCloseMobile}
                                         title={collapsed ? link.name : undefined}
-                                        className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                                            collapsed ? "justify-center px-2" : ""
+                                        className={`flex items-center gap-3 rounded-lg py-2 text-sm font-medium transition-colors ${
+                                            collapsed ? "justify-center px-2" : "px-3"
                                         } ${
                                             isActive
-                                                ? "bg-slate-100 text-slate-900"
-                                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                                                ? "bg-blue-50 text-blue-600 font-semibold"
+                                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                         }`}
                                     >
                                         <Icon
-                                            className={`w-4 h-4 shrink-0 ${
-                                                isActive
-                                                    ? "text-slate-700"
-                                                    : "text-slate-400"
+                                            className={`w-5 h-5 shrink-0 ${
+                                                isActive ? "text-blue-600" : "text-slate-400"
                                             }`}
                                         />
-                                        {!collapsed && (
-                                            <>
-                                                <span className="truncate flex-1">
-                                                    {link.name}
-                                                </span>
-                                                {isActive && (
-                                                    <ChevronRight className="w-4 h-4 shrink-0 text-slate-400" />
-                                                )}
-                                            </>
+                                        {isExpanded && (
+                                            <span className="truncate">{link.name}</span>
                                         )}
                                     </Link>
                                 );
@@ -427,19 +448,19 @@ export default function SidebarSection({
                 ))}
             </nav>
 
-            {/* Log out */}
-            <div className="border-t border-gray-200 p-3">
+            {/* Logout Footer */}
+            <div className="border-t border-gray-100 p-2.5">
                 <Link
                     href="/logout"
                     method="post"
                     as="button"
                     title={collapsed ? "Log out" : undefined}
-                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-colors ${
-                        collapsed ? "justify-center px-2" : ""
+                    className={`flex w-full items-center gap-3 rounded-lg py-2 text-sm font-medium text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors ${
+                        collapsed ? "justify-center px-2" : "px-3"
                     }`}
                 >
-                    <LogOut className="w-4 h-4 shrink-0 text-slate-400" />
-                    {!collapsed && <span>Log out</span>}
+                    <LogOut className="w-5 h-5 shrink-0 text-slate-400 group-hover:text-red-600" />
+                    {isExpanded && <span>Log out</span>}
                 </Link>
             </div>
         </div>
@@ -449,41 +470,16 @@ export default function SidebarSection({
 
     return (
         <>
-            {/* Desktop persistent sidebar */}
+            {/* Desktop Persistent Sidebar */}
             <div
                 className={`hidden lg:block fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${
-                    collapsed ? "w-20" : "w-72"
+                    collapsed ? "w-16" : "w-64"
                 }`}
             >
                 {content}
-
-                <button
-                    type="button"
-                    onClick={onToggleCollapse}
-                    aria-label={
-                        collapsed ? "Expand sidebar" : "Collapse sidebar"
-                    }
-                    className={
-                        isAdministrator
-                            ? "group absolute -right-3.5 top-7 flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-slate-400 shadow-md transition-all duration-200 hover:border-blue-500/50 hover:bg-slate-800 hover:text-white hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-                            : "absolute -right-3 top-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm hover:text-blue-600"
-                    }
-                >
-                    {isAdministrator ? (
-                        <ChevronLeft
-                            className={`h-4 w-4 transition-transform duration-300 ease-in-out ${
-                                collapsed ? "rotate-180" : ""
-                            }`}
-                        />
-                    ) : collapsed ? (
-                        <ChevronRight className="w-3.5 h-3.5" />
-                    ) : (
-                        <ChevronLeft className="w-3.5 h-3.5" />
-                    )}
-                </button>
             </div>
 
-            {/* Mobile drawer with backdrop fade */}
+            {/* Mobile Drawer */}
             <div
                 className={`lg:hidden fixed inset-0 z-40 transition-opacity duration-300 ${
                     mobileOpen
@@ -496,7 +492,7 @@ export default function SidebarSection({
                     onClick={onCloseMobile}
                 />
                 <div
-                    className={`absolute inset-y-0 left-0 w-72 shadow-xl transition-transform duration-300 ease-in-out ${
+                    className={`absolute inset-y-0 left-0 w-64 shadow-xl transition-transform duration-300 ease-in-out ${
                         mobileOpen ? "translate-x-0" : "-translate-x-full"
                     }`}
                 >
