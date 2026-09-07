@@ -1,16 +1,14 @@
 import React from "react";
 import FileDatabaseLayout from "../layout";
+import SearchSection from "./sections/search-section";
+import TableSection from "./sections/table-section";
 
 export default function Page() {
     return (
         <FileDatabaseLayout>
-            <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
-                <p className="text-sm font-semibold text-slate-900">
-                    File Manager
-                </p>
-                <p className="mt-1 text-sm text-slate-500">
-                    Browse and manage your website files.
-                </p>
+            <div className="space-y-4">
+             <SearchSection/>
+             <TableSection/>
             </div>
         </FileDatabaseLayout>
     );

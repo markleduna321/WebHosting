@@ -1,16 +1,18 @@
 import React from "react";
 import AccountBillingLayout from "../layout";
+import TableSection from "./sections/table-section";
+import CardSection from "./sections/card-section";
 
 export default function Page() {
     return (
         <AccountBillingLayout>
-            <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
-                <p className="text-sm font-semibold text-slate-900">
-                    Payment Methods
-                </p>
-                <p className="mt-1 text-sm text-slate-500">
-                    Manage your saved cards and payment options.
-                </p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-1 items-start">
+                <div className="lg:col-span-2">
+                    <TableSection />
+                </div>
+                <div className="lg:col-span-1">
+                    <CardSection />
+                </div>
             </div>
         </AccountBillingLayout>
     );
