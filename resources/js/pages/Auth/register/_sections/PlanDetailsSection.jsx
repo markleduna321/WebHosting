@@ -1,4 +1,4 @@
-import { Check, Plus } from "lucide-react";
+import { Check, CheckCircle, Plus } from "lucide-react";
 import React from "react";
 import { PLANS, getPlanByName } from "../../../../data/hostingPlans";
 
@@ -13,13 +13,10 @@ const ADD_ONS = [
 
 export default function PlanDetailsSection({ plan: planName }) {
     const plan =
-        getPlanByName(planName) ??
-        PLANS.find((p) => p.popular) ??
-        PLANS[0];
+        getPlanByName(planName) ?? PLANS.find((p) => p.popular) ?? PLANS[0];
 
     return (
         <div className="hidden lg:flex lg:w-3/5 flex-col justify-between bg-[#0B0F19] bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] p-12 text-white relative">
-            
             <div className="flex items-center gap-2">
                 <img
                     src="/images/asura-logo.png"
@@ -59,7 +56,7 @@ export default function PlanDetailsSection({ plan: planName }) {
                 <ul className="space-y-3 text-slate-300 text-sm">
                     {plan.features.map((feature) => (
                         <li key={feature} className="flex items-start gap-2">
-                            <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                             <span>{feature}</span>
                         </li>
                     ))}
@@ -69,15 +66,16 @@ export default function PlanDetailsSection({ plan: planName }) {
                     <h3 className="text-sm font-bold text-white mb-3">
                         Add-ons available
                     </h3>
-                    <ul className="space-y-2 text-slate-300 text-sm">
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm ">
                         {ADD_ONS.map((addOn) => (
                             <li
                                 key={addOn.label}
                                 className="flex items-start gap-2"
                             >
                                 <Plus className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                                <span>
-                                    {addOn.label} — {addOn.price}
+                                <span className="text-slate-300">
+                                    {addOn.label}
+                                    <span className="text-slate-500"> — {addOn.price}</span>
                                 </span>
                             </li>
                         ))}

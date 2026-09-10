@@ -12,12 +12,10 @@ export default function NavBarSection() {
     const [isDarkMode, setIsDarkMode] = useState(getInitialDarkMode);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    // Toggle Dark Mode Class on the Document Element
     useEffect(() => {
         document.documentElement.classList.toggle("dark", isDarkMode);
     }, [isDarkMode]);
 
-    // Keep following the OS theme in real time until the user picks one explicitly
     useEffect(() => {
         const media = window.matchMedia("(prefers-color-scheme: dark)");
         const handleSystemChange = (e) => {
@@ -54,10 +52,10 @@ export default function NavBarSection() {
 
     return (
         <div className="w-full bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 font-sans transition-colors duration-200">
-            <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
                 <Link
                     href="/"
-                    className="flex items-center space-x-2.5 cursor-pointer"
+                    className="flex items-center space-x-2.5 cursor-pointer "
                 >
                     <div className="flex items-center justify-center">
                         <img
