@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Layout from "../layout";
+import MainLayout from "@/components/layout/MainLayout";
 import HeroSection from "./sections/hero-section";
 import FeaturedGuideSection from "./sections/featured-guide-section";
 import GuidesSection from "./sections/guides-section";
@@ -13,29 +13,31 @@ export default function Page() {
 
     if (selectedGuide) {
         return (
-            <Layout title="Knowledge Base" subtitle="Guides and documentation">
-                <div className="space-y-6">
-                    <GuideHeaderSection
-                        guide={selectedGuide}
-                        onBack={() => setSelectedGuide(null)}
-                    />
-                    <GuideStepsSection steps={selectedGuide.steps} />
-                    <GuideFeedbackCard />
-                </div>
-            </Layout>
+            <div className="space-y-6">
+                <GuideHeaderSection
+                    guide={selectedGuide}
+                    onBack={() => setSelectedGuide(null)}
+                />
+                <GuideStepsSection steps={selectedGuide.steps} />
+                <GuideFeedbackCard />
+            </div>
         );
     }
 
     return (
-        <Layout title="Knowledge Base" subtitle="Guides and documentation">
-            <div className="space-y-6">
-                <HeroSection onSearch={setSearchQuery} />
-                <FeaturedGuideSection onSelectGuide={setSelectedGuide} />
-                <GuidesSection
-                    searchQuery={searchQuery}
-                    onSelectGuide={setSelectedGuide}
-                />
-            </div>
-        </Layout>
+        <div className="space-y-6">
+            <HeroSection onSearch={setSearchQuery} />
+            <FeaturedGuideSection onSelectGuide={setSelectedGuide} />
+            <GuidesSection
+                searchQuery={searchQuery}
+                onSelectGuide={setSelectedGuide}
+            />
+        </div>
     );
 }
+
+Page.layout = (page) => (
+    <MainLayout title="Knowledge Base" subtitle="Guides and documentation">
+        {page}
+    </MainLayout>
+);

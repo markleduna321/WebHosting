@@ -1,27 +1,25 @@
-import React from 'react'
-import NavBarSection from './sections/nav-bar-section'
-import HeroSection from './sections/hero-section'
-import HostPlan from './sections/host-plan'
-import FeatureSection from './sections/feature-section'
-import UseCasesSection from './sections/use-cases-section'
-import TestimonialSection from './sections/testimonial-section'
-import AboutUsSection from './sections/about-us-section'
-import FooterSection from './sections/footer-section'
+import { Head } from '@inertiajs/react';
+import Navbar from './_sections/Navbar';
+import HeroSection from './_sections/HeroSection';
+import StatsBar from './_sections/StatsBar';
+import PricingSection from './_sections/PricingSection';
+import PartnersSection from './_sections/PartnersSection';
+import ReviewsSection from './_sections/ReviewsSection';
+import Footer from './_sections/Footer';
 
-export default function Page() {
-  return (
-    <div className="bg-white dark:bg-slate-950">
-      <div className="sticky top-0 z-50">
-         <NavBarSection />
-      </div>
-       
-        <HeroSection /> 
-        <HostPlan />
-        <FeatureSection/>
-        <UseCasesSection />
-        <TestimonialSection />
-        <AboutUsSection />
-        <FooterSection />
-    </div>
-  )
+export default function HomePage() {
+    return (
+        <>
+            <Head title="Home" />
+            <Navbar />
+            <main>
+                <HeroSection />
+                <StatsBar />
+                <PricingSection />
+                <PartnersSection />
+                <ReviewsSection />
+            </main>
+            <Footer />
+        </>
+    );
 }

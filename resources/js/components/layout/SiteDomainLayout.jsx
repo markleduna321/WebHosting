@@ -1,9 +1,11 @@
-import { Globe, Lock, GitBranch } from "lucide-react";
 import React from "react";
-import Tabs from "../../../_components/tabs";
+import { usePage } from "@inertiajs/react";
+import { Globe, Lock, GitBranch } from "lucide-react";
+import Tabs from "@/_components/tabs";
 
-export default function TabsSection() {
-    const segment = window.location.pathname.split("/")[2];
+export default function SiteDomainLayout({ children }) {
+    const { url } = usePage();
+    const segment = url.split("?")[0].split("/")[2];
 
     const tabs = [
         {
@@ -26,5 +28,10 @@ export default function TabsSection() {
         },
     ];
 
-    return <Tabs tabs={tabs} />;
+    return (
+        <div className="p-6 bg-slate-50 min-h-screen">
+            <Tabs tabs={tabs} />
+            <div className="mt-4">{children}</div>
+        </div>
+    );
 }

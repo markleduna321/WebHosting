@@ -1,5 +1,5 @@
 import React from "react";
-import Layout from "../layout";
+import MainLayout from "@/components/layout/MainLayout";
 import Card from "../../_components/card";
 
 export default function Page() {
@@ -82,9 +82,8 @@ export default function Page() {
   ];
 
   return (
-    <Layout title="Hosting Plan" subtitle="Compare and switch your hosting plan">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {plans.map((plan, index) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {plans.map((plan, index) => (
           <Card
             key={index}
             variant={plan.isCurrent ? "primary" : "default"}
@@ -155,8 +154,13 @@ export default function Page() {
               {plan.buttonText}
             </button>
           </Card>
-        ))}
-      </div>
-    </Layout>
+      ))}
+    </div>
   );
 }
+
+Page.layout = (page) => (
+  <MainLayout title="Hosting Plan" subtitle="Compare and switch your hosting plan">
+    {page}
+  </MainLayout>
+);

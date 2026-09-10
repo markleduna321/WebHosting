@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query/react';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import uiReducer from '@/features/ui/uiSlice';
 
 // Base RTK Query API - extend this from `features/*` later.
 export const api = createApi({
@@ -19,6 +20,7 @@ export const { useGetUserQuery } = api;
 
 const store = configureStore({
 	reducer: {
+		ui: uiReducer,
 		[api.reducerPath]: api.reducer,
 	},
 	middleware: (getDefaultMiddleware) =>

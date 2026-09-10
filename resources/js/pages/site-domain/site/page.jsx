@@ -1,11 +1,14 @@
 import React from "react";
-import SiteDomainLayout from "../layout";
+import MainLayout from "@/components/layout/MainLayout";
+import SiteDomainLayout from "@/components/layout/SiteDomainLayout";
 import SiteDomainCardSection from "./sections/site-domain-card-section";
 
 export default function Page() {
-    return (
-        <SiteDomainLayout>
-            <SiteDomainCardSection />
-        </SiteDomainLayout>
-    );
+    return <SiteDomainCardSection />;
 }
+
+Page.layout = (page) => (
+    <MainLayout title="Sites & Domains">
+        <SiteDomainLayout>{page}</SiteDomainLayout>
+    </MainLayout>
+);

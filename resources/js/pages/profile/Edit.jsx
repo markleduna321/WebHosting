@@ -80,4 +80,4 @@ export default function Edit() {
     );
 }
 
-Edit.layout = (page) => <MainLayout>{page}</MainLayout>;
+Edit.layout = (page) => <MainLayout title="Profile">{page}</MainLayout>;
