@@ -1,6 +1,6 @@
 import { Globe, Database, Gift, Plus } from "lucide-react";
 import React from "react";
-import Button from "../../../_components/button";
+import Button from "@/components/ui/Button";
 
 const SHORTCUTS = [
     { label: "Domains",        icon: Globe },

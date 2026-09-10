@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Button from "../../../../_components/button";
-import Input from "../../../../_components/input";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 
 export default function ConnectDomainSection() {
     const [domain, setDomain] = useState("");

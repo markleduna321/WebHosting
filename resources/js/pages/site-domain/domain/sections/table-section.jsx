@@ -1,6 +1,6 @@
 import { CheckCircle, Loader2, AlertTriangle, Trash2, Star, RefreshCw, Globe } from "lucide-react";
 import React from "react";
-import Table from "../../../../_components/table";
+import Table from "@/components/ui/Table";
 
 const DOMAINS = [
     {

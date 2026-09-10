@@ -1,5 +1,5 @@
 import React from "react";
-import Table from "../../../../_components/table";
+import Table from "@/components/ui/Table";
 
 const REFERRALS = [
     { id: 1, name: "Jomar R.",  joined: "Joined Aug 27, 2026", status: "subscribed", credit: "₱199.00" },

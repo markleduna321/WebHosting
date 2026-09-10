@@ -1,7 +1,7 @@
 import React from "react";
 import { usePage } from "@inertiajs/react";
 import { Receipt, CreditCard, Gift, User } from "lucide-react";
-import Tabs from "@/_components/tabs";
+import Tabs from "@/components/ui/Tabs";
 
 export default function AccountBillingLayout({ children }) {
     const { url } = usePage();

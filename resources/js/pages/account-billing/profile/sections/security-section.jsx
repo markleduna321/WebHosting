@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "../../../../_components/button";
+import Button from "@/components/ui/Button";
 
 export default function SecuritySection() {
     return (

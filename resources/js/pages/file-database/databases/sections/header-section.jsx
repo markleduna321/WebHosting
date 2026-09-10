@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "../../../../_components/button";
+import Button from "@/components/ui/Button";
 import { Plus } from "lucide-react";
 
 const USED_GB = 0.68;

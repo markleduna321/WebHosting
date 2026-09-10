@@ -1,6 +1,6 @@
 import { Folder, FileText, Download, Trash2 } from "lucide-react";
 import React from "react";
-import Table from "../../../../_components/table";
+import Table from "@/components/ui/Table";
 
 export default function TableSection() {
     const ITEMS = [

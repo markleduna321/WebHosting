@@ -1,6 +1,6 @@
 import { Download } from "lucide-react";
 import React from "react";
-import Table from "../../../../_components/table";
+import Table from "@/components/ui/Table";
 
 const BACKUPS = [
     {

@@ -1,7 +1,7 @@
 import React from "react";
 import { usePage } from "@inertiajs/react";
 import { Globe, Lock, GitBranch } from "lucide-react";
-import Tabs from "@/_components/tabs";
+import Tabs from "@/components/ui/Tabs";
 
 export default function SiteDomainLayout({ children }) {
     const { url } = usePage();

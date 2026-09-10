@@ -1,6 +1,6 @@
 import { Copy, Mail } from "lucide-react";
 import React, { useState } from "react";
-import Button from "../../../../_components/button";
+import Button from "@/components/ui/Button";
 
 const REFERRAL_URL = "https://asuratechhost.app/r/MA...";
 const REFERRAL_CODE = "MARIA-HOST";

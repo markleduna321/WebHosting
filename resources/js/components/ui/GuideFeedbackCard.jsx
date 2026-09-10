@@ -1,6 +1,6 @@
 import { HeadphonesIcon } from "lucide-react";
 import React, { useState } from "react";
-import Button from "./button";
+import Button from "./Button";
 
 export default function GuideFeedbackCard() {
     const [answered, setAnswered] = useState(false);

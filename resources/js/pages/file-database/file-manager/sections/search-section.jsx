@@ -1,7 +1,7 @@
 import { FolderPlus, Upload } from "lucide-react";
 import React, { useState } from "react";
-import Button from "../../../../_components/button";
-import DropDown from "../../../../_components/dropdown";
+import Button from "@/components/ui/Button";
+import DropDown from "@/components/ui/Dropdown";
 
 const WEBSITES = [
     { label: "Portfolio 2026",              onClick: () => {} },

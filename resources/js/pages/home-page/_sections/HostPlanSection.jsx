@@ -1,67 +1,15 @@
 import { CheckCircle } from "lucide-react";
 import React, { useState, useEffect, useRef, useCallback, memo } from "react";
-
-// Move static data out of the render pipeline entirely
-const PLANS = [
-  {
-    name: "Student",
-    subtitle: "For your very first site",
-    price: "₱129",
-    billingNote: "/month",
-    annualNote: "or ₱1,000 billed annually",
-    features: [
-      "1 Site",
-      "1 Free Subdomain",
-      "50MB NVMe Storage",
-      "1 MySQL Database (50MB)",
-      "Automated Git Push Sync",
-      "Free SSL",
-    ],
-    popular: false,
-    cta: "Choose Plan",
-  },
-  {
-    name: "Pro",
-    subtitle: "For growing student projects",
-    price: "₱249",
-    billingNote: "/month",
-    annualNote: "or ₱2,200 billed annually",
-    features: [
-      "3 Sites",
-      "1 Free Subdomain",
-      "200MB NVMe Storage",
-      "1 MySQL Database (100MB)",
-      "Automated Git Push Sync",
-      "VS Code AI Extension (BYOK)",
-      "Free SSL",
-    ],
-    popular: true,
-    cta: "Choose Plan",
-  },
-  {
-    name: "Enterprise",
-    subtitle: "For organizations and capstone teams",
-    price: "Custom",
-    billingNote: "",
-    annualNote: "Contact for pricing",
-    features: [
-      "Free Domain (1 Year)",
-      "Automated Git + Priority Sync",
-    ],
-    popular: false,
-    cta: "Contact Sales",
-  },
-];
+import { router } from "@inertiajs/react";
+import { PLANS } from "../../../data/hostingPlans";
 
 const EXTENDED_PLANS = [...PLANS, ...PLANS, ...PLANS];
 const TOTAL_COUNT = PLANS.length;
 
-// Reusable Check Icon
 const CheckIcon = () => (
   <CheckCircle className="w-5 h-5 text-emerald-500 dark:text-emerald-400 mr-3 shrink-0" />
 );
 
-// Isolated PlanCard component for memoization
 const PlanCard = memo(({ plan, isActive, isSelected, onSelect, onFocusCard, cardIndex, slideWidthPct }) => {
   return (
     <div className="shrink-0 px-3" style={{ width: `${slideWidthPct}%` }}>
@@ -129,7 +77,6 @@ export default function HostPlan() {
   const isAnimating = useRef(false);
   const centerOffsetRef = useRef(Math.floor((3 - 1) / 2));
 
-  // Handle dynamic sizing efficiently, debounced to avoid thrashing on resize
   useEffect(() => {
     let resizeTimer;
     const applySize = () => {
@@ -201,7 +148,7 @@ export default function HostPlan() {
   }, [withTransition]);
 
   const handleSelectPlan = useCallback((planName) => {
-    setSelectedPlan((prev) => (prev === planName ? null : planName));
+    router.visit(route("register", { plan: planName }));
   }, []);
 
   const centerOffset = Math.floor((visible - 1) / 2);

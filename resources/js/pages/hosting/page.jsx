@@ -1,6 +1,6 @@
 import React from "react";
 import MainLayout from "@/components/layout/MainLayout";
-import Card from "../../_components/card";
+import Card from "@/components/ui/Card";
 
 export default function Page() {
   const plans = [

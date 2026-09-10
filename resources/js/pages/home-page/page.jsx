@@ -1,25 +1,27 @@
 import { Head } from '@inertiajs/react';
-import Navbar from './_sections/Navbar';
+import NavBarSection from './_sections/NavBarSection';
 import HeroSection from './_sections/HeroSection';
-import StatsBar from './_sections/StatsBar';
-import PricingSection from './_sections/PricingSection';
-import PartnersSection from './_sections/PartnersSection';
-import ReviewsSection from './_sections/ReviewsSection';
-import Footer from './_sections/Footer';
+import HostPlanSection from './_sections/HostPlanSection';
+import FeatureSection from './_sections/FeatureSection';
+import UseCasesSection from './_sections/UseCasesSection';
+import TestimonialSection from './_sections/TestimonialSection';
+import AboutUsSection from './_sections/AboutUsSection';
+import FooterSection from './_sections/FooterSection';
 
 export default function HomePage() {
     return (
         <>
             <Head title="Home" />
-            <Navbar />
+            <NavBarSection />
             <main>
                 <HeroSection />
-                <StatsBar />
-                <PricingSection />
-                <PartnersSection />
-                <ReviewsSection />
+                <HostPlanSection />
+                <FeatureSection />
+                <UseCasesSection />
+                <TestimonialSection />
+                <AboutUsSection />
             </main>
-            <Footer />
+            <FooterSection />
         </>
     );
 }

@@ -72,7 +72,7 @@ export default function Page() {
 
             {/* Right Login Panel */}
             <div className="flex w-full lg:w-2/5 flex-col justify-center bg-white px-6 py-12 sm:px-12 lg:px-16">
-                <div className="mx-auto w-full max-w-md">
+                <div className="mx-auto w-full max-w-xl">
                     {/* Back Link */}
                     <Link
                         href="/"
@@ -93,7 +93,7 @@ export default function Page() {
                     </div>
 
                     {/* Form Fields */}
-                    <form className="space-y-6" onSubmit={submit}>
+                    <form className="space-y-8" onSubmit={submit}>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">
                                 Email Address
@@ -105,7 +105,7 @@ export default function Page() {
                                     setData("email", e.target.value)
                                 }
                                 placeholder="you@university.edu.ph"
-                                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 placeholder-slate-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3.5 text-base text-slate-900 placeholder-slate-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             />
                             {errors.email && (
                                 <p className="mt-1.5 text-xs text-red-600">
@@ -134,7 +134,7 @@ export default function Page() {
                                         setData("password", e.target.value)
                                     }
                                     placeholder="••••••••"
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 pr-11 text-base text-slate-900 placeholder-slate-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3.5 pr-11 text-base text-slate-900 placeholder-slate-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                                 />
                                 <button
                                     type="button"
@@ -186,7 +186,7 @@ export default function Page() {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full rounded-lg bg-blue-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full rounded-lg bg-blue-600 px-4 py-3.5 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             {processing ? "Logging in..." : "Log In"}
                         </button>
@@ -207,7 +207,7 @@ export default function Page() {
                     {/* Social Auth */}
                     <button
                         type="button"
-                        className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-base font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors"
+                        className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3.5 text-base font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors"
                     >
                         <svg className="h-5 w-5" viewBox="0 0 24 24">
                             <path

@@ -1,12 +1,12 @@
 import React from "react";
 import { usePage } from "@inertiajs/react";
 import MainLayout from "@/components/layout/MainLayout";
-import HeaderSection from "./sections/header-section";
-import PerformanceSection from "./sections/performance-section";
-import PlanResourceUsageSection from "./sections/plan-resource-usage-section";
-import TipsSection from "./sections/tips-section";
-import ProjectListSection from "./sections/project-list-section";
-import ShortcutSection from "./sections/short-cut-section";
+import HeaderSection from "./_sections/HeaderSection";
+import PerformanceSection from "./_sections/PerformanceSection";
+import PlanResourceUsageSection from "./_sections/PlanResourceUsageSection";
+import TipsSection from "./_sections/TipsSection";
+import ProjectListSection from "./_sections/ProjectListSection";
+import ShortcutSection from "./_sections/ShortcutSection";
 
 export default function Page() {
     const { auth } = usePage().props;

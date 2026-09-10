@@ -1,6 +1,6 @@
 import { ExternalLink, Loader2 } from "lucide-react";
 import React from "react";
-import Card from "../../../../_components/card";
+import Card from "@/components/ui/Card";
 
 const SITES = [
     {

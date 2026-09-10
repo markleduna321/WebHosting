@@ -5,7 +5,7 @@ import FeaturedGuideSection from "./sections/featured-guide-section";
 import GuidesSection from "./sections/guides-section";
 import GuideHeaderSection from "./guide/sections/guide-header-section";
 import GuideStepsSection from "./guide/sections/guide-steps-section";
-import GuideFeedbackCard from "../../_components/guide-feedback-card";
+import GuideFeedbackCard from "@/components/ui/GuideFeedbackCard";
 
 export default function Page() {
     const [searchQuery, setSearchQuery] = useState("");

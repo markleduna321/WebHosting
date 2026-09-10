@@ -1,7 +1,7 @@
 import { Wallet, CreditCard, Trash2, Plus } from "lucide-react";
 import React from "react";
-import Button from "../../../../_components/button";
-import Table from "../../../../_components/table";
+import Button from "@/components/ui/Button";
+import Table from "@/components/ui/Table";
 
 const METHODS = [
     {
