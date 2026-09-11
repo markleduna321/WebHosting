@@ -50,8 +50,8 @@ export default function Topbar({ title = 'Dashboard', subtitle }) {
                 </button>
 
                 <Link
-                    href="/account/settings"
-                    aria-label="Account settings"
+                    href="/account-billing?tab=profile"
+                    aria-label="Account billing profile"
                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white transition-colors hover:bg-blue-700 ${FOCUS_RING}`}
                 >
                     <span aria-hidden="true">{initial}</span>

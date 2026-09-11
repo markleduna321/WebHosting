@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
-import HeroSection from "./sections/hero-section";
-import FeaturedGuideSection from "./sections/featured-guide-section";
-import GuidesSection from "./sections/guides-section";
-import GuideHeaderSection from "./guide/sections/guide-header-section";
-import GuideStepsSection from "./guide/sections/guide-steps-section";
+import HeroSection from "./_sections/HeroSection";
+import FeaturedGuideSection from "./_sections/FeaturedGuideSection";
+import GuidesSection from "./_sections/GuidesSection";
+import GuideHeaderSection from "./_sections/GuideHeaderSection";
+import GuideStepsSection from "./_sections/GuideStepsSection";
 import GuideFeedbackCard from "@/components/ui/GuideFeedbackCard";
 
 export default function Page() {

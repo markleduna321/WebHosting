@@ -1,14 +1,31 @@
 import { Link } from "@inertiajs/react";
-import { ArrowLeft } from "lucide-react";
-import React, { useState } from "react";
+import { ArrowLeft, Trash2 } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { ADD_ONS, formatCurrency } from "../../../../data/hostingPlans";
 
-const ADD_ON_ITEMS = [
-    { label: "Extra 10 GB Storage", price: "₱50/month" },
-    { label: "Website Security", price: "₱199/month" },
-];
-
-export default function CheckoutSummarySection({ onProceed }) {
+export default function CheckoutSummarySection({
+    plan,
+    selectedAddOnIds = [],
+    onRemoveAddOn,
+    onProceed,
+}) {
     const [coupon, setCoupon] = useState("");
+
+    const selectedAddOns = useMemo(
+        () => ADD_ONS.filter((addOn) => selectedAddOnIds.includes(addOn.id)),
+        [selectedAddOnIds],
+    );
+    const addOnsTotal = useMemo(
+        () => selectedAddOns.reduce((sum, addOn) => sum + addOn.price, 0),
+        [selectedAddOns],
+    );
+    const hasFixedPrice = plan?.monthlyPrice != null;
+    const subtotalDisplay = hasFixedPrice
+        ? formatCurrency(plan.monthlyPrice)
+        : plan?.price;
+    const totalDisplay = hasFixedPrice
+        ? formatCurrency(plan.monthlyPrice + addOnsTotal)
+        : plan?.price;
 
     return (
         <div className="mx-auto w-full max-w-xl">
@@ -52,7 +69,7 @@ export default function CheckoutSummarySection({ onProceed }) {
                         Subtotal
                     </span>
                     <span className="text-md font-bold text-slate-900">
-                        ₱199
+                        {subtotalDisplay}
                     </span>
                 </div>
 
@@ -62,19 +79,41 @@ export default function CheckoutSummarySection({ onProceed }) {
                             Add-ons
                         </span>
                         <span className="text-md font-bold text-slate-900">
-                            ₱249
+                            {formatCurrency(addOnsTotal)}
                         </span>
                     </div>
                     <div className="mt-3 space-y-2">
-                        {ADD_ON_ITEMS.map((item) => (
-                            <div
-                                key={item.label}
-                                className="flex items-center gap-1.5 text-sm text-slate-500"
-                            >
-                                <span className="text-emerald-600">+</span>
-                                {item.label} — {item.price}
-                            </div>
-                        ))}
+                        {selectedAddOns.length > 0 ? (
+                            selectedAddOns.map((addOn) => (
+                                <div
+                                    key={addOn.id}
+                                    className="flex items-center justify-between gap-2 text-sm text-slate-500"
+                                >
+                                    <span className="flex items-center gap-1.5">
+                                        <span className="text-emerald-600">
+                                            +
+                                        </span>
+                                        {addOn.label} —{" "}
+                                        {formatCurrency(addOn.price)}/
+                                        {addOn.period}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            onRemoveAddOn?.(addOn.id)
+                                        }
+                                        aria-label={`Remove ${addOn.label}`}
+                                        className="shrink-0 text-slate-400 hover:text-red-600 transition-colors"
+                                    >
+                                        <Trash2 className="w-3 h-3" />
+                                    </button>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-sm text-slate-400">
+                                No add-ons selected yet.
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -83,7 +122,7 @@ export default function CheckoutSummarySection({ onProceed }) {
                         Total
                     </span>
                     <span className="text-base font-bold text-slate-900">
-                        ₱448
+                        {totalDisplay}
                     </span>
                 </div>
 
@@ -98,3 +137,4 @@ export default function CheckoutSummarySection({ onProceed }) {
         </div>
     );
 }
+

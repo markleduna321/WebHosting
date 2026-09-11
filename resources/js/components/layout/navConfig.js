@@ -32,7 +32,7 @@ export const ADMIN_NAV_GROUPS = [
         name: 'Hosting Management',
         icon: Server,
         children: [
-            { name: 'Hosting Plans', href: '/admin/hosting/plans' },
+            { name: 'Hosting Plans', href: '/admin/hosting-plan/plans' },
             { name: 'Websites', href: '/admin/hosting/websites' },
             { name: 'Servers', href: '/admin/hosting/servers' },
             { name: 'Storage', href: '/admin/hosting/storage' },

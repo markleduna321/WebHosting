@@ -5,6 +5,7 @@ export const PLANS = [
         name: "Student",
         subtitle: "For your very first site",
         price: "₱129",
+        monthlyPrice: 129,
         billingNote: "/month",
         annualNote: "or ₱1,000 billed annually",
         features: [
@@ -22,6 +23,7 @@ export const PLANS = [
         name: "Pro",
         subtitle: "For growing student projects",
         price: "₱249",
+        monthlyPrice: 249,
         billingNote: "/month",
         annualNote: "or ₱2,200 billed annually",
         features: [
@@ -40,6 +42,7 @@ export const PLANS = [
         name: "Enterprise",
         subtitle: "For organizations and capstone teams",
         price: "Custom",
+        monthlyPrice: null,
         billingNote: "",
         annualNote: "Contact for pricing",
         features: ["Free Domain (1 Year)", "Automated Git + Priority Sync"],
@@ -48,6 +51,26 @@ export const PLANS = [
     },
 ];
 
+// Shared add-on catalog — used by both the plan details panel (to select
+// add-ons) and the checkout summary (to price them).
+export const ADD_ONS = [
+    { id: "professional-email", label: "Professional Email", price: 49, period: "month" },
+    { id: "extra-storage", label: "Extra 10 GB Storage", price: 50, period: "month" },
+    { id: "daily-backup", label: "Daily Website Backup", price: 149, period: "month" },
+    { id: "website-maintenance", label: "Website Maintenance", price: 499, period: "month" },
+    { id: "website-security", label: "Website Security", price: 199, period: "month" },
+    { id: "premium-ssl", label: "Premium SSL Certificate", price: 999, period: "year" },
+];
+
 export function getPlanByName(name) {
     return PLANS.find((plan) => plan.name === name);
 }
+
+export function getAddOnById(id) {
+    return ADD_ONS.find((addOn) => addOn.id === id);
+}
+
+export function formatCurrency(amount) {
+    return `₱${amount.toLocaleString()}`;
+}
+

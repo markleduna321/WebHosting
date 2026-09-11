@@ -1,9 +1,10 @@
 import { Head, usePage } from "@inertiajs/react";
 import { CheckCircle } from "lucide-react";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import PlanDetailsSection from "./_sections/PlanDetailsSection";
 import CheckoutSummarySection from "./_sections/CheckoutSummarySection";
 import CreateAccountSection from "./_sections/CreateAccountSection";
+import { PLANS, getPlanByName } from "../../../data/hostingPlans";
 
 function GenericBrandingPanel() {
     return (
@@ -57,16 +58,32 @@ function GenericBrandingPanel() {
 }
 
 export default function Page() {
-    const { plan } = usePage().props;
+    const { plan: planName } = usePage().props;
     const [step, setStep] = useState("checkout");
-    const hasPlan = Boolean(plan);
+    const [selectedAddOnIds, setSelectedAddOnIds] = useState([]);
+    const hasPlan = Boolean(planName);
+    const plan = hasPlan
+        ? getPlanByName(planName) ?? PLANS.find((p) => p.popular) ?? PLANS[0]
+        : null;
+
+    const toggleAddOn = useCallback((id) => {
+        setSelectedAddOnIds((prev) =>
+            prev.includes(id)
+                ? prev.filter((addOnId) => addOnId !== id)
+                : [...prev, id],
+        );
+    }, []);
 
     return (
         <div className="flex min-h-screen w-full font-sans antialiased">
             <Head title="Register" />
 
             {hasPlan ? (
-                <PlanDetailsSection plan={plan} />
+                <PlanDetailsSection
+                    plan={plan}
+                    selectedAddOnIds={selectedAddOnIds}
+                    onToggleAddOn={toggleAddOn}
+                />
             ) : (
                 <GenericBrandingPanel />
             )}
@@ -74,6 +91,9 @@ export default function Page() {
             <div className="flex w-full lg:w-2/5 flex-col justify-center bg-white px-6 py-12 sm:px-12 lg:px-16">
                 {hasPlan && step === "checkout" ? (
                     <CheckoutSummarySection
+                        plan={plan}
+                        selectedAddOnIds={selectedAddOnIds}
+                        onRemoveAddOn={toggleAddOn}
                         onProceed={() => setStep("create-account")}
                     />
                 ) : (
