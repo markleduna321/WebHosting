@@ -6,8 +6,24 @@ import uiReducer from '@/features/ui/uiSlice';
 // Base RTK Query API - extend this from `features/*` later.
 export const api = createApi({
 	reducerPath: 'api',
-	baseQuery: fetchBaseQuery({ baseUrl: '/api', credentials: 'include' }),
-	tagTypes: ['User'],
+	baseQuery: fetchBaseQuery({
+		baseUrl: '/api',
+		credentials: 'include',
+		prepareHeaders: (headers) => {
+			// Sanctum stateful requests require the XSRF cookie echoed as a header.
+			const token = document.cookie
+				.split('; ')
+				.find((row) => row.startsWith('XSRF-TOKEN='))
+				?.split('=')[1];
+
+			if (token) {
+				headers.set('X-XSRF-TOKEN', decodeURIComponent(token));
+			}
+
+			return headers;
+		},
+	}),
+	tagTypes: ['User', 'Role', 'Permission'],
 	endpoints: (builder) => ({
 		getUser: builder.query({
 			query: () => '/user',

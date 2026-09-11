@@ -275,7 +275,7 @@ export default function Sidebar() {
     const mobileOpen = useSelector(selectMobileSidebarOpen);
 
     const { url, props } = usePage();
-    const isAdmin = props?.auth?.user?.role === 'administrator';
+    const isAdmin = Boolean(props?.auth?.user?.roles?.includes('admin'));
     const theme = isAdmin ? THEMES.admin : THEMES.user;
 
     const isLinkActive = (href) => url === href || url.startsWith(`${href}/`);

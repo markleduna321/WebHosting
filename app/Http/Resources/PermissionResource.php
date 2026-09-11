@@ -2,9 +2,10 @@
 
 namespace App\Http\Resources;
 
+use App\Services\PermissionService;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UserResource extends JsonResource
+class PermissionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -12,12 +13,10 @@ class UserResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id' => $this->when(isset($this->id), $this->id),
+            'id' => $this->id,
             'name' => $this->name,
-            'email' => $this->email,
-            'roles' => $this->getRoleNames(),
-            'permissions' => $this->getAllPermissions()->pluck('name'),
-            'email_verified_at' => $this->email_verified_at,
+            'roles_count' => $this->whenCounted('roles'),
+            'is_protected' => PermissionService::isProtected($this->resource),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -25,7 +25,8 @@ export const ADMIN_NAV_GROUPS = [
         children: [
             { name: 'Students', href: '/admin/users/students' },
             { name: 'Admins', href: '/admin/users/admins' },
-            { name: 'Roles & Permissions', href: '/admin/users/roles-permissions' },
+            { name: 'Roles', href: '/admin/roles' },
+            { name: 'Permissions', href: '/admin/permissions' },
         ],
     },
     {

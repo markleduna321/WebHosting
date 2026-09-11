@@ -10,24 +10,24 @@ class TestUserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::updateOrCreate(
+        $user = User::updateOrCreate(
             ['email' => 'test@example.com'],
             [
                 'name' => 'Test User',
                 'password' => Hash::make('password'),
-                'role' => 'user',
                 'email_verified_at' => now(),
             ]
         );
+        $user->syncRoles(['student']);
 
-        User::updateOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Test Administrator',
                 'password' => Hash::make('password'),
-                'role' => 'administrator',
                 'email_verified_at' => now(),
             ]
         );
+        $admin->syncRoles(['admin']);
     }
 }

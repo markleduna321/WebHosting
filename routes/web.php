@@ -36,6 +36,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/account/settings', fn () => Inertia::render('account/settings/page'))->name('account.settings');
 });
 
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/roles', fn () => Inertia::render('admin/roles/page'))->name('admin.roles');
+    Route::get('/permissions', fn () => Inertia::render('admin/permissions/page'))->name('admin.permissions');
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -10,7 +10,7 @@ import ShortcutSection from "./_sections/ShortcutSection";
 
 export default function Page() {
     const { auth } = usePage().props;
-    const isAdministrator = auth?.user?.role === "administrator";
+    const isAdministrator = Boolean(auth?.user?.roles?.includes("admin"));
 
     // Administrators manage the site from the admin portal, not this user dashboard.
     if (isAdministrator) {
@@ -48,7 +48,7 @@ Page.layout = (page) => (
     <MainLayout
         title="Dashboard"
         subtitle={
-            page.props.auth?.user?.role === "administrator"
+            page.props.auth?.user?.roles?.includes("admin")
                 ? page.props.auth?.user?.name
                 : "Maria Clara Santos · Student Pro plan"
         }
