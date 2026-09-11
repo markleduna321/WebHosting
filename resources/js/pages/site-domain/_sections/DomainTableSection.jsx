@@ -140,7 +140,7 @@ const COLUMNS = [
     },
 ];
 
-export default function TableSection() {
+export default function DomainTableSection() {
     return (
         <div className="rounded-xl border border-gray-200 bg-white px-6 py-5">
             {/* Header */}

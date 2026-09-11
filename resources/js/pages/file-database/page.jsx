@@ -8,7 +8,7 @@ import DatabaseHeaderSection from "./_sections/DatabaseHeaderSection";
 import DatabaseToolSection from "./_sections/DatabaseToolSection";
 import BackupHistorySection from "./_sections/BackupHistorySection";
 import EnvironmentSection from "./_sections/EnvironmentSection";
-import SiteDomainCardSection from "@/pages/site-domain/site/sections/site-domain-card-section";
+import SiteDomainCardSection from "@/pages/site-domain/_sections/SiteDomainCardSection";
 
 const TABS = [
     { id: "file-manager", label: "File manager", icon: <FolderOpen size={16} /> },

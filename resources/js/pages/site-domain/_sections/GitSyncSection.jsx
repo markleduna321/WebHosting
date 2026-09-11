@@ -1,8 +1,6 @@
 import React from "react";
-import MainLayout from "@/components/layout/MainLayout";
-import SiteDomainLayout from "@/components/layout/SiteDomainLayout";
 
-export default function Page() {
+export default function GitSyncSection() {
     return (
         <div className="p-6 bg-white rounded-xl border border-gray-200 shadow-sm">
             <h2 className="text-lg font-semibold mb-2">Git Sync</h2>
@@ -13,9 +11,3 @@ export default function Page() {
         </div>
     );
 }
-
-Page.layout = (page) => (
-    <MainLayout title="Git Sync">
-        <SiteDomainLayout>{page}</SiteDomainLayout>
-    </MainLayout>
-);

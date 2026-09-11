@@ -24,9 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/websites', fn () => Inertia::render('websites/page'))->name('websites');
     Route::get('/websites/files', fn () => Inertia::render('websites/files/page'))->name('websites.files');
     Route::get('/websites/databases', fn () => Inertia::render('websites/databases/page'))->name('websites.databases');
-    Route::get('/site-domain', fn () => Inertia::render('site-domain/site/page'))->name('site-domain');
-    Route::get('/site-domain/domains', fn () => Inertia::render('site-domain/domain/page'))->name('site-domain.domains');
-    Route::get('/site-domain/git-sync', fn () => Inertia::render('site-domain/git-sync/page'))->name('site-domain.git-sync');
+    Route::get('/site-domain', fn () => Inertia::render('site-domain/page'))->name('site-domain');
     Route::get('/files-database', fn () => Inertia::render('file-database/page'))->name('files-database');
     Route::get('/account-billing', fn (Request $request) => Inertia::render('account-billing/page', [
         'tab' => $request->query('tab'),
