@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { router } from "@inertiajs/react";
 import Button from "@/components/ui/Button";
 
 export default function SubscriptionHeaderSection() {
@@ -22,7 +23,12 @@ export default function SubscriptionHeaderSection() {
 
                 {/* Right: action buttons */}
                 <div className="flex items-center gap-2 shrink-0">
-                    <Button variant="primary" size="sm" className="rounded-lg">
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        className="rounded-lg"
+                        onClick={() => router.visit(route("hosting"))}
+                    >
                         Change plan
                     </Button>
                     <Button

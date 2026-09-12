@@ -1,6 +1,8 @@
 import { Globe, Database, Gift, Plus } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import Button from "@/components/ui/Button";
+import DeployModalSection from "./DeployModalSection";
+import ConnectGithubSection from "./ConnectGithubSection";
 
 const SHORTCUTS = [
     { label: "Domains",        icon: Globe },
@@ -15,11 +17,19 @@ const STATUS_ITEMS = [
 ];
 
 export default function ShortcutSection() {
+    const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
+    const [isConnectGithubOpen, setIsConnectGithubOpen] = useState(false);
+
     return (
         <div className="rounded-xl border border-gray-200 bg-white px-5 py-4">
             {/* Action buttons row */}
             <div className="flex flex-wrap items-center gap-2">
-                <Button variant="primary" size="md" className="rounded-lg gap-1.5">
+                <Button
+                    variant="primary"
+                    size="md"
+                    className="rounded-lg gap-1.5"
+                    onClick={() => setIsDeployModalOpen(true)}
+                >
                     <Plus className="w-3.5 h-3.5" />
                     Deploy New Site
                 </Button>
@@ -51,6 +61,21 @@ export default function ShortcutSection() {
                     </span>
                 ))}
             </div>
+
+            <DeployModalSection
+                open={isDeployModalOpen}
+                onCancel={() => setIsDeployModalOpen(false)}
+                onCreate={() => {
+                    setIsDeployModalOpen(false);
+                    setIsConnectGithubOpen(true);
+                }}
+            />
+
+            <ConnectGithubSection
+                open={isConnectGithubOpen}
+                onCancel={() => setIsConnectGithubOpen(false)}
+                onConnect={() => setIsConnectGithubOpen(false)}
+            />
         </div>
     );
 }
