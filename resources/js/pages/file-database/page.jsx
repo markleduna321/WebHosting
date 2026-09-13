@@ -2,6 +2,7 @@ import React from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import Tabs, { TabPanel } from "@/components/ui/Tabs";
 import { FolderOpen, Database, KeyRound } from "lucide-react";
+import { usePage } from "@inertiajs/react";
 import FileSearchSection from "./_sections/FileSearchSection";
 import FileTableSection from "./_sections/FileTableSection";
 import DatabaseHeaderSection from "./_sections/DatabaseHeaderSection";
@@ -17,8 +18,11 @@ const TABS = [
 ];
 
 export default function Page() {
+    const { tab } = usePage().props;
+    const defaultTabId = TABS.some((t) => t.id === tab) ? tab : "file-manager";
+
     return (
-        <Tabs tabs={TABS} defaultTabId="file-manager">
+        <Tabs tabs={TABS} defaultTabId={defaultTabId}>
             <TabPanel id="file-manager">
                 <div className="space-y-4">
                     <FileSearchSection />

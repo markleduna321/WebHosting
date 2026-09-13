@@ -25,27 +25,7 @@ export default function FileSearchSection() {
                 <DropDown buttonText={selected} items={items} align="left" />
             </div>
 
-            {/* Action buttons */}
-            <div className="flex items-center gap-2">
-                <Button
-                    variant="light"
-                    size="sm"
-                    outlined
-                    className="rounded-lg gap-1.5"
-                >
-                    <FolderPlus className="w-3.5 h-3.5 text-slate-500" />
-                    New folder
-                </Button>
-
-                <Button
-                    variant="primary"
-                    size="sm"
-                    className="rounded-lg gap-1.5"
-                >
-                    <Upload className="w-3.5 h-3.5" />
-                    Upload files
-                </Button>
-            </div>
+            
         </div>
     );
 }

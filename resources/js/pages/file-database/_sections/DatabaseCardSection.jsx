@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Database, Eye, EyeOff, Copy, RefreshCw, Check } from 'lucide-react'
+import Card from '@/components/Card'
 
 const sampleDatabases = [
   {
@@ -55,7 +56,7 @@ export default function DatabaseCardSection() {
   }
 
   return (
-    <section className="w-full max-w-6xl mx-auto p-4 sm:p-6 bg-slate-50/50 min-h-screen">
+    <section >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {sampleDatabases.map((db) => {
           const usagePercent = Math.min(
@@ -65,12 +66,13 @@ export default function DatabaseCardSection() {
           const isRevealed = !!showCredentials[db.id]
 
           return (
-            <div
+            <Card
               key={db.id}
-              className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col justify-between"
+              className="justify-between cursor-default"
             >
-              {/* Header */}
+              {/* Card Body */}
               <div>
+                {/* Header */}
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0">
@@ -134,11 +136,12 @@ export default function DatabaseCardSection() {
                 </div>
               </div>
 
-              {/* Actions */}
+              {/* Actions Footer */}
               <div className="flex items-center gap-3 pt-2">
                 <button
+                  type="button"
                   onClick={() => toggleCredentials(db.id)}
-                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
                 >
                   {isRevealed ? (
                     <>
@@ -154,8 +157,9 @@ export default function DatabaseCardSection() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => handleCopy(db.id, db.connectionString)}
-                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
                 >
                   {copiedId === db.id ? (
                     <>
@@ -170,7 +174,7 @@ export default function DatabaseCardSection() {
                   )}
                 </button>
               </div>
-            </div>
+            </Card>
           )
         })}
       </div>

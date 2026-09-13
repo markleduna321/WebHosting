@@ -24,8 +24,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/websites', fn () => Inertia::render('websites/page'))->name('websites');
     Route::get('/websites/files', fn () => Inertia::render('websites/files/page'))->name('websites.files');
     Route::get('/websites/databases', fn () => Inertia::render('websites/databases/page'))->name('websites.databases');
-    Route::get('/site-domain', fn () => Inertia::render('site-domain/page'))->name('site-domain');
-    Route::get('/files-database', fn () => Inertia::render('file-database/page'))->name('files-database');
+    Route::get('/site-domain', fn (Request $request) => Inertia::render('site-domain/page', [
+        'tab' => $request->query('tab'),
+    ]))->name('site-domain');
+    Route::get('/files-database', fn (Request $request) => Inertia::render('file-database/page', [
+        'tab' => $request->query('tab'),
+    ]))->name('files-database');
     Route::get('/account-billing', fn (Request $request) => Inertia::render('account-billing/page', [
         'tab' => $request->query('tab'),
     ]))->name('account-billing');

@@ -1,13 +1,15 @@
-import { Globe, Database, Gift, Plus } from "lucide-react";
+import { Globe, Database, Gift, Plus, Table } from "lucide-react";
 import React, { useState } from "react";
+import { Link } from "@inertiajs/react";
 import Button from "@/components/ui/Button";
 import DeployModalSection from "./DeployModalSection";
 import ConnectGithubSection from "./ConnectGithubSection";
 
 const SHORTCUTS = [
-    { label: "Domains",        icon: Globe },
-    { label: "Databases",      icon: Database },
-    { label: "Refer a friend", icon: Gift },
+    { label: "Domains",        icon: Globe,     href: "/site-domain?tab=domains" },
+    { label: "Databases",      icon: Database,  href: "/files-database?tab=databases" },
+    { label: "phpMyAdmin",      icon: Table,  href: "/files-database?tab=databases" },
+    { label: "Refer a friend", icon: Gift,       href: "/account-billing?tab=referrals" },
 ];
 
 const STATUS_ITEMS = [
@@ -34,17 +36,18 @@ export default function ShortcutSection() {
                     Deploy New Site
                 </Button>
 
-                {SHORTCUTS.map(({ label, icon: Icon }) => (
-                    <Button
-                        key={label}
-                        variant="light"
-                        size="md"
-                        outlined
-                        className="rounded-lg gap-1.5 text-slate-700"
-                    >
-                        <Icon className="w-3.5 h-3.5 text-slate-500" />
-                        {label}
-                    </Button>
+                {SHORTCUTS.map(({ label, icon: Icon, href }) => (
+                    <Link key={label} href={href}>
+                        <Button
+                            variant="light"
+                            size="md"
+                            outlined
+                            className="rounded-lg gap-1.5 text-slate-700"
+                        >
+                            <Icon className="w-3.5 h-3.5 text-slate-500" />
+                            {label}
+                        </Button>
+                    </Link>
                 ))}
             </div>
 

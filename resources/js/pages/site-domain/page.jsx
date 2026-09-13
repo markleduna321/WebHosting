@@ -2,6 +2,7 @@ import React from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import Tabs, { TabPanel } from "@/components/ui/Tabs";
 import { Globe, Lock, GitBranch } from "lucide-react";
+import { usePage } from "@inertiajs/react";
 import SiteDomainCardSection from "./_sections/SiteDomainCardSection";
 import DomainTableSection from "./_sections/DomainTableSection";
 import ConnectDomainSection from "./_sections/ConnectDomainSection";
@@ -14,8 +15,11 @@ const TABS = [
 ];
 
 export default function Page() {
+    const { tab } = usePage().props;
+    const defaultTabId = TABS.some((t) => t.id === tab) ? tab : "sites";
+
     return (
-        <Tabs tabs={TABS} defaultTabId="sites">
+        <Tabs tabs={TABS} defaultTabId={defaultTabId}>
             <TabPanel id="sites">
                 <SiteDomainCardSection />
             </TabPanel>
