@@ -12,8 +12,8 @@ export default function Topbar({ title = 'Dashboard', subtitle }) {
 
     const { auth } = usePage().props;
     const user = auth?.user;
-    const planName = user?.plan ?? 'Student Pro';
-    const displaySubtitle = subtitle ?? `${user?.name ?? 'Account'} · ${planName} plan`;
+    const planLabel = user?.plan ? `${user.plan.name} plan` : 'No plan yet';
+    const displaySubtitle = subtitle ?? `${user?.name ?? 'Account'} · ${planLabel}`;
     const initial = (user?.name ?? 'A').charAt(0).toUpperCase();
 
     return (

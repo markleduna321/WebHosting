@@ -7,6 +7,7 @@ import PlanResourceUsageSection from "./_sections/PlanResourceUsageSection";
 import TipsSection from "./_sections/TipsSection";
 import ProjectListSection from "./_sections/ProjectListSection";
 import ShortcutSection from "./_sections/ShortcutSection";
+import VerifyEmailBanner from "./_sections/VerifyEmailBanner";
 
 export default function Page() {
     const { auth } = usePage().props;
@@ -28,6 +29,7 @@ export default function Page() {
 
     return (
         <div className="space-y-6">
+            <VerifyEmailBanner />
             <HeaderSection />
             <ShortcutSection />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -44,15 +46,22 @@ export default function Page() {
     );
 }
 
-Page.layout = (page) => (
-    <MainLayout
-        title="Dashboard"
-        subtitle={
-            page.props.auth?.user?.roles?.includes("admin")
-                ? page.props.auth?.user?.name
-                : "Maria Clara Santos · Student Pro plan"
-        }
-    >
-        {page}
-    </MainLayout>
-);
+Page.layout = (page) => {
+    const user = page.props.auth?.user;
+    const isAdmin = Boolean(user?.roles?.includes("admin"));
+
+    return (
+        <MainLayout
+            title="Dashboard"
+            subtitle={
+                isAdmin
+                    ? user?.name
+                    : `${user?.name ?? "Account"} · ${
+                          user?.plan ? `${user.plan.name} plan` : "No plan yet"
+                      }`
+            }
+        >
+            {page}
+        </MainLayout>
+    );
+};

@@ -1,4 +1,5 @@
-import { HardDrive, Cpu, Layers, MemoryStick, Globe, Info } from "lucide-react";
+import { HardDrive, Cpu, Layers, MemoryStick, Globe, Info, Rocket } from "lucide-react";
+import { Link, usePage } from "@inertiajs/react";
 import React from "react";
 
 function MiniSparkline({ color = "#7c3aed" }) {
@@ -53,6 +54,38 @@ function MetricRow({ icon, label, value, valueColor = "text-slate-900", suffix }
 }
 
 export default function PlanResourceUsageSection() {
+    const { auth } = usePage().props;
+    const plan = auth?.user?.plan;
+
+    if (!plan) {
+        return (
+            <div className="rounded-xl border border-gray-200 bg-white p-6 flex-1">
+                <h2 className="text-base font-bold text-slate-900">
+                    Plan resource usage
+                </h2>
+
+                <div className="mt-6 flex flex-col items-center text-center">
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                        <Rocket aria-hidden="true" className="h-6 w-6" />
+                    </span>
+                    <p className="mt-4 text-sm font-semibold text-slate-900">
+                        No plan yet
+                    </p>
+                    <p className="mt-1 max-w-xs text-sm text-slate-500">
+                        Pick a hosting plan to unlock storage, bandwidth and
+                        resource tracking for your sites.
+                    </p>
+                    <Link
+                        href="/hosting"
+                        className="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    >
+                        Choose a plan
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="rounded-xl border border-gray-200 bg-white p-6 flex-1">
             <div className="flex items-center justify-between mb-6">

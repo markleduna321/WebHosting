@@ -17,9 +17,9 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return Inertia::render('dashboard/page');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware('auth')->name('dashboard');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('/hosting', fn () => Inertia::render('hosting-plan/page'))->name('hosting');
     Route::get('/websites', fn () => Inertia::render('websites/page'))->name('websites');
     Route::get('/websites/files', fn () => Inertia::render('websites/files/page'))->name('websites.files');
@@ -40,7 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/account/settings', fn () => Inertia::render('account/settings/page'))->name('account.settings');
 });
 
-Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/roles', fn () => Inertia::render('admin/roles/page'))->name('admin.roles');
     Route::get('/permissions', fn () => Inertia::render('admin/permissions/page'))->name('admin.permissions');
 });

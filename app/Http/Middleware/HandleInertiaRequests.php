@@ -30,6 +30,8 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
+        $user?->loadMissing('activeSubscription.plan');
+        $plan = $user?->activeSubscription?->plan;
 
         return [
             ...parent::share($request),
@@ -39,8 +41,13 @@ class HandleInertiaRequests extends Middleware
                     'name' => $user->name,
                     'email' => $user->email,
                     'email_verified_at' => $user->email_verified_at,
+                    'has_verified_email' => $user->hasVerifiedEmail(),
                     'roles' => $user->getRoleNames(),
                     'permissions' => $user->getAllPermissions()->pluck('name'),
+                    'plan' => $plan ? [
+                        'slug' => $plan->slug,
+                        'name' => $plan->name,
+                    ] : null,
                 ] : null,
             ],
         ];

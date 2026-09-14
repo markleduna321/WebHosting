@@ -1,6 +1,6 @@
-import { Globe, Database, Gift, Plus, Table } from "lucide-react";
+import { Globe, Database, Gift, Plus, Table, Rocket } from "lucide-react";
 import React, { useState } from "react";
-import { Link } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 import Button from "@/components/ui/Button";
 import DeployModalSection from "./DeployModalSection";
 import ConnectGithubSection from "./ConnectGithubSection";
@@ -19,8 +19,19 @@ const STATUS_ITEMS = [
 ];
 
 export default function ShortcutSection() {
+    const { auth } = usePage().props;
+    const hasPlan = Boolean(auth?.user?.plan);
     const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
     const [isConnectGithubOpen, setIsConnectGithubOpen] = useState(false);
+
+    const shortcuts = [
+        {
+            label: hasPlan ? "Manage plan" : "Choose a plan",
+            icon: Rocket,
+            href: "/hosting",
+        },
+        ...SHORTCUTS,
+    ];
 
     return (
         <div className="rounded-xl border border-gray-200 bg-white px-5 py-4">
@@ -36,7 +47,7 @@ export default function ShortcutSection() {
                     Deploy New Site
                 </Button>
 
-                {SHORTCUTS.map(({ label, icon: Icon, href }) => (
+                {shortcuts.map(({ label, icon: Icon, href }) => (
                     <Link key={label} href={href}>
                         <Button
                             variant="light"
