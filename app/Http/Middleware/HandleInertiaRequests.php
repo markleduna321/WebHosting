@@ -30,8 +30,9 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
-        $user?->loadMissing('activeSubscription.plan');
+        $user?->loadMissing('activeSubscription.plan', 'githubConnection');
         $plan = $user?->activeSubscription?->plan;
+        $github = $user?->githubConnection;
 
         return [
             ...parent::share($request),
@@ -48,7 +49,15 @@ class HandleInertiaRequests extends Middleware
                         'slug' => $plan->slug,
                         'name' => $plan->name,
                     ] : null,
+                    // Tokens are deliberately excluded.
+                    'github' => $github ? [
+                        'username' => $github->github_username,
+                        'avatar_url' => $github->avatar_url,
+                    ] : null,
                 ] : null,
+            ],
+            'flash' => [
+                'github_error' => fn () => $request->session()->get('github_error'),
             ],
         ];
     }

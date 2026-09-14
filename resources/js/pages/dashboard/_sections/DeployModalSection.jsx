@@ -1,13 +1,29 @@
 import React, { useState } from 'react'
-import { Modal, Input, Button } from 'antd'
+import { Modal, Input, Button, Select, Tag } from 'antd'
+import { useGetGithubRepositoriesQuery } from '@/features/github/githubApi'
 
 export default function DeployModalSection({ open, onCancel, onCreate }) {
   const [websiteName, setWebsiteName] = useState('')
   const [subdomain, setSubdomain] = useState('')
-  const [repositoryUrl, setRepositoryUrl] = useState('')
+  const [repositoryFullName, setRepositoryFullName] = useState(undefined)
+
+  // Only hit GitHub while the modal is actually open.
+  const {
+    data: repositories = [],
+    isFetching,
+    isError,
+    error,
+    refetch,
+  } = useGetGithubRepositoriesQuery(undefined, { skip: !open })
+
+  const needsReconnect = error?.status === 403
+  const selectedRepository = repositories.find(
+    (repo) => repo.full_name === repositoryFullName,
+  )
+  const canCreate = Boolean(websiteName && subdomain && selectedRepository)
 
   const handleCreate = () => {
-    onCreate?.({ websiteName, subdomain, repositoryUrl })
+    onCreate?.({ websiteName, subdomain, repository: selectedRepository })
   }
 
   return (
@@ -51,23 +67,95 @@ export default function DeployModalSection({ open, onCancel, onCreate }) {
       </div>
 
       <div style={{ marginBottom: 28 }}>
-        <label style={{ display: 'block', fontWeight: 600, marginBottom: 8 }}>
-          Paste repository
+        <label htmlFor="deploy-repository" style={{ display: 'block', fontWeight: 600, marginBottom: 8 }}>
+          Repository
         </label>
 
-        <Input
-          size="large"
-          placeholder="https://github.com/username/repository.git"
-          value={repositoryUrl}
-          onChange={(e) => setRepositoryUrl(e.target.value)}
-        />
+        {isError ? (
+          <div
+            role="alert"
+            style={{
+              border: '1px solid #fecaca',
+              background: '#fef2f2',
+              borderRadius: 8,
+              padding: 12,
+              fontSize: 13,
+              color: '#b91c1c',
+            }}
+          >
+            <p style={{ margin: 0 }}>
+              {needsReconnect
+                ? 'We could not reach your GitHub account. Reconnect to continue.'
+                : 'Could not load your repositories.'}
+            </p>
+            <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+              {needsReconnect ? (
+                <Button
+                  size="small"
+                  onClick={() => {
+                    window.location.href = route('github.redirect')
+                  }}
+                >
+                  Reconnect GitHub
+                </Button>
+              ) : (
+                <Button size="small" onClick={refetch}>
+                  Try again
+                </Button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <Select
+            id="deploy-repository"
+            size="large"
+            style={{ width: '100%' }}
+            showSearch
+            allowClear
+            loading={isFetching}
+            disabled={isFetching}
+            value={repositoryFullName}
+            onChange={setRepositoryFullName}
+            placeholder={isFetching ? 'Loading repositories…' : 'Select a repository'}
+            optionFilterProp="label"
+            notFoundContent={
+              isFetching ? 'Loading…' : 'No repositories found on your GitHub account.'
+            }
+            options={repositories.map((repo) => ({
+              value: repo.full_name,
+              label: repo.full_name,
+            }))}
+            optionRender={({ data }) => {
+              const repo = repositories.find((r) => r.full_name === data.value)
+              return (
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span>{data.label}</span>
+                  <Tag color={repo?.private ? 'orange' : 'green'} style={{ marginInlineEnd: 0 }}>
+                    {repo?.private ? 'Private' : 'Public'}
+                  </Tag>
+                </span>
+              )
+            }}
+          />
+        )}
+
+        {selectedRepository && (
+          <div style={{ color: '#9ca3af', fontSize: 13, marginTop: 6 }}>
+            Default branch: {selectedRepository.default_branch}
+          </div>
+        )}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
         <Button size="large" onClick={onCancel}>
           Cancel
         </Button>
-        <Button size="large" type="primary" onClick={handleCreate}>
+        <Button
+          size="large"
+          type="primary"
+          onClick={handleCreate}
+          disabled={!canCreate}
+        >
           Create website
         </Button>
       </div>

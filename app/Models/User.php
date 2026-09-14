@@ -59,4 +59,9 @@ class User extends Authenticatable implements MustVerifyEmail
             ->whereIn('status', Subscription::LIVE_STATUSES)
             ->latestOfMany();
     }
+
+    public function githubConnection(): HasOne
+    {
+        return $this->hasOne(GithubConnection::class);
+    }
 }

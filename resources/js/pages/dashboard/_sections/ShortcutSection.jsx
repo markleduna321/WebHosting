@@ -1,6 +1,7 @@
 import { Globe, Database, Gift, Plus, Table, Rocket } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
+import { message } from "antd";
 import Button from "@/components/ui/Button";
 import DeployModalSection from "./DeployModalSection";
 import ConnectGithubSection from "./ConnectGithubSection";
@@ -19,10 +20,34 @@ const STATUS_ITEMS = [
 ];
 
 export default function ShortcutSection() {
-    const { auth } = usePage().props;
+    const page = usePage();
+    const { auth, flash } = page.props;
     const hasPlan = Boolean(auth?.user?.plan);
+    const isGithubConnected = Boolean(auth?.user?.github);
     const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
     const [isConnectGithubOpen, setIsConnectGithubOpen] = useState(false);
+
+    // Returning from the OAuth round trip should drop the user straight into deploy.
+    useEffect(() => {
+        if (page.url.includes("github=connected") && isGithubConnected) {
+            setIsConnectGithubOpen(false);
+            setIsDeployModalOpen(true);
+        }
+    }, [page.url, isGithubConnected]);
+
+    useEffect(() => {
+        if (flash?.github_error) {
+            message.error(flash.github_error, 5);
+        }
+    }, [flash?.github_error]);
+
+    const openDeployFlow = () => {
+        if (isGithubConnected) {
+            setIsDeployModalOpen(true);
+        } else {
+            setIsConnectGithubOpen(true);
+        }
+    };
 
     const shortcuts = [
         {
@@ -41,7 +66,7 @@ export default function ShortcutSection() {
                     variant="primary"
                     size="md"
                     className="rounded-lg gap-1.5"
-                    onClick={() => setIsDeployModalOpen(true)}
+                    onClick={openDeployFlow}
                 >
                     <Plus className="w-3.5 h-3.5" />
                     Deploy New Site
@@ -79,16 +104,12 @@ export default function ShortcutSection() {
             <DeployModalSection
                 open={isDeployModalOpen}
                 onCancel={() => setIsDeployModalOpen(false)}
-                onCreate={() => {
-                    setIsDeployModalOpen(false);
-                    setIsConnectGithubOpen(true);
-                }}
+                onCreate={() => setIsDeployModalOpen(false)}
             />
 
             <ConnectGithubSection
                 open={isConnectGithubOpen}
                 onCancel={() => setIsConnectGithubOpen(false)}
-                onConnect={() => setIsConnectGithubOpen(false)}
             />
         </div>
     );
