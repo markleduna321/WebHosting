@@ -3,11 +3,11 @@ import MainLayout from "@/components/layout/MainLayout";
 import HostPlanHeaderSection from "./_sections/HostPlanHeaderSection";
 import HostPlanCardSection from "./_sections/HostPlanCardSection";
 
-export default function Page() {
+export default function Page({ plans = [] }) {
   return (
     <div className="space-y-6">
       <HostPlanHeaderSection />
-      <HostPlanCardSection />
+      <HostPlanCardSection plans={plans} />
     </div>
   );
 }

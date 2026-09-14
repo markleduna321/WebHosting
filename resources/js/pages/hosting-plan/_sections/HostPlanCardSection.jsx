@@ -1,18 +1,56 @@
 import React from 'react'
+import { Link, usePage } from '@inertiajs/react'
+import { PackageOpen } from 'lucide-react'
 import Card from '@/components/ui/Card'
-import { PLANS } from '../../../data/hostingPlans'
+import { formatCurrency } from '../../../data/hostingPlans'
 
-const CURRENT_PLAN_NAME = "Pro";
+const priceLabel = (plan) =>
+  plan.monthly_price !== null ? formatCurrency(plan.monthly_price) : 'Custom'
 
-export default function HostPlanCardSection() {
+const billingNote = (plan) => (plan.monthly_price !== null ? '/month' : '')
+
+const annualNote = (plan) =>
+  plan.annual_price !== null
+    ? `or ${formatCurrency(plan.annual_price)} billed annually`
+    : 'Contact for pricing'
+
+const ctaLabel = (plan) =>
+  plan.monthly_price !== null ? 'Choose Plan' : 'Contact Sales'
+
+export default function HostPlanCardSection({ plans = [] }) {
+  const { auth } = usePage().props
+  const currentSlug = auth?.user?.plan?.slug ?? null
+
+  if (plans.length === 0) {
+    return (
+      <div className="rounded-xl border border-gray-200 bg-white p-10 text-center">
+        <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+          <PackageOpen aria-hidden="true" className="h-6 w-6" />
+        </span>
+        <p className="mt-4 text-sm font-semibold text-slate-900">
+          No plans available
+        </p>
+        <p className="mt-1 text-sm text-slate-500">
+          Hosting plans aren&apos;t published yet. Please check back shortly.
+        </p>
+        <Link
+          href="/support"
+          className="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        >
+          Contact support
+        </Link>
+      </div>
+    )
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {PLANS.map((plan) => {
-        const isCurrent = plan.name === CURRENT_PLAN_NAME;
+      {plans.map((plan) => {
+        const isCurrent = plan.slug === currentSlug
 
         return (
           <Card
-            key={plan.name}
+            key={plan.slug}
             variant={isCurrent ? "primary" : "default"}
             outlined={isCurrent}
             padding="p-6"
@@ -29,21 +67,28 @@ export default function HostPlanCardSection() {
                   </h3>
                   <p className="text-xs text-gray-400">{plan.subtitle}</p>
                 </div>
-                {isCurrent && (
+                {isCurrent ? (
                   <span className="bg-blue-50 text-blue-600 text-xs px-2.5 py-0.5 rounded-full font-medium">
                     Current
                   </span>
+                ) : (
+                  plan.is_popular && (
+                    <span className="bg-amber-50 text-amber-700 text-xs px-2.5 py-0.5 rounded-full font-medium">
+                      Popular
+                    </span>
+                  )
                 )}
               </div>
 
               {/* Pricing */}
               <div className="my-4">
                 <span className="text-3xl font-extrabold text-slate-900">
-                  {plan.price}
+                  {priceLabel(plan)}
                 </span>
-                {plan.billingNote && (
-                  <span className="text-sm text-gray-500">{plan.billingNote}</span>
+                {billingNote(plan) && (
+                  <span className="text-sm text-gray-500">{billingNote(plan)}</span>
                 )}
+                <p className="mt-1 text-xs text-gray-400">{annualNote(plan)}</p>
               </div>
 
               <hr className="border-gray-100 my-4" />
@@ -73,14 +118,15 @@ export default function HostPlanCardSection() {
 
             {/* Action Button */}
             <button
-              className={`w-full py-2.5 rounded-md text-xs font-semibold transition ${
+              type="button"
+              className={`w-full py-2.5 rounded-md text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
                 isCurrent
                   ? "border border-gray-200 text-gray-500 cursor-not-allowed bg-transparent"
                   : "bg-blue-600 text-white hover:bg-blue-700"
               }`}
               disabled={isCurrent}
             >
-              {isCurrent ? "Active plan" : plan.cta}
+              {isCurrent ? "Active plan" : ctaLabel(plan)}
             </button>
           </Card>
         );
