@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { usePage } from "@inertiajs/react";
 import MainLayout from "@/components/layout/MainLayout";
-import HostPlanHeaderSection from "./_sections/HostPlanHeaderSection";
-import HostPlanTableSection from "./_sections/HostPlanTableSection";
+import HostPlanHeaderSection from "@/pages/hosting-plan/_sections/HostPlanHeaderSection";
+import HostPlanTableSection from "@/pages/hosting-plan/_sections/HostPlanTableSection";
 import AdminHeaderSection from "@/Layouts/AdminHeaderSection";
-import CreatePlanSection from "./_sections/CreatePlanSection";
+import CreatePlanSection from "@/pages/hosting-plan/_sections/CreatePlanSection";
+import CardSection from "@/pages/user-management/CardSection";
 
 export default function Page({ plans = [] }) {
     const [createPlanOpen, setCreatePlanOpen] = useState(false);
@@ -14,14 +15,8 @@ export default function Page({ plans = [] }) {
     if (isAdministrator) {
         return (
             <div className="space-y-4">
-                <AdminHeaderSection href="/hosting" onAction={() => setCreatePlanOpen(true)} />
-                <HostPlanTableSection plans={plans} />
-
-                <CreatePlanSection
-                    open={createPlanOpen}
-                    onCancel={() => setCreatePlanOpen(false)}
-                    onCreate={() => setCreatePlanOpen(false)}
-                />
+                <AdminHeaderSection href="/admin/user-management" onAction={() => setCreatePlanOpen(true)} />
+              <CardSection />
             </div>
         );
     }

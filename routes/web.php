@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/roles', fn () => Inertia::render('admin/roles/page'))->name('admin.roles');
+    Route::get('/user-management', fn () => Inertia::render('user-management/page'))->name('admin.user-management');
     Route::get('/permissions', fn () => Inertia::render('admin/permissions/page'))->name('admin.permissions');
 });
 
