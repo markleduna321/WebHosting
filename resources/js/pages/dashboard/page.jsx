@@ -8,21 +8,33 @@ import TipsSection from "./_sections/TipsSection";
 import ProjectListSection from "./_sections/ProjectListSection";
 import ShortcutSection from "./_sections/ShortcutSection";
 import VerifyEmailBanner from "./_sections/VerifyEmailBanner";
+import AdminHeaderSection from "@/Layouts/AdminHeaderSection";
+import MonthlyRecurringRevenueSection from "./_sections/MonthlyRecurringRevenueSection";
+import HostCardSection from "./_sections/HostCardSection";
+import DashboardMetricsSection from "./_sections/DashboardMetricsSection";
+import VPSLoadChartSection from "./_sections/VPSLoadChartSection";
 
 export default function Page() {
     const { auth } = usePage().props;
     const isAdministrator = Boolean(auth?.user?.roles?.includes("admin"));
 
-    // Administrators manage the site from the admin portal, not this user dashboard.
     if (isAdministrator) {
         return (
-            <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
-                <p className="text-sm font-semibold text-slate-900">
-                    This dashboard is only available to student accounts.
-                </p>
-                <p className="mt-1 text-sm text-slate-500">
-                    Use the admin portal to manage the platform.
-                </p>
+            <div className="space-y-2">
+                <AdminHeaderSection href="/users" />
+            
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
+                    <div className="lg:col-span-2 flex h-full">
+                        <MonthlyRecurringRevenueSection />
+                    </div>
+
+                    <div className="lg:col-span-1 flex h-full">
+                        <HostCardSection />
+                    </div>
+                </div>
+
+                <DashboardMetricsSection />
+                <VPSLoadChartSection />
             </div>
         );
     }

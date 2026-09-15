@@ -3,105 +3,113 @@ import {
     Users,
     Server,
     CreditCard,
-    LifeBuoy,
-    Monitor,
-    Handshake,
     BarChart3,
+    Database,
     Globe,
     BookOpen,
-    Database,
 } from 'lucide-react';
 
 export const DASHBOARD_LINK = {
     name: 'Dashboard',
     href: '/dashboard',
     icon: LayoutGrid,
+    description: 'VPS health and financial KPIs',
 };
 
 export const ADMIN_NAV_GROUPS = [
     {
-        name: 'User Management',
-        icon: Users,
-        children: [
-            { name: 'Students', href: '/admin/users/students' },
-            { name: 'Admins', href: '/admin/users/admins' },
-            { name: 'Roles', href: '/admin/roles' },
-            { name: 'Permissions', href: '/admin/permissions' },
-        ],
-    },
-    {
-        name: 'Hosting Management',
+        name: 'Plans',
+        href: '/hosting',
         icon: Server,
-        children: [
-            { name: 'Hosting Plans', href: '/admin/hosting-plan/plans' },
-            { name: 'Websites', href: '/admin/hosting/websites' },
-            { name: 'Servers', href: '/admin/hosting/servers' },
-            { name: 'Storage', href: '/admin/hosting/storage' },
-            { name: 'Bandwidth', href: '/admin/hosting/bandwidth' },
-            { name: 'Domains', href: '/admin/hosting/domains' },
-            { name: 'SSL Certificates', href: '/admin/hosting/ssl-certificates' },
-            { name: 'Databases', href: '/admin/hosting/databases' },
-            { name: 'Deployments', href: '/admin/hosting/deployments' },
-        ],
+        description: 'Pricing, caps and feature flags',
     },
     {
-        name: 'Subscription & Billing',
+        name: 'User Management',
+        href: '/admin/user-management',
+        icon: Users,
+        description: 'Global directory of all users',
+    },
+    {
+        name: 'Tenant & License Manager',
+        href: '/admin/permissions',
         icon: CreditCard,
-        children: [
-            { name: 'Subscriptions', href: '/admin/billing/subscriptions' },
-            { name: 'Payments', href: '/admin/billing/payments' },
-            { name: 'Transactions', href: '/admin/billing/transactions' },
-            { name: 'Invoices', href: '/admin/billing/invoices' },
-            { name: 'Coupons & Discounts', href: '/admin/billing/coupons' },
-            { name: 'Refunds', href: '/admin/billing/refunds' },
-        ],
+        description: 'School contracts and seat quotas',
     },
     {
-        name: 'Support',
-        icon: LifeBuoy,
-        children: [
-            { name: 'Support Tickets', href: '/admin/support/tickets' },
-            { name: 'Student Messages', href: '/admin/support/messages' },
-            { name: 'Knowledge Base', href: '/admin/support/knowledge-base' },
-            { name: 'FAQs', href: '/admin/support/faqs' },
-        ],
+        name: 'Global RBAC & Audit Logs',
+        href: '/admin/permissions?view=audit-logs',
+        icon: Database,
+        description: 'Permissions matrix and system trail',
     },
     {
-        name: 'Website Management',
-        icon: Monitor,
-        children: [
-            { name: 'Homepage Content', href: '/admin/website/homepage' },
-            { name: 'Hero Section', href: '/admin/website/hero-section' },
-            { name: 'Hosting Plans Content', href: '/admin/website/hosting-plans-content' },
-            { name: 'Features', href: '/admin/website/features' },
-            { name: 'Partners', href: '/admin/website/partners' },
-            { name: 'Testimonials', href: '/admin/website/testimonials' },
-            { name: 'FAQs', href: '/admin/website/faqs' },
-            { name: 'Footer Content', href: '/admin/website/footer' },
-        ],
-    },
-    {
-        name: 'Partner Management',
-        icon: Handshake,
-        children: [
-            { name: 'Partners', href: '/admin/partners' },
-            { name: 'Partner Logos', href: '/admin/partners/logos' },
-            { name: 'Partner Details', href: '/admin/partners/details' },
-        ],
-    },
-    {
-        name: 'Reports',
+        name: 'Reports (Analytics)',
+        href: '/admin/roles?view=reports',
         icon: BarChart3,
-        children: [
-            { name: 'Revenue Reports', href: '/admin/reports/revenue' },
-            { name: 'User Reports', href: '/admin/reports/users' },
-            { name: 'Hosting Reports', href: '/admin/reports/hosting' },
-            { name: 'Website Reports', href: '/admin/reports/websites' },
-            { name: 'Payment Reports', href: '/admin/reports/payments' },
-            { name: 'Server Reports', href: '/admin/reports/servers' },
-        ],
+        description: 'Growth, referrals, storage and churn',
     },
 ];
+
+const ADMIN_HEADER_META = {
+    '/dashboard': {
+        breadcrumb: 'Dashboard',
+        title: 'Dashboard',
+        subtitle:
+            'Server infrastructure metrics for Hostinger KVM 4 (srv-asuratech-01) alongside the financial KPIs that matter this month.',
+        actionLabel: null,
+        actionSecondaryLabel: null,
+    },
+    '/hosting': {
+        breadcrumb: 'Plans',
+        title: 'Plans',
+        subtitle:
+            'Dynamic plan configuration — set price points, storage caps, database limits and feature flags without touching backend code. Active plans publish straight to the public pricing carousel.',
+        actionLabel: 'Create plan',
+        actionSecondaryLabel: null,
+    },
+    '/admin/roles': {
+        breadcrumb: 'User Management',
+        title: 'Roles',
+        subtitle: 'Create roles and assign permissions.',
+        actionLabel: 'Create role',
+        actionSecondaryLabel: null,
+    },
+    '/admin/user-management': {
+        breadcrumb: 'User Management',
+        title: 'User management',
+        subtitle:
+            'Global directory of every registered student and standard user — suspend accounts, override resource quotas, or reset credentials.',
+        actionLabel: 'Invite student',
+        actionSecondaryLabel: null,
+    },
+    '/admin/permissions': {
+        breadcrumb: 'Tenant & License Manager',
+        title: 'Tenant & license manager',
+        subtitle:
+            'Institutional contracts for future school partnerships — assign bulk seat quotas, set per-seat storage caps, and issue school-level access keys.',
+        actionLabel: 'New tenant',
+        actionSecondaryLabel: null,
+    },
+    '/admin/permissions?view=audit-logs': {
+        breadcrumb: 'Global RBAC & Audit Logs',
+        title: 'Global RBAC & audit logs',
+        subtitle:
+            'The permissions matrix for Super Admin, Admin and Student roles, plus the system trail of VPS commands, account creations and webhook events.',
+        actionLabel: 'Create custom role',
+        actionSecondaryLabel: null,
+    },
+    '/admin/roles?view=reports': {
+        breadcrumb: 'Reports (Analytics)',
+        title: 'Reports',
+        subtitle:
+            'Business growth intelligence — MRR trends, referral conversion, storage consumption and churn, read together.',
+        actionLabel: '12 months',
+        actionSecondaryLabel: '6 months',
+    },
+};
+
+export function getAdminHeaderMeta(href) {
+    return ADMIN_HEADER_META[href] ?? ADMIN_HEADER_META['/dashboard'];
+}
 
 export const USER_NAV_GROUPS = [
     {

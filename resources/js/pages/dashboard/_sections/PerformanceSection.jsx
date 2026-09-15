@@ -1,7 +1,6 @@
 import React from "react";
 
 function ScoreRing({ score = 99 }) {
-    // Circular ring styled to resemble the multi-color speed-test badge.
     const radius = 26;
     const circumference = 2 * Math.PI * radius;
     return (

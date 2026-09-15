@@ -11,7 +11,6 @@ import {
 } from '@/features/ui/uiSlice';
 import { ADMIN_NAV_GROUPS, DASHBOARD_LINK, USER_NAV_GROUPS } from './navConfig';
 import SidebarNavItem from './SidebarNavItem';
-import SidebarNavGroup from './SidebarNavGroup';
 
 const THEMES = {
     admin: {
@@ -145,9 +144,6 @@ function SidebarPanel({
     isAdmin,
     collapsed,
     theme,
-    idPrefix,
-    openGroup,
-    onToggleGroup,
     isLinkActive,
     onToggleCollapse,
     onCloseMobile,
@@ -180,35 +176,48 @@ function SidebarPanel({
             >
                 {isAdmin ? (
                     <>
-                        <SidebarNavItem
-                            href={DASHBOARD_LINK.href}
-                            name={DASHBOARD_LINK.name}
-                            icon={DASHBOARD_LINK.icon}
-                            collapsed={collapsed}
-                            active={isLinkActive(DASHBOARD_LINK.href)}
-                            theme={theme}
-                            onNavigate={onCloseMobile}
-                        />
+                        <div className="space-y-1">
+                            {[DASHBOARD_LINK, ...ADMIN_NAV_GROUPS].map((item) => {
+                                const Icon = item.icon;
+                                const active = isLinkActive(item.href);
 
-                        <div className="pt-2 space-y-1">
-                            {ADMIN_NAV_GROUPS.map((group) => (
-                                <SidebarNavGroup
-                                    key={group.name}
-                                    group={group}
-                                    panelId={`${idPrefix}-${group.name.replace(/\W+/g, '-').toLowerCase()}`}
-                                    collapsed={collapsed}
-                                    open={openGroup === group.name}
-                                    activeGroup={group.children.some((child) =>
-                                        isLinkActive(child.href)
-                                    )}
-                                    isLinkActive={isLinkActive}
-                                    theme={theme}
-                                    onToggle={() =>
-                                        collapsed ? onToggleCollapse() : onToggleGroup(group.name)
-                                    }
-                                    onNavigate={onCloseMobile}
-                                />
-                            ))}
+                                return (
+                                    <Link
+                                        key={item.name}
+                                        href={item.href}
+                                        onClick={onCloseMobile}
+                                        aria-current={active ? 'page' : undefined}
+                                        title={collapsed ? item.name : undefined}
+                                        aria-label={collapsed ? item.name : undefined}
+                                        className={cn(
+                                            'group flex items-start gap-3 rounded-xl px-3 py-3 transition-colors',
+                                            theme.focusRing,
+                                            active ? theme.itemActive : theme.itemIdle,
+                                            collapsed && 'justify-center'
+                                        )}
+                                    >
+                                        <Icon
+                                            aria-hidden="true"
+                                            className={cn(
+                                                'mt-0.5 h-5 w-5 shrink-0',
+                                                active ? theme.iconActive : theme.iconIdle
+                                            )}
+                                        />
+                                        {!collapsed && (
+                                            <span className="min-w-0">
+                                                <span className="block truncate text-sm font-semibold leading-tight">
+                                                    {item.name}
+                                                </span>
+                                                {item.description && (
+                                                    <span className="mt-0.5 block text-xs leading-snug text-blue-100/70">
+                                                        {item.description}
+                                                    </span>
+                                                )}
+                                            </span>
+                                        )}
+                                    </Link>
+                                );
+                            })}
                         </div>
                     </>
                 ) : (
@@ -279,21 +288,8 @@ export default function Sidebar() {
     const theme = isAdmin ? THEMES.admin : THEMES.user;
 
     const isLinkActive = (href) => url === href || url.startsWith(`${href}/`);
-
-    const findActiveGroup = () =>
-        ADMIN_NAV_GROUPS.find((group) => group.children.some((child) => isLinkActive(child.href)))
-            ?.name ?? null;
-
-    const [openGroup, setOpenGroup] = useState(findActiveGroup);
     const drawerRef = useRef(null);
     const lastFocusedRef = useRef(null);
-
-    useEffect(() => {
-        const activeGroup = findActiveGroup();
-        if (activeGroup) {
-            setOpenGroup(activeGroup);
-        }
-    }, [url]);
 
     const closeMobile = () => dispatch(closeMobileSidebar());
 
@@ -351,8 +347,6 @@ export default function Sidebar() {
     const sharedProps = {
         isAdmin,
         theme,
-        openGroup,
-        onToggleGroup: (name) => setOpenGroup((prev) => (prev === name ? null : name)),
         isLinkActive,
         onToggleCollapse: () => dispatch(toggleSidebar()),
     };
@@ -368,7 +362,6 @@ export default function Sidebar() {
                 <SidebarPanel
                     {...sharedProps}
                     collapsed={collapsed}
-                    idPrefix="sidebar-desktop"
                     onCloseMobile={undefined}
                 />
             </div>
@@ -399,7 +392,6 @@ export default function Sidebar() {
                     <SidebarPanel
                         {...sharedProps}
                         collapsed={false}
-                        idPrefix="sidebar-mobile"
                         onCloseMobile={closeMobile}
                     />
                 </div>
