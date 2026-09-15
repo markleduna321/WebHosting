@@ -1,86 +1,34 @@
-import { Download } from "lucide-react";
 import React from "react";
-import Table from "@/components/ui/Table";
-
-const BACKUPS = [
-    {
-        id: 1,
-        db: "portfolio_prod",
-        meta: "Aug 30, 2026 · 02:10 · 84 MB",
-        trigger: "Automatic",
-    },
-    {
-        id: 2,
-        db: "traffic_model",
-        meta: "Aug 30, 2026 · 02:14 · 612 MB",
-        trigger: "Automatic",
-    },
-    {
-        id: 3,
-        db: "portfolio_prod",
-        meta: "Aug 24, 2026 · 16:42 · 81 MB",
-        trigger: "Manual",
-    },
-    {
-        id: 4,
-        db: "traffic_model",
-        meta: "Aug 23, 2026 · 02:11 · 598 MB",
-        trigger: "Automatic",
-    },
-];
-
-const COLUMNS = [
-    {
-        header: "",
-        accessor: "db",
-        render: (row) => (
-            <div>
-                <p className="text-sm font-semibold text-slate-900 font-mono">
-                    {row.db}
-                </p>
-                <p className="text-xs text-blue-400 mt-0.5">{row.meta}</p>
-            </div>
-        ),
-    },
-    {
-        header: "",
-        accessor: "actions",
-        render: (row) => (
-            <div className="flex items-center justify-end gap-3">
-                {/* Trigger badge */}
-                <span className="inline-flex items-center rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-medium text-slate-600">
-                    {row.trigger}
-                </span>
-
-                {/* Download */}
-                <button className="inline-flex items-center gap-1 text-xs font-medium text-blue-500 hover:text-blue-700 transition-colors">
-                    <Download className="w-3.5 h-3.5" />
-                    Download
-                </button>
-
-                {/* Restore */}
-                <button className="text-xs font-medium text-slate-700 hover:text-slate-900 transition-colors">
-                    Restore
-                </button>
-            </div>
-        ),
-    },
-];
+import { Archive } from "lucide-react";
 
 export default function BackupHistorySection() {
     return (
         <div className="rounded-xl border border-gray-200 bg-white px-6 py-5 h-full">
-            {/* Header */}
             <div className="mb-4">
                 <h2 className="text-sm font-bold text-slate-900">
                     Backup history
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">
-                    4 snapshots available to restore
+                    Scheduled snapshots of your databases
                 </p>
             </div>
 
-            <Table columns={COLUMNS} data={BACKUPS} />
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 px-6 py-10 text-center">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
+                    <Archive className="h-5 w-5" />
+                </div>
+                <p className="mt-3 text-sm font-semibold text-slate-900">
+                    No backups yet
+                </p>
+                <p className="mt-1 max-w-xs text-xs text-slate-500">
+                    Scheduled backups are not available on this plan yet. Use
+                    <span className="font-medium text-slate-600">
+                        {" "}
+                        Export .sql{" "}
+                    </span>
+                    to download a snapshot whenever you need one.
+                </p>
+            </div>
         </div>
     );
 }

@@ -1,8 +1,20 @@
-import { ExternalLink, Loader2, Globe, AlertCircle } from "lucide-react";
+import {
+    ExternalLink,
+    Loader2,
+    Globe,
+    AlertCircle,
+    RefreshCw,
+    Trash2,
+} from "lucide-react";
 import React from "react";
 import { Link } from "@inertiajs/react";
+import { Modal, message } from "antd";
 import Card from "@/components/ui/Card";
-import { useGetWebsitesQuery } from "@/features/websites/websitesApi";
+import {
+    useGetWebsitesQuery,
+    useRedeployWebsiteMutation,
+    useDeleteWebsiteMutation,
+} from "@/features/websites/websitesApi";
 
 function timeAgo(value) {
     if (!value) return "—";
@@ -67,6 +79,39 @@ function SkeletonCard() {
 
 export default function SiteDomainCardSection() {
     const { data: sites = [], isLoading } = useGetWebsitesQuery();
+    const [redeployWebsite, { isLoading: isRedeploying }] =
+        useRedeployWebsiteMutation();
+    const [deleteWebsite] = useDeleteWebsiteMutation();
+
+    const handleRedeploy = async (site) => {
+        try {
+            await redeployWebsite(site.uuid).unwrap();
+            message.success(`${site.name} queued for redeployment.`, 4);
+        } catch {
+            message.error("Could not start the redeploy. Please try again.", 4);
+        }
+    };
+
+    const confirmDelete = (site) => {
+        Modal.confirm({
+            title: `Delete ${site.name}?`,
+            content:
+                "This permanently removes the site and all of its cloned files. This cannot be undone.",
+            okText: "Delete site",
+            okButtonProps: { danger: true },
+            cancelText: "Cancel",
+            centered: true,
+            onOk: async () => {
+                try {
+                    await deleteWebsite(site.uuid).unwrap();
+                    message.success(`${site.name} deleted.`, 4);
+                } catch {
+                    message.error("Could not delete the site.", 4);
+                    throw new Error("delete failed");
+                }
+            },
+        });
+    };
 
     if (isLoading) {
         return (
@@ -164,6 +209,31 @@ export default function SiteDomainCardSection() {
                             {site.failure_reason}
                         </p>
                     )}
+
+                    <div className="mt-4 flex items-center gap-2 border-t border-gray-100 pt-3">
+                        <button
+                            type="button"
+                            onClick={() => handleRedeploy(site)}
+                            disabled={isRedeploying}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        >
+                            {isRedeploying ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                                <RefreshCw className="h-3.5 w-3.5" />
+                            )}
+                            Redeploy
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => confirmDelete(site)}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                        >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Delete
+                        </button>
+                    </div>
                 </Card>
             ))}
         </div>

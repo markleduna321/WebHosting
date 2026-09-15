@@ -19,6 +19,17 @@ export const websitesApi = api.injectEndpoints({
             transformResponse: (response) => response?.data ?? [],
             providesTags: ["WebsiteFile"],
         }),
+        redeployWebsite: builder.mutation({
+            query: (uuid) => ({
+                url: `/websites/${uuid}/redeploy`,
+                method: "POST",
+            }),
+            invalidatesTags: ["Website", "WebsiteFile"],
+        }),
+        deleteWebsite: builder.mutation({
+            query: (uuid) => ({ url: `/websites/${uuid}`, method: "DELETE" }),
+            invalidatesTags: ["Website", "WebsiteFile"],
+        }),
     }),
 });
 
@@ -26,4 +37,6 @@ export const {
     useGetWebsitesQuery,
     useCreateWebsiteMutation,
     useGetWebsiteFilesQuery,
+    useRedeployWebsiteMutation,
+    useDeleteWebsiteMutation,
 } = websitesApi;

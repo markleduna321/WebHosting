@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Policies\GithubConnectionPolicy;
 use App\Policies\PermissionPolicy;
 use App\Policies\RolePolicy;
+use App\Policies\StudentDatabasePolicy;
 use App\Policies\UserPolicy;
 use App\Policies\WebsitePolicy;
 use Spatie\Permission\Models\Permission;
@@ -27,6 +28,7 @@ class AuthServiceProvider extends ServiceProvider
         Permission::class => PermissionPolicy::class,
         GithubConnection::class => GithubConnectionPolicy::class,
         \App\Models\Website::class => WebsitePolicy::class,
+        \App\Models\StudentDatabase::class => StudentDatabasePolicy::class,
     ];
 
     /**

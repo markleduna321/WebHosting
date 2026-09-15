@@ -10,6 +10,7 @@ import DatabaseToolSection from "./_sections/DatabaseToolSection";
 import BackupHistorySection from "./_sections/BackupHistorySection";
 import EnvironmentSection from "./_sections/EnvironmentSection";
 import DatabaseCardSection from "./_sections/DatabaseCardSection";
+import CreateDatabaseSection from "./_sections/CreateDatabaseSection";
 
 const TABS = [
     { id: "file-manager", label: "File manager", icon: <FolderOpen size={16} /> },
@@ -22,6 +23,9 @@ export default function Page() {
     const defaultTabId = TABS.some((t) => t.id === tab) ? tab : "file-manager";
     const [selectedWebsite, setSelectedWebsite] = useState(null);
     const handleSelect = useCallback((site) => setSelectedWebsite(site), []);
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const openCreate = useCallback(() => setIsCreateOpen(true), []);
+    const closeCreate = useCallback(() => setIsCreateOpen(false), []);
 
     return (
         <Tabs tabs={TABS} defaultTabId={defaultTabId}>
@@ -34,7 +38,7 @@ export default function Page() {
 
             <TabPanel id="databases">
                 <div className="space-y-4">
-                    <DatabaseHeaderSection />
+                    <DatabaseHeaderSection onCreate={openCreate} />
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-1 items-stretch">
                         <div className="lg:col-span-1">
                             <DatabaseToolSection />
@@ -43,7 +47,11 @@ export default function Page() {
                             <BackupHistorySection />
                         </div>
                     </div>
-                    <DatabaseCardSection />
+                    <DatabaseCardSection onCreate={openCreate} />
+                    <CreateDatabaseSection
+                        open={isCreateOpen}
+                        onClose={closeCreate}
+                    />
                 </div>
             </TabPanel>
 

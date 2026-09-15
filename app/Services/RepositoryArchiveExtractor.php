@@ -14,11 +14,18 @@ use ZipArchive;
  */
 class RepositoryArchiveExtractor
 {
-    public const MAX_TOTAL_BYTES = 209_715_200; // 200 MB uncompressed
+    private int $maxFiles;
 
-    public const MAX_FILE_BYTES = 26_214_400;   // 25 MB per file
+    private int $maxFileBytes;
 
-    public const MAX_FILES = 5_000;
+    private int $maxTotalBytes;
+
+    public function __construct()
+    {
+        $this->maxFiles = (int) config('hosting.clone.max_files');
+        $this->maxFileBytes = (int) config('hosting.clone.max_file_bytes');
+        $this->maxTotalBytes = (int) config('hosting.clone.max_total_bytes');
+    }
 
     /**
      * @return array{file_count: int, size_bytes: int}
@@ -70,19 +77,30 @@ class RepositoryArchiveExtractor
                     continue;
                 }
 
-                if ($stat['size'] > self::MAX_FILE_BYTES) {
-                    throw new RepositoryExtractionException('The repository contains a file larger than 25 MB.');
+                if ($stat['size'] > $this->maxFileBytes) {
+                    throw new RepositoryExtractionException(sprintf(
+                        '"%s" is %s, which exceeds the %s per-file limit.',
+                        $relative,
+                        $this->formatBytes((int) $stat['size']),
+                        $this->formatBytes($this->maxFileBytes),
+                    ));
                 }
 
                 $fileCount++;
                 $totalBytes += $stat['size'];
 
-                if ($fileCount > self::MAX_FILES) {
-                    throw new RepositoryExtractionException('The repository contains more than 5,000 files.');
+                if ($fileCount > $this->maxFiles) {
+                    throw new RepositoryExtractionException(sprintf(
+                        'This repository has more than %s files, which is over the limit.',
+                        number_format($this->maxFiles),
+                    ));
                 }
 
-                if ($totalBytes > self::MAX_TOTAL_BYTES) {
-                    throw new RepositoryExtractionException('The repository is larger than the 200 MB limit.');
+                if ($totalBytes > $this->maxTotalBytes) {
+                    throw new RepositoryExtractionException(sprintf(
+                        'This repository is larger than the %s total limit.',
+                        $this->formatBytes($this->maxTotalBytes),
+                    ));
                 }
 
                 $this->writeFile($zip, $i, $target);
@@ -189,5 +207,14 @@ class RepositoryArchiveExtractor
 
         fclose($handle);
         fclose($stream);
+    }
+
+    private function formatBytes(int $bytes): string
+    {
+        if ($bytes >= 1024 * 1024 * 1024) {
+            return round($bytes / (1024 * 1024 * 1024), 1).' GB';
+        }
+
+        return round($bytes / (1024 * 1024), 1).' MB';
     }
 }

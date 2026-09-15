@@ -59,6 +59,30 @@ return [
             ]) : [],
         ],
 
+        /*
+         * Privileged connection used ONLY by StudentDatabaseService to provision
+         * student schemas. It intentionally selects no database so the account
+         * can never be used for ordinary application queries.
+         */
+        'mysql_admin' => [
+            'driver' => 'mysql',
+            'host' => env('DB_ADMIN_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('DB_ADMIN_PORT', env('DB_PORT', '3306')),
+            'database' => null,
+            'username' => env('DB_ADMIN_USERNAME', 'root'),
+            'password' => env('DB_ADMIN_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),

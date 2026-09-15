@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class Website extends Model
@@ -53,6 +54,11 @@ class Website extends Model
     {
         static::creating(function (self $website) {
             $website->uuid ??= (string) Str::uuid();
+        });
+
+        // Path is derived from the uuid only, never from user input.
+        static::deleting(function (self $website) {
+            File::deleteDirectory(storage_path('app/websites/'.$website->uuid));
         });
     }
 
