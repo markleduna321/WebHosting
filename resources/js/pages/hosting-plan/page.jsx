@@ -5,6 +5,7 @@ import HostPlanHeaderSection from "./_sections/HostPlanHeaderSection";
 import HostPlanTableSection from "./_sections/HostPlanTableSection";
 import AdminHeaderSection from "@/Layouts/AdminHeaderSection";
 import CreatePlanSection from "./_sections/CreatePlanSection";
+import HostPlanCardSection from "./_sections/HostPlanCardSection";
 
 export default function Page({ plans = [] }) {
     const [createPlanOpen, setCreatePlanOpen] = useState(false);
@@ -29,6 +30,9 @@ export default function Page({ plans = [] }) {
     return (
         <div className="space-y-6">
             <HostPlanHeaderSection />
+            <HostPlanCardSection
+                plans={plans}
+            />
         </div>
     );
 }
