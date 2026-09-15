@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // First-party SPA: session + CSRF on /api routes.
         $middleware->statefulApi();
 
+        // PayMongo signs this request; its signature is the authentication.
+        $middleware->validateCsrfTokens(except: [
+            'api/webhooks/paymongo',
+        ]);
+
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,

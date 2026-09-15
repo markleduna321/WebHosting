@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HostingPlanController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -22,6 +23,7 @@ Route::get('/dashboard', function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/hosting', [HostingPlanController::class, 'index'])->name('hosting');
+    Route::get('/checkout/{plan:slug}', [CheckoutController::class, 'show'])->name('checkout');
     Route::get('/websites', fn () => Inertia::render('websites/page'))->name('websites');
     Route::get('/websites/files', fn () => Inertia::render('websites/files/page'))->name('websites.files');
     Route::get('/websites/databases', fn () => Inertia::render('websites/databases/page'))->name('websites.databases');

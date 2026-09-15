@@ -15,7 +15,7 @@ import ProfileSecuritySection from "./_sections/ProfileSecuritySection";
 
 const TABS = [
     { id: "subscription", label: "Subscription & invoices", icon: <Receipt size={16} /> },
-    { id: "payment-methods", label: "Payment methods", icon: <CreditCard size={16} /> },
+    //{ id: "payment-methods", label: "Payment methods", icon: <CreditCard size={16} /> },
     { id: "referrals", label: "Referrals", icon: <Gift size={16} /> },
     { id: "profile", label: "Profile", icon: <User size={16} /> },
 ];

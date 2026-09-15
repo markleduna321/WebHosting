@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\GithubRepositoryController;
+use App\Http\Controllers\Api\CheckoutController;
+use App\Http\Controllers\Api\PayMongoWebhookController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\StudentDatabaseController;
@@ -18,6 +20,10 @@ use App\Http\Controllers\Api\WebsiteFileController;
 | These routes are intended for RTK Query endpoints and must return JSON.
 |
 */
+
+// PayMongo authenticates itself with a request signature, so this route is deliberately public.
+Route::post('/webhooks/paymongo', [PayMongoWebhookController::class, 'handle'])
+    ->name('api.webhooks.paymongo');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [UserController::class, 'me']);
@@ -60,4 +66,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/databases/{database}', [StudentDatabaseController::class, 'destroy'])
         ->middleware('throttle:20,1')
         ->name('api.databases.destroy');
+
+    Route::post('/checkout', [CheckoutController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('api.checkout.store');
+    Route::get('/checkout/{payment}', [CheckoutController::class, 'show'])
+        ->middleware('throttle:120,1')
+        ->name('api.checkout.show');
 });

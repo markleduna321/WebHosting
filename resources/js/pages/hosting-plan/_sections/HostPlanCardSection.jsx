@@ -117,17 +117,26 @@ export default function HostPlanCardSection({ plans = [] }) {
             </div>
 
             {/* Action Button */}
-            <button
-              type="button"
-              className={`w-full py-2.5 rounded-md text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
-                isCurrent
-                  ? "border border-gray-200 text-gray-500 cursor-not-allowed bg-transparent"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
-              }`}
-              disabled={isCurrent}
-            >
-              {isCurrent ? "Active plan" : ctaLabel(plan)}
-            </button>
+            {isCurrent ? (
+              <button
+                type="button"
+                disabled
+                className="w-full py-2.5 rounded-md text-xs font-semibold border border-gray-200 text-gray-500 cursor-not-allowed bg-transparent"
+              >
+                Active plan
+              </button>
+            ) : (
+              <Link
+                href={
+                  plan.monthly_price !== null
+                    ? `/checkout/${plan.slug}`
+                    : "/support"
+                }
+                className="block w-full rounded-md bg-blue-600 py-2.5 text-center text-xs font-semibold text-white transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              >
+                {ctaLabel(plan)}
+              </Link>
+            )}
           </Card>
         );
       })}

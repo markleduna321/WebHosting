@@ -8,6 +8,7 @@ use App\Models\GithubConnection;
 use App\Models\Role;
 use App\Models\User;
 use App\Policies\GithubConnectionPolicy;
+use App\Policies\PaymentPolicy;
 use App\Policies\PermissionPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\StudentDatabasePolicy;
@@ -29,6 +30,7 @@ class AuthServiceProvider extends ServiceProvider
         GithubConnection::class => GithubConnectionPolicy::class,
         \App\Models\Website::class => WebsitePolicy::class,
         \App\Models\StudentDatabase::class => StudentDatabasePolicy::class,
+        \App\Models\Payment::class => PaymentPolicy::class,
     ];
 
     /**

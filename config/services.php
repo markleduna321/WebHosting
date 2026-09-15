@@ -37,4 +37,15 @@ return [
         'redirect' => env('GITHUB_REDIRECT_URI', '/auth/github/callback'),
     ],
 
+    'paymongo' => [
+        'secret_key' => env('PAYMONGO_SECRET_KEY'),
+        // Shown once when the endpoint is created in the dashboard. NOT the secret API key.
+        'webhook_secret' => env('PAYMONGO_WEBHOOK_SECRET'),
+        'base_url' => env('PAYMONGO_BASE_URL', 'https://api.paymongo.com/v1'),
+        'livemode' => filter_var(env('PAYMONGO_LIVEMODE', false), FILTER_VALIDATE_BOOLEAN),
+        // QR Ph accepts 60-9000; PayMongo defaults to 1800.
+        'qr_expiry_seconds' => (int) env('PAYMONGO_QR_EXPIRY_SECONDS', 1800),
+        'signature_tolerance' => (int) env('PAYMONGO_SIGNATURE_TOLERANCE', 300),
+    ],
+
 ];
