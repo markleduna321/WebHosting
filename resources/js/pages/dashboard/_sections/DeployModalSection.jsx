@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { Modal, Input, Button, Select, Tag } from 'antd'
+import { Modal, Input, Button, Select, Tag, message } from 'antd'
 import { useGetGithubRepositoriesQuery } from '@/features/github/githubApi'
+import { useCreateWebsiteMutation } from '@/features/websites/websitesApi'
 
 export default function DeployModalSection({ open, onCancel, onCreate }) {
   const [websiteName, setWebsiteName] = useState('')
@@ -16,14 +17,39 @@ export default function DeployModalSection({ open, onCancel, onCreate }) {
     refetch,
   } = useGetGithubRepositoriesQuery(undefined, { skip: !open })
 
+  const [createWebsite, { isLoading: isCreating, error: createError }] =
+    useCreateWebsiteMutation()
+
+  const fieldErrors = createError?.data?.errors ?? {}
+
   const needsReconnect = error?.status === 403
   const selectedRepository = repositories.find(
     (repo) => repo.full_name === repositoryFullName,
   )
   const canCreate = Boolean(websiteName && subdomain && selectedRepository)
 
-  const handleCreate = () => {
-    onCreate?.({ websiteName, subdomain, repository: selectedRepository })
+  const resetForm = () => {
+    setWebsiteName('')
+    setSubdomain('')
+    setRepositoryFullName(undefined)
+  }
+
+  const handleCreate = async () => {
+    try {
+      const website = await createWebsite({
+        name: websiteName,
+        subdomain,
+        repository_full_name: selectedRepository.full_name,
+        repository_default_branch: selectedRepository.default_branch,
+      }).unwrap()
+
+      message.success('Site queued for deployment.', 4)
+      resetForm()
+      onCreate?.(website?.data ?? website)
+    } catch {
+      // Field errors render inline; anything else surfaces as a toast.
+      message.error('Could not create the site. Check the form and try again.', 4)
+    }
   }
 
   return (
@@ -48,7 +74,13 @@ export default function DeployModalSection({ open, onCancel, onCreate }) {
           placeholder="Capstone Demo"
           value={websiteName}
           onChange={(e) => setWebsiteName(e.target.value)}
+          status={fieldErrors.name ? 'error' : undefined}
         />
+        {fieldErrors.name && (
+          <div style={{ color: '#dc2626', fontSize: 13, marginTop: 6 }}>
+            {fieldErrors.name[0]}
+          </div>
+        )}
       </div>
 
       <div style={{ marginBottom: 20 }}>
@@ -60,10 +92,17 @@ export default function DeployModalSection({ open, onCancel, onCreate }) {
           placeholder="capstone-demo"
           value={subdomain}
           onChange={(e) => setSubdomain(e.target.value)}
+          status={fieldErrors.subdomain ? 'error' : undefined}
         />
-        <div style={{ color: '#9ca3af', fontSize: 13, marginTop: 6 }}>
-          your-site.asuratechhost.app
-        </div>
+        {fieldErrors.subdomain ? (
+          <div style={{ color: '#dc2626', fontSize: 13, marginTop: 6 }}>
+            {fieldErrors.subdomain[0]}
+          </div>
+        ) : (
+          <div style={{ color: '#9ca3af', fontSize: 13, marginTop: 6 }}>
+            {subdomain ? `${subdomain}.asuratechhost.app` : 'your-site.asuratechhost.app'}
+          </div>
+        )}
       </div>
 
       <div style={{ marginBottom: 28 }}>
@@ -144,17 +183,23 @@ export default function DeployModalSection({ open, onCancel, onCreate }) {
             Default branch: {selectedRepository.default_branch}
           </div>
         )}
+        {fieldErrors.repository_full_name && (
+          <div style={{ color: '#dc2626', fontSize: 13, marginTop: 6 }}>
+            {fieldErrors.repository_full_name[0]}
+          </div>
+        )}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-        <Button size="large" onClick={onCancel}>
+        <Button size="large" onClick={onCancel} disabled={isCreating}>
           Cancel
         </Button>
         <Button
           size="large"
           type="primary"
           onClick={handleCreate}
-          disabled={!canCreate}
+          disabled={!canCreate || isCreating}
+          loading={isCreating}
         >
           Create website
         </Button>

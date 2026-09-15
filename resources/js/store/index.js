@@ -23,7 +23,7 @@ export const api = createApi({
 			return headers;
 		},
 	}),
-	tagTypes: ['User', 'Role', 'Permission', 'GithubRepository'],
+	tagTypes: ['User', 'Role', 'Permission', 'GithubRepository', 'Website', 'WebsiteFile'],
 	endpoints: (builder) => ({
 		getUser: builder.query({
 			query: () => '/user',

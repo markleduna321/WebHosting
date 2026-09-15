@@ -1,31 +1,43 @@
-import { FolderPlus, Upload } from "lucide-react";
-import React, { useState } from "react";
-import Button from "@/components/ui/Button";
+import React, { useEffect, useState } from "react";
 import DropDown from "@/components/ui/Dropdown";
+import { useGetWebsitesQuery } from "@/features/websites/websitesApi";
 
-const WEBSITES = [
-    { label: "Portfolio 2026", onClick: () => {} },
-    { label: "CS Thesis — Traffic Model", onClick: () => {} },
-    { label: "ACM Student Chapter", onClick: () => {} },
-    { label: "Kadiwa Marketplace (demo)", onClick: () => {} },
-];
+export default function FileSearchSection({ onSelect }) {
+    const { data: sites = [], isLoading } = useGetWebsitesQuery();
+    const [selectedUuid, setSelectedUuid] = useState(null);
 
-export default function FileSearchSection() {
-    const [selected, setSelected] = useState(WEBSITES[0].label);
+    useEffect(() => {
+        if (!selectedUuid && sites.length > 0) {
+            setSelectedUuid(sites[0].uuid);
+        }
+    }, [sites, selectedUuid]);
 
-    const items = WEBSITES.map((site) => ({
-        label: site.label,
-        onClick: () => setSelected(site.label),
+    const selected = sites.find((site) => site.uuid === selectedUuid);
+
+    useEffect(() => {
+        onSelect?.(selected ?? null);
+    }, [selected, onSelect]);
+
+    const items = sites.map((site) => ({
+        label: site.name,
+        onClick: () => setSelectedUuid(site.uuid),
     }));
+
+    const buttonText = isLoading
+        ? "Loading…"
+        : (selected?.name ?? "No sites yet");
 
     return (
         <div className="flex items-end justify-between gap-4">
             <div>
                 <p className="text-xs text-slate-500 mb-1.5">Website</p>
-                <DropDown buttonText={selected} items={items} align="left" />
+                <DropDown buttonText={buttonText} items={items} align="left" />
+                {!isLoading && sites.length === 0 && (
+                    <p className="mt-1.5 text-xs text-slate-400">
+                        Deploy a site to browse its files here.
+                    </p>
+                )}
             </div>
-
-            
         </div>
     );
 }

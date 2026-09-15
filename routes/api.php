@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\GithubRepositoryController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\WebsiteController;
+use App\Http\Controllers\Api\WebsiteFileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,4 +28,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/github/repositories', [GithubRepositoryController::class, 'index'])
         ->middleware('throttle:30,1')
         ->name('api.github.repositories');
+
+    Route::get('/websites', [WebsiteController::class, 'index'])->name('api.websites.index');
+    Route::post('/websites', [WebsiteController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('api.websites.store');
+
+    Route::get('/websites/{website}/files', [WebsiteFileController::class, 'index'])
+        ->middleware('throttle:60,1')
+        ->name('api.websites.files');
 });

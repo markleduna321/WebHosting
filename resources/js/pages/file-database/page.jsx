@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import Tabs, { TabPanel } from "@/components/ui/Tabs";
 import { FolderOpen, Database, KeyRound } from "lucide-react";
@@ -20,13 +20,15 @@ const TABS = [
 export default function Page() {
     const { tab } = usePage().props;
     const defaultTabId = TABS.some((t) => t.id === tab) ? tab : "file-manager";
+    const [selectedWebsite, setSelectedWebsite] = useState(null);
+    const handleSelect = useCallback((site) => setSelectedWebsite(site), []);
 
     return (
         <Tabs tabs={TABS} defaultTabId={defaultTabId}>
             <TabPanel id="file-manager">
                 <div className="space-y-4">
-                    <FileSearchSection />
-                    <FileTableSection />
+                    <FileSearchSection onSelect={handleSelect} />
+                    <FileTableSection website={selectedWebsite} />
                 </div>
             </TabPanel>
 

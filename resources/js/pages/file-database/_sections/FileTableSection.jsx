@@ -1,322 +1,255 @@
 import {
     Folder,
-    FolderOpen,
     FileText,
-    Download,
-    Trash2,
     ChevronRight,
     Home,
+    Loader2,
+    AlertCircle,
 } from "lucide-react";
-import Button from "@/components/ui/Button";
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useEffect } from "react";
+import { useGetWebsiteFilesQuery } from "@/features/websites/websitesApi";
 
-// ---------------------------------------------------------------------------
-// Static data
-// ---------------------------------------------------------------------------
-const ROOT_ITEMS = [
-    {
-        id: 1,
-        name: "My Portfolio",
-        type: "folder",
-        updatedAt: "2 hours ago",
-        children: [
-            {
-                id: 101,
-                name: "public",
-                type: "folder",
-                updatedAt: "2 hours ago",
-                children: [
-                    { id: 1011, name: "index.html",  type: "file", size: "8.2 KB", updatedAt: "2 hours ago" },
-                    { id: 1012, name: "style.css",   type: "file", size: "4.1 KB", updatedAt: "2 hours ago" },
-                    { id: 1013, name: "favicon.ico", type: "file", size: "1.1 KB", updatedAt: "Jul 12" },
-                ],
-            },
-            {
-                id: 102,
-                name: "src",
-                type: "folder",
-                updatedAt: "3 hours ago",
-                children: [
-                    { id: 1021, name: "App.jsx",  type: "file", size: "3.4 KB", updatedAt: "3 hours ago" },
-                    { id: 1022, name: "main.jsx", type: "file", size: "512 B",  updatedAt: "3 hours ago" },
-                ],
-            },
-            { id: 103, name: ".env",         type: "file", size: "256 B",  updatedAt: "Jul 10" },
-            { id: 104, name: "package.json", type: "file", size: "1.8 KB", updatedAt: "Jul 10" },
-            { id: 105, name: "README.md",    type: "file", size: "2.3 KB", updatedAt: "Jul 9"  },
-        ],
-    },
-    {
-        id: 2,
-        name: "Thesis Capstone",
-        type: "folder",
-        updatedAt: "2 hours ago",
-        children: [
-            {
-                id: 201,
-                name: "backend",
-                type: "folder",
-                updatedAt: "Yesterday",
-                children: [
-                    { id: 2011, name: "server.js", type: "file", size: "5.6 KB", updatedAt: "Yesterday" },
-                    { id: 2012, name: "routes.js", type: "file", size: "3.2 KB", updatedAt: "Yesterday" },
-                ],
-            },
-            {
-                id: 202,
-                name: "frontend",
-                type: "folder",
-                updatedAt: "Yesterday",
-                children: [
-                    { id: 2021, name: "index.html", type: "file", size: "6.1 KB", updatedAt: "Yesterday" },
-                    { id: 2022, name: "app.js",     type: "file", size: "4.9 KB", updatedAt: "Yesterday" },
-                ],
-            },
-            { id: 203, name: "README.md", type: "file", size: "1.2 KB", updatedAt: "Jul 8" },
-        ],
-    },
-];
-
-// Module-level constant — never recreated
 const EXT_COLORS = {
-    html:     "text-orange-400",
-    css:      "text-blue-400",
-    js:       "text-yellow-400",
-    jsx:      "text-cyan-400",
-    ts:       "text-blue-500",
-    tsx:      "text-cyan-500",
-    md:       "text-slate-400",
-    json:     "text-green-400",
-    env:      "text-red-400",
-    ico:      "text-purple-400",
+    html: "text-orange-400",
+    css: "text-blue-400",
+    js: "text-yellow-400",
+    jsx: "text-cyan-400",
+    ts: "text-blue-500",
+    tsx: "text-cyan-500",
+    md: "text-slate-400",
+    json: "text-green-400",
+    env: "text-red-400",
+    ico: "text-purple-400",
     htaccess: "text-slate-400",
 };
 
-function fileIconColor(name) {
-    const ext = name.split(".").pop().toLowerCase();
+function extColor(name) {
+    const ext = name.split(".").pop()?.toLowerCase();
     return EXT_COLORS[ext] ?? "text-slate-400";
 }
 
-function itemLabel(item) {
-    if (item.type !== "folder") return item.size;
-    const n = item.children.length;
-    return `${n} item${n !== 1 ? "s" : ""}`;
+function formatSize(bytes) {
+    if (bytes === null || bytes === undefined) return "";
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-// ---------------------------------------------------------------------------
-// Shared action buttons — used by both row and mobile card
-// ---------------------------------------------------------------------------
-function ItemActions({ item }) {
+function timeAgo(value) {
+    if (!value) return "—";
+    const seconds = Math.floor((Date.now() - new Date(value).getTime()) / 1000);
+    const units = [
+        ["year", 31536000],
+        ["month", 2592000],
+        ["week", 604800],
+        ["day", 86400],
+        ["hour", 3600],
+        ["minute", 60],
+    ];
+    for (const [unit, secondsInUnit] of units) {
+        const amount = Math.floor(seconds / secondsInUnit);
+        if (amount >= 1) {
+            return new Intl.RelativeTimeFormat("en", { numeric: "auto" }).format(
+                -amount,
+                unit,
+            );
+        }
+    }
+    return "just now";
+}
+
+function Shell({ children }) {
     return (
-        <div
-            className="flex items-center justify-end gap-1"
-            onClick={(e) => e.stopPropagation()}
-        >
-            {item.type === "file" && (
-                <Button
-                    variant="outline"
-                    aria-label="Download"
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-50 transition-colors"
-                >
-                    <Download className="w-3.5 h-3.5" />
-                </Button>
+        <div className="rounded-xl border border-gray-200 bg-white">
+            <div className="flex items-center gap-2 border-b border-gray-100 px-5 py-3.5 text-sm text-slate-600">
+                <Home className="h-4 w-4 text-slate-400" />
+                Files
+            </div>
+            {children}
+        </div>
+    );
+}
+
+function Message({ icon: Icon, title, description, spin = false }) {
+    return (
+        <div className="px-5 py-12 text-center">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                <Icon
+                    aria-hidden="true"
+                    className={`h-5 w-5 ${spin ? "animate-spin" : ""}`}
+                />
+            </span>
+            <p className="mt-3 text-sm font-semibold text-slate-900">{title}</p>
+            {description && (
+                <p className="mt-1 text-sm text-slate-500">{description}</p>
             )}
-            <Button
-                variant="outline"
-                aria-label="Delete"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-slate-50 transition-colors"
-            >
-                <Trash2 className="w-3.5 h-3.5" />
-            </Button>
         </div>
     );
 }
 
-// ---------------------------------------------------------------------------
-// Desktop table row
-// ---------------------------------------------------------------------------
-function FileRow({ item, onOpenFolder }) {
-    const isFolder = item.type === "folder";
-    const iconCls  = isFolder ? "text-blue-400" : fileIconColor(item.name);
-    const Icon     = isFolder ? Folder : FileText;
+export default function FileTableSection({ website }) {
+    const [path, setPath] = useState("");
 
-    return (
-        <tr
-            onClick={() => isFolder && onOpenFolder(item)}
-            className={`border-b border-gray-100 transition-colors group ${
-                isFolder ? "hover:bg-blue-50/40 cursor-pointer" : "hover:bg-gray-50/80"
-            }`}
-        >
-            <td className="py-3 px-4">
-                <div className="flex items-center gap-3">
-                    <Icon className={`w-4 h-4 shrink-0 ${iconCls}`} />
-                    <div>
-                        <p className={`text-sm font-medium ${isFolder ? "text-blue-600 group-hover:underline" : "text-slate-800"}`}>
-                            {item.name}
-                        </p>
-                        <p className="text-xs text-slate-400">{itemLabel(item)}</p>
-                    </div>
-                </div>
-            </td>
+    useEffect(() => {
+        setPath("");
+    }, [website?.uuid]);
 
-            <td className="py-3 px-4 text-xs text-slate-400 hidden sm:table-cell">
-                {item.updatedAt}
-            </td>
+    const isLive = website?.status === "live";
 
-            <td className="py-3 px-4">
-                <div className="flex items-center justify-end">
-                    <ItemActions item={item} />
-                    {isFolder && (
-                        <ChevronRight className="w-4 h-4 text-slate-300 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    )}
-                </div>
-            </td>
-        </tr>
-    );
-}
-
-// ---------------------------------------------------------------------------
-// Mobile card
-// ---------------------------------------------------------------------------
-function FileMobileCard({ item, onOpenFolder }) {
-    const isFolder = item.type === "folder";
-    const iconCls  = isFolder ? "text-blue-400" : fileIconColor(item.name);
-    const Icon     = isFolder ? Folder : FileText;
-
-    return (
-        <div
-            onClick={() => isFolder && onOpenFolder(item)}
-            className={`flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 ${
-                isFolder ? "cursor-pointer hover:bg-blue-50/40" : ""
-            }`}
-        >
-            <div className="flex items-center gap-3">
-                <Icon className={`w-4 h-4 shrink-0 ${iconCls}`} />
-                <div>
-                    <p className={`text-sm font-medium ${isFolder ? "text-blue-600" : "text-slate-800"}`}>
-                        {item.name}
-                    </p>
-                    <p className="text-xs text-slate-400">
-                        {itemLabel(item)} · {item.updatedAt}
-                    </p>
-                </div>
-            </div>
-
-            <div className="flex items-center gap-1">
-                <ItemActions item={item} />
-                {isFolder && <ChevronRight className="w-4 h-4 text-slate-300 ml-1" />}
-            </div>
-        </div>
-    );
-}
-
-// ---------------------------------------------------------------------------
-// Empty state
-// ---------------------------------------------------------------------------
-function EmptyState() {
-    return (
-        <p className="py-10 text-center text-sm text-slate-400">
-            This folder is empty.
-        </p>
-    );
-}
-
-// ---------------------------------------------------------------------------
-// Main component
-// ---------------------------------------------------------------------------
-export default function FileTableSection() {
-    const [stack, setStack] = useState([]);
-
-    const currentItems = stack.length === 0
-        ? ROOT_ITEMS
-        : stack[stack.length - 1].children;
-
-    const sorted = useMemo(
-        () =>
-            [...currentItems].sort((a, b) => {
-                if (a.type !== b.type) return a.type === "folder" ? -1 : 1;
-                return a.name.localeCompare(b.name);
-            }),
-        [currentItems],
+    const {
+        data: entries = [],
+        isFetching,
+        isError,
+        error,
+    } = useGetWebsiteFilesQuery(
+        { uuid: website?.uuid, path },
+        { skip: !website || !isLive },
     );
 
-    const openFolder  = useCallback((folder) => setStack((prev) => [...prev, folder]), []);
-    const goToRoot    = useCallback(() => setStack([]), []);
-    const navigateTo  = useCallback((i) => setStack((prev) => prev.slice(0, i + 1)), []);
+    if (!website) {
+        return (
+            <Shell>
+                <Message
+                    icon={Folder}
+                    title="No site selected"
+                    description="Deploy a site to browse its files here."
+                />
+            </Shell>
+        );
+    }
 
-    const currentFolder = stack[stack.length - 1];
+    if (!isLive) {
+        const failed = website.status === "failed";
+        return (
+            <Shell>
+                <Message
+                    icon={failed ? AlertCircle : Loader2}
+                    spin={!failed}
+                    title={failed ? "Deployment failed" : "Still deploying"}
+                    description={
+                        failed
+                            ? (website.failure_reason ??
+                              "Try deploying this repository again.")
+                            : "Files appear here once the repository finishes cloning."
+                    }
+                />
+            </Shell>
+        );
+    }
+
+    const segments = path ? path.split("/") : [];
 
     return (
-        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-
+        <div className="rounded-xl border border-gray-200 bg-white">
             {/* Breadcrumb */}
-            <div className="flex items-center gap-1 px-4 py-3 border-b border-gray-100 text-sm text-slate-500 flex-wrap">
+            <div className="flex flex-wrap items-center gap-1 border-b border-gray-100 px-5 py-3.5 text-sm">
                 <button
                     type="button"
-                    onClick={goToRoot}
-                    className="flex items-center gap-1 hover:text-blue-600 transition-colors font-medium"
+                    onClick={() => setPath("")}
+                    className="inline-flex items-center gap-1.5 rounded px-1 text-slate-600 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
-                    <Home className="w-3.5 h-3.5" />
-                    <span>Files</span>
+                    <Home className="h-4 w-4 text-slate-400" />
+                    {website.name}
                 </button>
-
-                {stack.map((folder, i) => (
-                    <React.Fragment key={folder.id}>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />
+                {segments.map((segment, index) => (
+                    <span key={segment + index} className="flex items-center gap-1">
+                        <ChevronRight className="h-3.5 w-3.5 text-slate-300" />
                         <button
                             type="button"
-                            onClick={() => navigateTo(i)}
-                            className={`hover:text-blue-600 transition-colors font-medium ${
-                                i === stack.length - 1 ? "text-slate-800 pointer-events-none" : ""
-                            }`}
+                            onClick={() =>
+                                setPath(segments.slice(0, index + 1).join("/"))
+                            }
+                            className="rounded px-1 text-slate-600 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                         >
-                            {folder.name}
+                            {segment}
                         </button>
-                    </React.Fragment>
+                    </span>
                 ))}
             </div>
 
-            {/* Current folder header */}
-            {currentFolder && (
-                <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border-b border-gray-100">
-                    <FolderOpen className="w-4 h-4 text-blue-400 shrink-0" />
-                    <span className="text-sm font-semibold text-slate-700">{currentFolder.name}</span>
-                    <span className="text-xs text-slate-400 ml-1">
-                        {sorted.length} item{sorted.length !== 1 ? "s" : ""}
-                    </span>
-                </div>
+            {isFetching && (
+                <ul className="divide-y divide-gray-100">
+                    {[0, 1, 2, 3].map((row) => (
+                        <li key={row} className="animate-pulse px-5 py-4">
+                            <div className="h-3.5 w-1/3 rounded bg-slate-200" />
+                        </li>
+                    ))}
+                </ul>
             )}
 
-            {/* Desktop table */}
-            <div className="hidden md:block overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+            {!isFetching && isError && (
+                <Message
+                    icon={AlertCircle}
+                    title="Could not load files"
+                    description={error?.data?.message ?? "Please try again."}
+                />
+            )}
+
+            {!isFetching && !isError && entries.length === 0 && (
+                <Message
+                    icon={Folder}
+                    title="This folder is empty"
+                    description="Nothing was found at this path."
+                />
+            )}
+
+            {!isFetching && !isError && entries.length > 0 && (
+                <table className="w-full text-left">
                     <thead>
-                        <tr className="text-gray-400 text-xs font-medium border-b border-gray-100">
-                            <th className="py-2.5 px-4">Name</th>
-                            <th className="py-2.5 px-4 hidden sm:table-cell">Last modified</th>
-                            <th className="py-2.5 px-4 text-right">Actions</th>
+                        <tr className="border-b border-gray-100 text-xs text-slate-400">
+                            <th className="px-5 py-2.5 font-medium">Name</th>
+                            <th className="hidden px-5 py-2.5 font-medium sm:table-cell">
+                                Last modified
+                            </th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {sorted.length === 0
-                            ? <tr><td colSpan={3}><EmptyState /></td></tr>
-                            : sorted.map((item) => (
-                                <FileRow key={item.id} item={item} onOpenFolder={openFolder} />
-                            ))
-                        }
+                    <tbody className="divide-y divide-gray-100">
+                        {entries.map((entry) => {
+                            const isFolder = entry.type === "folder";
+                            return (
+                                <tr key={entry.path} className="hover:bg-slate-50">
+                                    <td className="px-5 py-3.5">
+                                        {isFolder ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => setPath(entry.path)}
+                                                className="flex items-center gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+                                            >
+                                                <Folder className="h-4 w-4 shrink-0 text-blue-400" />
+                                                <span className="min-w-0">
+                                                    <span className="block truncate text-sm font-medium text-blue-600">
+                                                        {entry.name}
+                                                    </span>
+                                                    <span className="block text-xs text-slate-400">
+                                                        {entry.item_count} items
+                                                    </span>
+                                                </span>
+                                            </button>
+                                        ) : (
+                                            <span className="flex items-center gap-3">
+                                                <FileText
+                                                    className={`h-4 w-4 shrink-0 ${extColor(entry.name)}`}
+                                                />
+                                                <span className="min-w-0">
+                                                    <span className="block truncate text-sm font-medium text-slate-800">
+                                                        {entry.name}
+                                                    </span>
+                                                    <span className="block text-xs text-slate-400">
+                                                        {formatSize(entry.size_bytes)}
+                                                    </span>
+                                                </span>
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="hidden px-5 py-3.5 text-sm text-slate-500 sm:table-cell">
+                                        {timeAgo(entry.updated_at)}
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
-            </div>
-
-            {/* Mobile cards */}
-            <div className="md:hidden p-3 space-y-2">
-                {sorted.length === 0
-                    ? <EmptyState />
-                    : sorted.map((item) => (
-                        <FileMobileCard key={item.id} item={item} onOpenFolder={openFolder} />
-                    ))
-                }
-            </div>
+            )}
         </div>
     );
 }

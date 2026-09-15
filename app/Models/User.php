@@ -64,4 +64,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(GithubConnection::class);
     }
+
+    public function websites(): HasMany
+    {
+        return $this->hasMany(Website::class);
+    }
 }
