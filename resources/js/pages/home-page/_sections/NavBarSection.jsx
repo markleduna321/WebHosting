@@ -41,7 +41,6 @@ export default function NavBarSection() {
         { name: "Features", href: "features" },
         { name: "Partners", href: "partners" },
         { name: "About Us", href: "about-us" },
-        
     ];
 
     const handleNavClick = (e, id) => {
@@ -59,18 +58,20 @@ export default function NavBarSection() {
                 >
                     <div className="flex items-center justify-center">
                         <img
-                            src="/images/asura-logo.png"
-                            alt="AsuraTechHost Logo"
-                            className="w-9 h-9 object-contain"
+                            src="/images/logo 3.png"
+                            alt="CALEHO Host Logo"
+                            className="w-12 h-12 object-contain"
                         />
                     </div>
-                    <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-                        Asura
+                    <span className="text-xl font-bold tracking-tight">
+                        <span className="bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-400 bg-clip-text text-transparent">
+                            CALEHO
+                        </span>{" "}
                         <span className="text-blue-600 dark:text-blue-500">
-                            Host
+                            HOST
                         </span>
                     </span>
-                </Link> 
+                </Link>
 
                 <nav className="hidden lg:flex items-center space-x-14 text-sm font-medium text-slate-600 dark:text-slate-300">
                     {navLinks.map((link) => (

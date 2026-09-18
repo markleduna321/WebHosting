@@ -10,14 +10,17 @@ export default function PlanDetailsSection({
     return (
         <div className="hidden lg:flex lg:w-2/3 flex-col justify-between bg-[#0B0F19] bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] p-12 lg:p-16 text-white relative">
             {/* Header / Logo */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
                 <img
-                    src="/images/asura-logo.png"
-                    alt="AsuraTechHost Logo"
+                    src="/images/logo 3.png"
+                    alt="CALEHO Host Logo"
                     className="w-11 h-11 object-contain"
                 />
-                <span className="text-2xl font-bold tracking-wide">
-                    Asura<span className="text-blue-500">Host</span>
+                <span className="text-xl font-bold tracking-wide">
+                    <span className="bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-400 bg-clip-text text-transparent">
+                        CALEHO
+                    </span>{" "}
+                    <span className="text-blue-500">HOST</span>
                 </span>
             </div>
 
@@ -102,7 +105,7 @@ export default function PlanDetailsSection({
 
             {/* Footer */}
             <div className="text-sm text-slate-500">
-                © 2026 AsuraTech Host. All rights reserved.
+                © 2026 CALEHO HOST. All rights reserved.
             </div>
         </div>
     );

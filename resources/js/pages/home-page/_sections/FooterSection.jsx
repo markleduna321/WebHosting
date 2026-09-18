@@ -76,9 +76,9 @@ export default function FooterSection() {
           {/* Brand, description, socials & contact */}
           <div className="lg:col-span-4">
             <a href="/" className="flex items-center gap-2.5">
-              <img src="/images/asura-logo.png" alt="AsuraTechHost Logo" className="w-8 h-8 object-contain" />
-              <span className="text-lg font-bold tracking-tight text-white">
-                Asura<span className="text-blue-500">Host</span>
+              <img src="/images/logo 3.png" alt="CALEHO Host Logo" className="w-12 h-12 object-contain" />
+               <span className="bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-400 bg-clip-text text-transparent font-bold">
+                CALEHO<span className="text-blue-500">{" "}HOST</span>
               </span>
             </a>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-400">
@@ -135,7 +135,7 @@ export default function FooterSection() {
 
         {/* Bottom bar */}
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-6 text-sm text-slate-500 sm:flex-row">
-          <p>© {year} Asura Host. All rights reserved.</p>
+          <p>© {year} CALEHO Host. All rights reserved.</p>
           <div className="flex gap-6">
             <a href="#privacy-policy" className="transition-colors hover:text-white">Privacy Policy</a>
             <a href="#terms-of-service" className="transition-colors hover:text-white">Terms of Service</a>

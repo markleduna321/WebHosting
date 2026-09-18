@@ -1,61 +1,68 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link, usePage } from '@inertiajs/react';
-import { useDispatch, useSelector } from 'react-redux';
-import { LogOut, X, PanelLeftClose } from 'lucide-react';
-import cn from 'classnames';
+import { useEffect, useRef, useState } from "react";
+import { Link, usePage } from "@inertiajs/react";
+import { useDispatch, useSelector } from "react-redux";
+import { LogOut, X, PanelLeftClose } from "lucide-react";
+import cn from "classnames";
 import {
     closeMobileSidebar,
     selectMobileSidebarOpen,
     selectSidebarCollapsed,
     toggleSidebar,
-} from '@/features/ui/uiSlice';
-import { ADMIN_NAV_GROUPS, DASHBOARD_LINK, USER_NAV_GROUPS } from './navConfig';
-import SidebarNavItem from './SidebarNavItem';
+} from "@/features/ui/uiSlice";
+import { ADMIN_NAV_GROUPS, DASHBOARD_LINK, USER_NAV_GROUPS } from "./navConfig";
+import SidebarNavItem from "./SidebarNavItem";
 
 const THEMES = {
     admin: {
-        shell: 'bg-slate-900 border-r border-slate-800 text-slate-100',
-        headerBorder: 'border-slate-800/80',
-        footerBorder: 'border-slate-800/80',
-        toggleButton: 'text-slate-400 hover:bg-slate-800 hover:text-white',
-        sectionLabel: 'text-slate-500',
-        itemActive: 'bg-blue-600 text-white',
-        itemIdle: 'text-slate-300 hover:bg-slate-800 hover:text-white',
-        iconActive: 'text-white',
-        iconIdle: 'text-slate-400',
-        groupActive: 'text-blue-400',
-        groupIdle: 'text-slate-300',
-        groupHover: 'hover:bg-slate-800',
-        groupPanelBorder: 'border-slate-800',
-        childActive: 'text-blue-400 font-semibold bg-slate-800/50',
-        childIdle: 'text-slate-400 hover:text-white hover:bg-slate-800/30',
-        logout: 'text-slate-400 hover:bg-slate-800 hover:text-red-400',
+        shell: "bg-slate-900 border-r border-slate-800 text-slate-100",
+        headerBorder: "border-slate-800/80",
+        footerBorder: "border-slate-800/80",
+        toggleButton: "text-slate-400 hover:bg-slate-800 hover:text-white",
+        sectionLabel: "text-slate-500",
+        itemActive: "bg-blue-600 text-white",
+        itemIdle: "text-slate-300 hover:bg-slate-800 hover:text-white",
+        iconActive: "text-white",
+        iconIdle: "text-slate-400",
+        groupActive: "text-blue-400",
+        groupIdle: "text-slate-300",
+        groupHover: "hover:bg-slate-800",
+        groupPanelBorder: "border-slate-800",
+        childActive: "text-blue-400 font-semibold bg-slate-800/50",
+        childIdle: "text-slate-400 hover:text-white hover:bg-slate-800/30",
+        logout: "text-slate-400 hover:bg-slate-800 hover:text-red-400",
         focusRing:
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900",
     },
     user: {
-        shell: 'bg-white border-r border-gray-200',
-        headerBorder: 'border-gray-100',
-        footerBorder: 'border-gray-100',
-        toggleButton: 'text-gray-500 hover:bg-gray-100 hover:text-gray-900',
-        sectionLabel: 'text-slate-400',
-        itemActive: 'bg-blue-50 text-blue-600 font-semibold',
-        itemIdle: 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
-        iconActive: 'text-blue-600',
-        iconIdle: 'text-slate-400',
-        groupActive: 'text-blue-600',
-        groupIdle: 'text-slate-600',
-        groupHover: 'hover:bg-slate-50',
-        groupPanelBorder: 'border-gray-200',
-        childActive: 'text-blue-600 font-semibold bg-blue-50',
-        childIdle: 'text-slate-500 hover:text-slate-900 hover:bg-slate-50',
-        logout: 'text-slate-500 hover:bg-red-50 hover:text-red-600',
+        shell: "bg-white border-r border-gray-200",
+        headerBorder: "border-gray-100",
+        footerBorder: "border-gray-100",
+        toggleButton: "text-gray-500 hover:bg-gray-100 hover:text-gray-900",
+        sectionLabel: "text-slate-400",
+        itemActive: "bg-blue-50 text-blue-600 font-semibold",
+        itemIdle: "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+        iconActive: "text-blue-600",
+        iconIdle: "text-slate-400",
+        groupActive: "text-blue-600",
+        groupIdle: "text-slate-600",
+        groupHover: "hover:bg-slate-50",
+        groupPanelBorder: "border-gray-200",
+        childActive: "text-blue-600 font-semibold bg-blue-50",
+        childIdle: "text-slate-500 hover:text-slate-900 hover:bg-slate-50",
+        logout: "text-slate-500 hover:bg-red-50 hover:text-red-600",
         focusRing:
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
     },
 };
 
-function SidebarBrand({ isAdmin, collapsed, theme, onToggleCollapse, onNavigate, onCloseMobile }) {
+function SidebarBrand({
+    isAdmin,
+    collapsed,
+    theme,
+    onToggleCollapse,
+    onNavigate,
+    onCloseMobile,
+}) {
     if (collapsed) {
         return (
             <button
@@ -64,16 +71,16 @@ function SidebarBrand({ isAdmin, collapsed, theme, onToggleCollapse, onNavigate,
                 aria-label="Expand sidebar"
                 aria-expanded="false"
                 className={cn(
-                    'p-1.5 rounded-lg transition-colors flex items-center justify-center',
+                    "p-1.5 rounded-lg transition-colors flex items-center justify-center",
                     theme.toggleButton,
-                    theme.focusRing
+                    theme.focusRing,
                 )}
             >
                 <img
-                    src="/images/asura-logo.png"
+                    src="/images/logo 3.png"
                     alt=""
                     aria-hidden="true"
-                    className="h-7 w-7 object-contain"
+                    className="h-8 w-8 object-contain"
                 />
             </button>
         );
@@ -84,26 +91,29 @@ function SidebarBrand({ isAdmin, collapsed, theme, onToggleCollapse, onNavigate,
             <Link
                 href="/"
                 onClick={onNavigate}
-                className={cn('flex items-center gap-2.5 min-w-0 rounded-lg', theme.focusRing)}
+                className={cn(
+                    "flex items-center gap-2.5 min-w-0 rounded-lg",
+                    theme.focusRing,
+                )}
             >
                 <img
-                    src="/images/asura-logo.png"
+                    src="/images/logo 3.png"
                     alt=""
                     aria-hidden="true"
-                    className="h-7 w-7 object-contain shrink-0"
+                    className="h-8 w-8 object-contain shrink-0 ml-4"
                 />
                 {isAdmin ? (
                     <span className="min-w-0">
                         <span className="block text-sm font-bold text-white truncate leading-tight">
-                            AsuraTech Host
+                            CALEHO HOST
                         </span>
                         <span className="block text-[9px] font-bold tracking-wider text-blue-400">
                             ADMIN PORTAL
                         </span>
                     </span>
                 ) : (
-                    <span className="text-lg font-bold text-slate-900 truncate">
-                        Asura<span className="text-blue-600">Host</span>
+                    <span className="min-w-0 font-extrabold tracking-tight text-cyan-500">
+                        CALEHO HOST
                     </span>
                 )}
             </Link>
@@ -115,9 +125,9 @@ function SidebarBrand({ isAdmin, collapsed, theme, onToggleCollapse, onNavigate,
                     aria-label="Collapse sidebar"
                     aria-expanded="true"
                     className={cn(
-                        'hidden lg:flex p-1.5 rounded-lg transition-colors',
+                        "hidden lg:flex p-1.5 rounded-lg transition-colors",
                         theme.toggleButton,
-                        theme.focusRing
+                        theme.focusRing,
                     )}
                 >
                     <PanelLeftClose aria-hidden="true" className="w-5 h-5" />
@@ -128,9 +138,9 @@ function SidebarBrand({ isAdmin, collapsed, theme, onToggleCollapse, onNavigate,
                     onClick={onCloseMobile}
                     aria-label="Close sidebar"
                     className={cn(
-                        'lg:hidden p-1.5 rounded-md transition-colors',
+                        "lg:hidden p-1.5 rounded-md transition-colors",
                         theme.toggleButton,
-                        theme.focusRing
+                        theme.focusRing,
                     )}
                 >
                     <X aria-hidden="true" className="w-5 h-5" />
@@ -149,12 +159,12 @@ function SidebarPanel({
     onCloseMobile,
 }) {
     return (
-        <div className={cn('flex h-full flex-col', theme.shell)}>
+        <div className={cn("flex h-full flex-col", theme.shell)}>
             <div
                 className={cn(
-                    'flex items-center h-16 shrink-0 px-3.5 border-b',
+                    "flex items-center h-16 shrink-0 px-3.5 border-b",
                     theme.headerBorder,
-                    collapsed ? 'justify-center' : 'justify-between'
+                    collapsed ? "justify-center" : "justify-between",
                 )}
             >
                 <SidebarBrand
@@ -170,54 +180,70 @@ function SidebarPanel({
             <nav
                 aria-label="Main"
                 className={cn(
-                    'flex-1 overflow-y-auto px-2.5 py-4',
-                    isAdmin ? 'space-y-1' : 'space-y-6'
+                    "flex-1 overflow-y-auto px-2.5 py-4",
+                    isAdmin ? "space-y-1" : "space-y-6",
                 )}
             >
                 {isAdmin ? (
                     <>
                         <div className="space-y-1">
-                            {[DASHBOARD_LINK, ...ADMIN_NAV_GROUPS].map((item) => {
-                                const Icon = item.icon;
-                                const active = isLinkActive(item.href);
+                            {[DASHBOARD_LINK, ...ADMIN_NAV_GROUPS].map(
+                                (item) => {
+                                    const Icon = item.icon;
+                                    const active = isLinkActive(item.href);
 
-                                return (
-                                    <Link
-                                        key={item.name}
-                                        href={item.href}
-                                        onClick={onCloseMobile}
-                                        aria-current={active ? 'page' : undefined}
-                                        title={collapsed ? item.name : undefined}
-                                        aria-label={collapsed ? item.name : undefined}
-                                        className={cn(
-                                            'group flex items-start gap-3 rounded-xl px-3 py-3 transition-colors',
-                                            theme.focusRing,
-                                            active ? theme.itemActive : theme.itemIdle,
-                                            collapsed && 'justify-center'
-                                        )}
-                                    >
-                                        <Icon
-                                            aria-hidden="true"
+                                    return (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            onClick={onCloseMobile}
+                                            aria-current={
+                                                active ? "page" : undefined
+                                            }
+                                            title={
+                                                collapsed
+                                                    ? item.name
+                                                    : undefined
+                                            }
+                                            aria-label={
+                                                collapsed
+                                                    ? item.name
+                                                    : undefined
+                                            }
                                             className={cn(
-                                                'mt-0.5 h-5 w-5 shrink-0',
-                                                active ? theme.iconActive : theme.iconIdle
+                                                "group flex items-start gap-3 rounded-xl px-3 py-3 transition-colors",
+                                                theme.focusRing,
+                                                active
+                                                    ? theme.itemActive
+                                                    : theme.itemIdle,
+                                                collapsed && "justify-center",
                                             )}
-                                        />
-                                        {!collapsed && (
-                                            <span className="min-w-0">
-                                                <span className="block truncate text-sm font-semibold leading-tight">
-                                                    {item.name}
-                                                </span>
-                                                {item.description && (
-                                                    <span className="mt-0.5 block text-xs leading-snug text-blue-100/70">
-                                                        {item.description}
-                                                    </span>
+                                        >
+                                            <Icon
+                                                aria-hidden="true"
+                                                className={cn(
+                                                    "mt-0.5 h-5 w-5 shrink-0",
+                                                    active
+                                                        ? theme.iconActive
+                                                        : theme.iconIdle,
                                                 )}
-                                            </span>
-                                        )}
-                                    </Link>
-                                );
-                            })}
+                                            />
+                                            {!collapsed && (
+                                                <span className="min-w-0">
+                                                    <span className="block truncate text-sm font-semibold leading-tight">
+                                                        {item.name}
+                                                    </span>
+                                                    {item.description && (
+                                                        <span className="mt-0.5 block text-xs leading-snug text-blue-100/70">
+                                                            {item.description}
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            )}
+                                        </Link>
+                                    );
+                                },
+                            )}
                         </div>
                     </>
                 ) : (
@@ -226,8 +252,8 @@ function SidebarPanel({
                             {!collapsed && (
                                 <p
                                     className={cn(
-                                        'mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider',
-                                        theme.sectionLabel
+                                        "mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider",
+                                        theme.sectionLabel,
                                     )}
                                 >
                                     {group.label}
@@ -252,19 +278,19 @@ function SidebarPanel({
                 )}
             </nav>
 
-            <div className={cn('border-t p-2.5', theme.footerBorder)}>
+            <div className={cn("border-t p-2.5", theme.footerBorder)}>
                 <Link
                     href="/logout"
                     method="post"
                     as="button"
                     type="button"
-                    title={collapsed ? 'Log out' : undefined}
-                    aria-label={collapsed ? 'Log out' : undefined}
+                    title={collapsed ? "Log out" : undefined}
+                    aria-label={collapsed ? "Log out" : undefined}
                     className={cn(
-                        'flex w-full items-center gap-3 rounded-lg py-2 text-sm font-medium transition-colors',
+                        "flex w-full items-center gap-3 rounded-lg py-2 text-sm font-medium transition-colors",
                         theme.logout,
                         theme.focusRing,
-                        collapsed ? 'justify-center px-2' : 'px-3'
+                        collapsed ? "justify-center px-2" : "px-3",
                     )}
                 >
                     <LogOut aria-hidden="true" className="w-5 h-5 shrink-0" />
@@ -284,7 +310,7 @@ export default function Sidebar() {
     const mobileOpen = useSelector(selectMobileSidebarOpen);
 
     const { url, props } = usePage();
-    const isAdmin = Boolean(props?.auth?.user?.roles?.includes('admin'));
+    const isAdmin = Boolean(props?.auth?.user?.roles?.includes("admin"));
     const theme = isAdmin ? THEMES.admin : THEMES.user;
 
     const isLinkActive = (href) => url === href || url.startsWith(`${href}/`);
@@ -298,9 +324,9 @@ export default function Sidebar() {
         const node = drawerRef.current;
         if (!node) return;
         if (mobileOpen) {
-            node.removeAttribute('inert');
+            node.removeAttribute("inert");
         } else {
-            node.setAttribute('inert', '');
+            node.setAttribute("inert", "");
         }
     }, [mobileOpen]);
 
@@ -312,11 +338,11 @@ export default function Sidebar() {
         node?.querySelector(FOCUSABLE)?.focus();
 
         const handleKeyDown = (event) => {
-            if (event.key === 'Escape') {
+            if (event.key === "Escape") {
                 closeMobile();
                 return;
             }
-            if (event.key !== 'Tab' || !node) return;
+            if (event.key !== "Tab" || !node) return;
 
             const items = Array.from(node.querySelectorAll(FOCUSABLE));
             if (items.length === 0) return;
@@ -334,11 +360,11 @@ export default function Sidebar() {
         };
 
         const previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-        document.addEventListener('keydown', handleKeyDown);
+        document.body.style.overflow = "hidden";
+        document.addEventListener("keydown", handleKeyDown);
 
         return () => {
-            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener("keydown", handleKeyDown);
             document.body.style.overflow = previousOverflow;
             lastFocusedRef.current?.focus?.();
         };
@@ -355,8 +381,8 @@ export default function Sidebar() {
         <>
             <div
                 className={cn(
-                    'hidden lg:block fixed inset-y-0 left-0 z-30 transition-[width] duration-300 ease-in-out',
-                    collapsed ? 'w-16' : 'w-64'
+                    "hidden lg:block fixed inset-y-0 left-0 z-30 transition-[width] duration-300 ease-in-out",
+                    collapsed ? "w-16" : "w-64",
                 )}
             >
                 <SidebarPanel
@@ -368,8 +394,10 @@ export default function Sidebar() {
 
             <div
                 className={cn(
-                    'lg:hidden fixed inset-0 z-40 transition-opacity duration-300',
-                    mobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    "lg:hidden fixed inset-0 z-40 transition-opacity duration-300",
+                    mobileOpen
+                        ? "opacity-100"
+                        : "opacity-0 pointer-events-none",
                 )}
             >
                 <button
@@ -385,8 +413,8 @@ export default function Sidebar() {
                     aria-modal="true"
                     aria-label="Sidebar navigation"
                     className={cn(
-                        'absolute inset-y-0 left-0 w-[85%] max-w-xs sm:w-72 md:w-80 shadow-xl transition-transform duration-300 ease-in-out',
-                        mobileOpen ? 'translate-x-0' : '-translate-x-full'
+                        "absolute inset-y-0 left-0 w-[85%] max-w-xs sm:w-72 md:w-80 shadow-xl transition-transform duration-300 ease-in-out",
+                        mobileOpen ? "translate-x-0" : "-translate-x-full",
                     )}
                 >
                     <SidebarPanel

@@ -9,24 +9,25 @@ import { PLANS, getPlanByName } from "../../../data/hostingPlans";
 function GenericBrandingPanel() {
     return (
         <div className="hidden lg:flex lg:w-3/5 flex-col justify-between bg-[#0B0F19] bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] p-12 text-white relative">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
                 <img
-                    src="/images/asura-logo.png"
-                    alt="AsuraTechHost Logo"
-                    className="w-9 h-9 object-contain"
+                    src="/images/logo 3.png"
+                    alt="CALEHO Host Logo"
+                    className="w-11 h-11 object-contain"
                 />
-
                 <span className="text-xl font-bold tracking-wide">
-                    Asura<span className="text-blue-500">Host</span>
+                    <span className="bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-400 bg-clip-text text-transparent">
+                        CALEHO
+                    </span>{" "}
+                    <span className="text-blue-500">HOST</span>
                 </span>
             </div>
-
-            <div className="max-w-xl space-y-6 my-auto">
+            <div className="max-w-xl space-y-10 my-auto">
                 <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl leading-tight">
                     Hosting that keeps up with your semester.
                 </h1>
 
-                <ul className="space-y-3 text-slate-300 text-sm">
+                <ul className="space-y-6 text-slate-300 text-sm">
                     <li className="flex items-start gap-2">
                         <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                         <span>
@@ -51,7 +52,7 @@ function GenericBrandingPanel() {
 
             {/* Footer Copyright */}
             <div className="text-xs text-slate-500">
-                © 2026 AsuraTech Host. All rights reserved.
+                © 2026 CALEHO Host. All rights reserved.
             </div>
         </div>
     );

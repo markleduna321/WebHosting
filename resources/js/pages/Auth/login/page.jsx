@@ -22,18 +22,19 @@ export default function Page() {
             {/* Left Branding Panel */}
             <div className="hidden lg:flex lg:w-3/5 flex-col justify-between bg-[#0B0F19] bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] p-12 text-white relative">
                 {/* Brand Header */}
-                <div className="flex items-center gap-2">
-                    <img
-                        src="/images/asura-logo.png"
-                        alt="AsuraTechHost Logo"
-                        className="w-9 h-9 object-contain"
-                    />
-
-                    <span className="text-xl font-bold tracking-wide">
-                        Asura<span className="text-blue-500">Host</span>
-                    </span>
-                </div>
-
+               <div className="flex items-center gap-1">
+                <img
+                    src="/images/logo 3.png"
+                    alt="CALEHO Host Logo"
+                    className="w-11 h-11 object-contain"
+                />
+                <span className="text-xl font-bold tracking-wide">
+                    <span className="bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-400 bg-clip-text text-transparent">
+                        CALEHO
+                    </span>{" "}
+                    <span className="text-blue-500">HOST</span>
+                </span>
+            </div>
                 {/* Hero Content */}
                 <div className="max-w-xl space-y-6 my-auto">
                     <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl leading-tight">
