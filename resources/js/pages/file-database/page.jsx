@@ -15,7 +15,7 @@ import CreateDatabaseSection from "./_sections/CreateDatabaseSection";
 const TABS = [
     { id: "file-manager", label: "File manager", icon: <FolderOpen size={16} /> },
     { id: "databases", label: "Databases", icon: <Database size={16} /> },
-    { id: "environment", label: "Environment", icon: <KeyRound size={16} /> },
+  
 ];
 
 export default function Page() {

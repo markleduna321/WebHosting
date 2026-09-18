@@ -42,7 +42,7 @@ export default function Page() {
     return (
         <div className="space-y-6">
             <VerifyEmailBanner />
-            <HeaderSection />
+            {/* <HeaderSection /> */}
             <ShortcutSection />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <ProjectListSection />

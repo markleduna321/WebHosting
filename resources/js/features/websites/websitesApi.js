@@ -19,6 +19,25 @@ export const websitesApi = api.injectEndpoints({
             transformResponse: (response) => response?.data ?? [],
             providesTags: ["WebsiteFile"],
         }),
+        createWebsiteFile: builder.mutation({
+            query: ({ uuid, name, path = "", content = "", upload }) => {
+                if (upload) {
+                    const body = new FormData();
+                    body.append("name", name);
+                    body.append("path", path);
+                    body.append("upload", upload);
+
+                    return { url: `/websites/${uuid}/files`, method: "POST", body };
+                }
+
+                return {
+                    url: `/websites/${uuid}/files`,
+                    method: "POST",
+                    body: { name, path, content },
+                };
+            },
+            invalidatesTags: ["WebsiteFile"],
+        }),
         redeployWebsite: builder.mutation({
             query: (uuid) => ({
                 url: `/websites/${uuid}/redeploy`,
@@ -37,6 +56,7 @@ export const {
     useGetWebsitesQuery,
     useCreateWebsiteMutation,
     useGetWebsiteFilesQuery,
+    useCreateWebsiteFileMutation,
     useRedeployWebsiteMutation,
     useDeleteWebsiteMutation,
 } = websitesApi;

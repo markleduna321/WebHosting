@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import DropDown from "@/components/ui/Dropdown";
 import { useGetWebsitesQuery } from "@/features/websites/websitesApi";
+import Button from "@/components/Button";
+import { Plus } from "lucide-react";
+import CreateFileSection from "./CreateFileSection";
 
 export default function FileSearchSection({ onSelect }) {
     const { data: sites = [], isLoading } = useGetWebsitesQuery();
     const [selectedUuid, setSelectedUuid] = useState(null);
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
 
     useEffect(() => {
         if (!selectedUuid && sites.length > 0) {
@@ -37,7 +41,25 @@ export default function FileSearchSection({ onSelect }) {
                         Deploy a site to browse its files here.
                     </p>
                 )}
+
             </div>
+            <div className="flex justify-end mr-6">
+                <Button
+                    type="button"
+                    outlined
+                    onClick={() => setIsCreateOpen(true)}
+                    disabled={!selected}
+                    className="flex items-center gap-2"
+                >
+                    <Plus className="w-4 h-4" />
+                    <span>Create File</span>
+                </Button>
+            </div>
+            <CreateFileSection
+                open={isCreateOpen}
+                onClose={() => setIsCreateOpen(false)}
+                website={selected}
+            />
         </div>
     );
 }

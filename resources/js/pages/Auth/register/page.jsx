@@ -88,7 +88,7 @@ export default function Page() {
                 <GenericBrandingPanel />
             )}
 
-            <div className="flex w-full lg:w-2/5 flex-col justify-center bg-white px-6 py-12 sm:px-12 lg:px-16">
+            <div className="flex w-full lg:w-2/6 flex-col justify-center bg-white px-6 py-12 sm:px-12 lg:px-16">
                 {hasPlan && step === "checkout" ? (
                     <CheckoutSummarySection
                         plan={plan}

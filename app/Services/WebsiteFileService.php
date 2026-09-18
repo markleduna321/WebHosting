@@ -63,23 +63,58 @@ class WebsiteFileService
             ->reject(fn (string $entry) => $entry === '.' || $entry === '..')
             // Symlinks are never created during extraction; skip any that appear.
             ->reject(fn (string $entry) => is_link($absolute.DIRECTORY_SEPARATOR.$entry))
-            ->map(function (string $entry) use ($absolute, $prefix) {
-                $full = $absolute.DIRECTORY_SEPARATOR.$entry;
-                $isDirectory = is_dir($full);
-
-                return [
-                    'name' => $entry,
-                    'path' => $prefix === '' ? $entry : $prefix.'/'.$entry,
-                    'type' => $isDirectory ? 'folder' : 'file',
-                    'size_bytes' => $isDirectory ? null : (filesize($full) ?: 0),
-                    'item_count' => $isDirectory ? max(count(scandir($full) ?: []) - 2, 0) : null,
-                    'updated_at' => date(DATE_ATOM, filemtime($full) ?: time()),
-                ];
-            })
+            ->map(fn (string $entry) => $this->describeEntry($absolute.DIRECTORY_SEPARATOR.$entry, $entry, $prefix))
             ->sortBy([
                 fn (array $a, array $b) => ($b['type'] === 'folder') <=> ($a['type'] === 'folder'),
                 fn (array $a, array $b) => strcasecmp($a['name'], $b['name']),
             ])
             ->values();
+    }
+
+    /**
+     * Creates a file inside the given directory with the given content.
+     *
+     * @return array<string, mixed>
+     */
+    public function createFile(Website $website, string $directory, string $name, string $content = ''): array
+    {
+        $absoluteDirectory = $this->resolvePath($website, $directory);
+
+        if (! is_dir($absoluteDirectory)) {
+            throw new RuntimeException('That path is not a folder.');
+        }
+
+        if (str_contains($name, '/') || str_contains($name, '\\') || $name === '.' || $name === '..') {
+            throw new RuntimeException('Invalid file name.');
+        }
+
+        $target = $absoluteDirectory.DIRECTORY_SEPARATOR.$name;
+
+        if (file_exists($target)) {
+            throw new RuntimeException('A file or folder with that name already exists.');
+        }
+
+        if (file_put_contents($target, $content) === false) {
+            throw new RuntimeException('Could not create that file.');
+        }
+
+        return $this->describeEntry($target, $name, trim($directory, '/'));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function describeEntry(string $absolutePath, string $name, string $prefix): array
+    {
+        $isDirectory = is_dir($absolutePath);
+
+        return [
+            'name' => $name,
+            'path' => $prefix === '' ? $name : $prefix.'/'.$name,
+            'type' => $isDirectory ? 'folder' : 'file',
+            'size_bytes' => $isDirectory ? null : (filesize($absolutePath) ?: 0),
+            'item_count' => $isDirectory ? max(count(scandir($absolutePath) ?: []) - 2, 0) : null,
+            'updated_at' => date(DATE_ATOM, filemtime($absolutePath) ?: time()),
+        ];
     }
 }

@@ -1,8 +1,12 @@
 import { CheckCircle, Loader2, AlertTriangle, Trash2, Star, RefreshCw, Globe } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import Table from "@/components/ui/Table";
+import DropDown from "@/components/ui/Dropdown";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import { useGetWebsitesQuery } from "@/features/websites/websitesApi";
 
-const DOMAINS = [
+const INITIAL_DOMAINS = [
     {
         id: 1,
         domain: "mariaclara.dev",
@@ -41,27 +45,26 @@ const DOMAINS = [
     },
 ];
 
+const BADGE_STYLES = {
+    verified: "border-green-200 bg-green-50 text-green-600",
+    pending: "border-blue-200 bg-blue-50 text-blue-500",
+    failed: "border-red-200 bg-red-50 text-red-500",
+};
+
 function StatusBadge({ status }) {
-    if (status === "verified") {
-        return (
-            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-600">
-                <CheckCircle className="w-4 h-4" />
-                verified
-            </span>
-        );
-    }
-    if (status === "pending") {
-        return (
-            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-500">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                pending
-            </span>
-        );
-    }
+    const Icon =
+        status === "verified"
+            ? CheckCircle
+            : status === "pending"
+              ? Loader2
+              : AlertTriangle;
+
     return (
-        <span className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-500">
-            <AlertTriangle className="w-3.5 h-3.5" />
-            failed
+        <span
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium capitalize ${BADGE_STYLES[status]}`}
+        >
+            <Icon className={`w-3.5 h-3.5 ${status === "pending" ? "animate-spin" : ""}`} />
+            {status}
         </span>
     );
 }
@@ -141,19 +144,79 @@ const COLUMNS = [
 ];
 
 export default function DomainTableSection() {
+    const { data: sites = [] } = useGetWebsitesQuery();
+    const [domains, setDomains] = useState(INITIAL_DOMAINS);
+    const [domainInput, setDomainInput] = useState("");
+    const [selectedSite, setSelectedSite] = useState(null);
+
+    const siteItems = sites.map((site) => ({
+        label: site.name,
+        onClick: () => setSelectedSite(site),
+    }));
+
+    const handleAddDomain = (e) => {
+        e.preventDefault();
+
+        const trimmed = domainInput.trim();
+        if (!trimmed || !selectedSite) return;
+
+        setDomains((prev) => [
+            {
+                id: (prev.at(-1)?.id ?? 0) + 1,
+                domain: trimmed,
+                primary: false,
+                site: selectedSite.name,
+                ssl: "SSL issuing",
+                renews: "—",
+                status: "pending",
+            },
+            ...prev,
+        ]);
+        setDomainInput("");
+    };
+
     return (
         <div className="rounded-xl border border-gray-200 bg-white px-6 py-5">
             {/* Header */}
-            <div className="mb-4">
-                <h2 className="text-sm font-bold text-slate-900">
-                    Connected domains
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                    4 domains across your websites
-                </p>
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
+                <div>
+                    <h2 className="text-sm font-bold text-slate-900">
+                        Connected domains
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                        {domains.length} domain{domains.length === 1 ? "" : "s"} across
+                        your websites
+                    </p>
+                </div>
+
+                <form
+                    onSubmit={handleAddDomain}
+                    className="flex flex-wrap items-center gap-3"
+                >
+                    <div className="w-48">
+                        <Input
+                            name="new-domain"
+                            placeholder="myproject.dev"
+                            value={domainInput}
+                            onChange={(e) => setDomainInput(e.target.value)}
+                        />
+                    </div>
+                    <DropDown
+                        buttonText={selectedSite?.name ?? "Select website"}
+                        items={siteItems}
+                        align="right"
+                    />
+                    <Button
+                        type="submit"
+                        disabled={!domainInput.trim() || !selectedSite}
+                        className="rounded-full px-5"
+                    >
+                        Add domain
+                    </Button>
+                </form>
             </div>
 
-            <Table columns={COLUMNS} data={DOMAINS} />
+            <Table columns={COLUMNS} data={domains} />
         </div>
     );
 }

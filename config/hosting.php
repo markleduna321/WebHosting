@@ -21,6 +21,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | File Manager
+    |--------------------------------------------------------------------------
+    |
+    | Limit applied to a single file's typed content or upload when created
+    | from the file manager "Create File" modal.
+    |
+    */
+
+    'files' => [
+        'max_upload_bytes' => (int) env('FILES_MAX_UPLOAD_MB', 10) * 1024 * 1024,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Student Database Provisioning
     |--------------------------------------------------------------------------
     |

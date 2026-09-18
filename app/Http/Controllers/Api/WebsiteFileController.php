@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreWebsiteFileRequest;
 use App\Http\Resources\WebsiteFileResource;
 use App\Models\Website;
 use App\Services\WebsiteFileService;
@@ -34,5 +35,29 @@ class WebsiteFileController extends Controller
         }
 
         return WebsiteFileResource::collection($entries)->response();
+    }
+
+    public function store(StoreWebsiteFileRequest $request, Website $website, WebsiteFileService $files): JsonResponse
+    {
+        $validated = $request->validated();
+
+        if ($website->status !== Website::STATUS_LIVE) {
+            return response()->json([
+                'message' => 'This site has not finished deploying yet.',
+                'code' => 'website_not_ready',
+            ], 409);
+        }
+
+        $content = $request->file('upload')
+            ? file_get_contents($request->file('upload')->getRealPath())
+            : ($validated['content'] ?? '');
+
+        try {
+            $entry = $files->createFile($website, $validated['path'] ?? '', $validated['name'], $content);
+        } catch (RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return (new WebsiteFileResource($entry))->response()->setStatusCode(201);
     }
 }
