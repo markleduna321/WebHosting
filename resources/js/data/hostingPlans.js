@@ -54,12 +54,66 @@ export const PLANS = [
 // Shared add-on catalog — used by both the plan details panel (to select
 // add-ons) and the checkout summary (to price them).
 export const ADD_ONS = [
-    { id: "professional-email", label: "Professional Email", price: 49, period: "month" },
-    { id: "extra-storage", label: "Extra 10 GB Storage", price: 50, period: "month" },
-    { id: "daily-backup", label: "Daily Website Backup", price: 149, period: "month" },
-    { id: "website-maintenance", label: "Website Maintenance", price: 499, period: "month" },
-    { id: "website-security", label: "Website Security", price: 199, period: "month" },
-    { id: "premium-ssl", label: "Premium SSL Certificate", price: 999, period: "year" },
+    {
+        id: "professional-email",
+        label: "Professional Email",
+        price: 49,
+        period: "month",
+        description: [
+            "A custom @yourdomain inbox instead of a free webmail address.",
+            "Looks more credible on resumes, portfolios, and client work.",
+        ],
+    },
+    {
+        id: "extra-storage",
+        label: "Extra 10 GB Storage",
+        price: 50,
+        period: "month",
+        description: [
+            "Room for bigger media libraries, datasets, or multiple projects.",
+            "Upgrade anytime without migrating your existing site.",
+        ],
+    },
+    {
+        id: "daily-backup",
+        label: "Daily Website Backup",
+        price: 149,
+        period: "month",
+        description: [
+            "Automatic daily snapshots of your files and database.",
+            "Restore in one click if something breaks during a deploy.",
+        ],
+    },
+    {
+        id: "website-maintenance",
+        label: "Website Maintenance",
+        price: 499,
+        period: "month",
+        description: [
+            "We monitor uptime and apply routine updates for you.",
+            "Frees you up to focus on coursework, not server upkeep.",
+        ],
+    },
+    {
+        id: "website-security",
+        label: "Website Security",
+        price: 199,
+        period: "month",
+        description: [
+            "Web Application Firewall (WAF) blocks common attacks.",
+            "Malware scanning and alerts with cleanup support.",
+        ],
+    },
+    {
+        id: "premium-ssl",
+        label: "Premium SSL Certificate",
+        price: 999,
+        period: "year",
+        description: [
+            "Extended-validation HTTPS encryption for your domain.",
+            "Boosts visitor trust and search ranking signals.",
+        ],
+    },
 ];
 
 export function getPlanByName(name) {

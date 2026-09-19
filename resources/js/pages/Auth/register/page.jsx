@@ -8,7 +8,7 @@ import { PLANS, getPlanByName } from "../../../data/hostingPlans";
 
 function GenericBrandingPanel() {
     return (
-        <div className="hidden lg:flex lg:w-3/5 flex-col justify-between bg-[#0B0F19] bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] p-12 text-white relative">
+        <div className="hidden lg:flex lg:h-screen lg:w-1/2 lg:overflow-y-auto flex-col justify-between bg-[#0B0F19] bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] p-12 text-white relative">
             <div className="flex items-center gap-1">
                 <img
                     src="/images/logo 3.png"
@@ -75,8 +75,10 @@ export default function Page() {
         );
     }, []);
 
+    const isCheckoutStep = hasPlan && step === "checkout";
+
     return (
-        <div className="flex min-h-screen w-full font-sans antialiased">
+        <div className="flex min-h-screen w-full font-sans antialiased lg:h-screen lg:overflow-hidden">
             <Head title="Register" />
 
             {hasPlan ? (
@@ -89,17 +91,25 @@ export default function Page() {
                 <GenericBrandingPanel />
             )}
 
-            <div className="flex w-full lg:w-2/6 flex-col justify-center bg-white px-6 py-12 sm:px-12 lg:px-16">
-                {hasPlan && step === "checkout" ? (
-                    <CheckoutSummarySection
-                        plan={plan}
-                        selectedAddOnIds={selectedAddOnIds}
-                        onRemoveAddOn={toggleAddOn}
-                        onProceed={() => setStep("create-account")}
-                    />
-                ) : (
-                    <CreateAccountSection />
-                )}
+            <div
+                className={`flex w-full flex-col px-6 py-12 sm:px-12 lg:h-screen lg:w-1/2 lg:overflow-y-auto lg:px-10 ${
+                    isCheckoutStep
+                        ? "bg-[#0B0F19] bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px]"
+                        : "bg-white"
+                }`}
+            >
+                <div className="m-auto w-full">
+                    {isCheckoutStep ? (
+                        <CheckoutSummarySection
+                            plan={plan}
+                            selectedAddOnIds={selectedAddOnIds}
+                            onToggleAddOn={toggleAddOn}
+                            onProceed={() => setStep("create-account")}
+                        />
+                    ) : (
+                        <CreateAccountSection />
+                    )}
+                </div>
             </div>
         </div>
     );
