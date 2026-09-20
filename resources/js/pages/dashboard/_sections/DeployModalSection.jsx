@@ -62,7 +62,7 @@ export default function DeployModalSection({ open, onCancel, onCreate }) {
       title="Create new website"
     >
       <p style={{ color: '#6b7280', marginTop: -8, marginBottom: 24 }}>
-        Your site goes live on a free asuratechhost.app subdomain.
+        Your site goes live on a free caleho.cloud subdomain.
       </p>
 
       <div style={{ marginBottom: 20 }}>
@@ -100,7 +100,7 @@ export default function DeployModalSection({ open, onCancel, onCreate }) {
           </div>
         ) : (
           <div style={{ color: '#9ca3af', fontSize: 13, marginTop: 6 }}>
-            {subdomain ? `${subdomain}.asuratechhost.app` : 'your-site.asuratechhost.app'}
+            {subdomain ? `${subdomain}.caleho.cloud` : 'your-site.caleho.cloud'}
           </div>
         )}
       </div>
