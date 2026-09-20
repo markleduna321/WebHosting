@@ -22,7 +22,7 @@ class Website extends Model
 
     public const STATUS_FAILED = 'failed';
 
-    public const HOST_SUFFIX = 'asuratechhost.app';
+    public const HOST_SUFFIX = 'caleho.cloud';
 
     protected $fillable = [
         'uuid',

@@ -16,7 +16,11 @@ class WebsiteFileService
      */
     public function resolvePath(Website $website, string $relativePath = ''): string
     {
-        $root = realpath(storage_path('app/websites/'.$website->uuid));
+        if (empty($website->storage_path)) {
+            throw new RuntimeException('This site has no files yet.');
+        }
+
+        $root = realpath($website->storage_path);
 
         if ($root === false) {
             throw new RuntimeException('This site has no files yet.');

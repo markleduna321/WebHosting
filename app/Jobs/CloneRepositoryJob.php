@@ -22,10 +22,7 @@ class CloneRepositoryJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
-
-    public int $timeout = 300;
-
-    /** @var array<int, int> */
+    public int $timeout = 600; // Increased to 10m to allow npm builds
     public array $backoff = [10, 60];
 
     public function __construct(public readonly Website $website) {}
@@ -33,22 +30,17 @@ class CloneRepositoryJob implements ShouldQueue
     public function handle(GithubService $github, RepositoryArchiveExtractor $extractor): void
     {
         $website = $this->website->fresh();
-
-        if (! $website) {
-            return;
-        }
+        if (! $website) return;
 
         $connection = $website->user->githubConnection;
-
         if (! $connection) {
             $this->markFailed($website, 'GitHub is no longer connected.');
-
             return;
         }
 
         $website->update(['status' => Website::STATUS_BUILDING]);
 
-        $domainName = strtolower($website->subdomain).'.caleho.cloud';
+        $domainName = strtolower($website->subdomain) . '.caleho.cloud';
         $destination = "/home/caleho/htdocs/{$domainName}";
         $archivePath = null;
 
@@ -59,43 +51,62 @@ class CloneRepositoryJob implements ShouldQueue
                 $website->repository_default_branch,
             );
 
+            // Clear old directory state
             if (File::exists($destination)) {
                 File::deleteDirectory($destination);
             }
 
+            // Extract zipball contents
             $stats = $extractor->extract($archivePath, $destination);
 
-            // =========================================================
-            // AUTOMATIC BUILD PIPELINE
-            // =========================================================
-            $packageJson = "{$destination}/package.json";
+            // Environment path setup for binaries
+            $envPath = ['PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'];
 
-            if (File::exists($packageJson)) {
-                // 1. Install dependencies & compile frontend
-                Process::path($destination)->env(['PATH' => '/usr/bin:' . getenv('PATH')])->run('npm install');
-                Process::path($destination)->env(['PATH' => '/usr/bin:' . getenv('PATH')])->run('npm run build');
+            // =========================================================
+            // 1. COMPOSER / LARAVEL BUILD STEP
+            // =========================================================
+            if (File::exists("{$destination}/composer.json")) {
+                Process::path($destination)->env($envPath)->run('composer install --no-dev --optimize-autoloader');
+                if (File::exists("{$destination}/.env.example") && ! File::exists("{$destination}/.env")) {
+                    File::copy("{$destination}/.env.example", "{$destination}/.env");
+                    Process::path($destination)->env($envPath)->run('php artisan key:generate --force');
+                }
+            }
 
-                // 2. Identify output folder created by the framework build step
+            // =========================================================
+            // 2. NODE / JAVASCRIPT BUILD STEP
+            // =========================================================
+            if (File::exists("{$destination}/package.json")) {
+                Process::path($destination)->env($envPath)->run('npm install');
+
+                // Fallback attempt with npx vite build if standard script fails or outputs no index.html
+                Process::path($destination)->env($envPath)->run('npm run build');
+
+                // Determine framework static output target containing index.html
                 $buildOutput = match (true) {
-                    File::exists("{$destination}/.output/public") => "{$destination}/.output/public", // Nitro / TanStack / Nuxt
-                    File::exists("{$destination}/dist") => "{$destination}/dist",                      // Vite / Vue / React
-                    File::exists("{$destination}/build") => "{$destination}/build",                    // CRA / Svelte
-                    File::exists("{$destination}/out") => "{$destination}/out",                        // Next.js static export
+                    File::exists("{$destination}/dist/index.html") => "{$destination}/dist",
+                    File::exists("{$destination}/.output/public/index.html") => "{$destination}/.output/public",
+                    File::exists("{$destination}/build/index.html") => "{$destination}/build",
+                    File::exists("{$destination}/out/index.html") => "{$destination}/out",
+                    // Fallback check for assets-only output: attempt direct Vite SPA fallback
+                    File::exists("{$destination}/vite.config.ts") || File::exists("{$destination}/vite.config.js") => $this->runViteFallback($destination, $envPath),
                     default => null,
                 };
 
-                if ($buildOutput) {
+                if ($buildOutput && File::exists($buildOutput)) {
                     File::deleteDirectory("{$destination}/public");
                     @symlink($buildOutput, "{$destination}/public");
                 }
             }
 
-            // Fallback for raw static HTML repositories without a public/ folder
+            // =========================================================
+            // 3. PLAIN STATIC HTML FALLBACK
+            // =========================================================
             if (! File::exists("{$destination}/public")) {
                 @symlink($destination, "{$destination}/public");
             }
 
-            // Grant read/execute permissions to CloudPanel site user
+            // Grant ownership and directory traversal permissions
             Process::run("chown -R caleho:caleho {$destination}");
             Process::run("chmod -R 755 {$destination}");
 
@@ -107,20 +118,13 @@ class CloneRepositoryJob implements ShouldQueue
                 'failure_reason' => null,
                 'last_deployed_at' => now(),
             ]);
-        } catch (RepositoryExtractionException $e) {
-            File::deleteDirectory($destination);
-            $this->markFailed($website, $e->getMessage());
-        } catch (GithubAuthorizationException) {
-            File::deleteDirectory($destination);
-            $this->markFailed($website, 'Your GitHub authorization expired. Reconnect and redeploy.');
         } catch (Throwable $e) {
             File::deleteDirectory($destination);
-            Log::error('Repository clone failed.', [
+            Log::error('Deployment pipeline failed.', [
                 'website_uuid' => $website->uuid,
                 'reason' => $e->getMessage(),
             ]);
-            $this->markFailed($website, 'We could not deploy this repository. Please try again.');
-
+            $this->markFailed($website, 'Deployment failed: ' . $e->getMessage());
             throw $e;
         } finally {
             if ($archivePath !== null && file_exists($archivePath)) {
@@ -129,12 +133,13 @@ class CloneRepositoryJob implements ShouldQueue
         }
     }
 
-    public function failed(Throwable $exception): void
+    private function runViteFallback(string $destination, array $envPath): ?string
     {
-        $this->website->fresh()?->update([
-            'status' => Website::STATUS_FAILED,
-            'failure_reason' => 'Deployment failed after several attempts.',
-        ]);
+        Process::path($destination)->env($envPath)->run('npx vite build');
+        if (File::exists("{$destination}/dist/index.html")) {
+            return "{$destination}/dist";
+        }
+        return null;
     }
 
     private function markFailed(Website $website, string $reason): void
