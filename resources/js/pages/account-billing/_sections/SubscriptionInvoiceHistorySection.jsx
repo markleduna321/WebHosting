@@ -111,7 +111,7 @@ const COLUMNS = [
     },
 ];
 
-export default function SubscriptionInvoiceHistorySection() {
+export default function SubscriptionInvoiceHistorySection({ onSelectInvoice }) {
     return (
         <div className="rounded-xl border border-gray-200 bg-white px-6 py-5">
             {/* Header */}
@@ -129,7 +129,7 @@ export default function SubscriptionInvoiceHistorySection() {
                 </Button>
             </div>
 
-            <Table columns={COLUMNS} data={INVOICES} />
+            <Table columns={COLUMNS} data={INVOICES} onRowClick={onSelectInvoice} />
         </div>
     );
 }

@@ -80,7 +80,7 @@ export default function CheckoutSummarySection({
 }) {
     const [coupon, setCoupon] = useState("");
     const [showCoupon, setShowCoupon] = useState(false);
-    const [recommendedOpen, setRecommendedOpen] = useState(true);
+    const [recommendedOpen, setRecommendedOpen] = useState(false);
     const shouldReduceMotion = useReducedMotion();
 
     const selectedAddOns = useMemo(
