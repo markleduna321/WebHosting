@@ -8,7 +8,11 @@ export const websitesApi = api.injectEndpoints({
             providesTags: ["Website"],
         }),
         createWebsite: builder.mutation({
-            query: (body) => ({ url: "/websites", method: "POST", body }),
+            query: (body) => ({ 
+                url: "/websites", 
+                method: "POST", 
+                body 
+            }),
             invalidatesTags: ["Website"],
         }),
         getWebsiteFiles: builder.query({
