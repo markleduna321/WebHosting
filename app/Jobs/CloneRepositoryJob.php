@@ -48,7 +48,6 @@ class CloneRepositoryJob implements ShouldQueue
 
         $website->update(['status' => Website::STATUS_BUILDING]);
 
-        // 1. Target the exact Nginx directory path on disk
         $domainName = strtolower($website->subdomain).'.caleho.cloud';
         $destination = "/home/caleho/htdocs/{$domainName}";
         $archivePath = null;
@@ -60,22 +59,43 @@ class CloneRepositoryJob implements ShouldQueue
                 $website->repository_default_branch,
             );
 
-            // Clear previous contents for fresh redeployments
             if (File::exists($destination)) {
                 File::deleteDirectory($destination);
             }
 
-            // Extract extracted zipball directly to target directory
             $stats = $extractor->extract($archivePath, $destination);
 
-            // 2. Ensure a public/ directory exists (Fallback for static HTML/JS projects)
-            $publicDir = "{$destination}/public";
-            if (! File::exists($publicDir)) {
-                // Symlink root to public if repo has no dedicated public directory
-                @symlink($destination, $publicDir);
+            // =========================================================
+            // AUTOMATIC BUILD PIPELINE
+            // =========================================================
+            $packageJson = "{$destination}/package.json";
+
+            if (File::exists($packageJson)) {
+                // 1. Install dependencies & compile frontend
+                Process::path($destination)->env(['PATH' => '/usr/bin:' . getenv('PATH')])->run('npm install');
+                Process::path($destination)->env(['PATH' => '/usr/bin:' . getenv('PATH')])->run('npm run build');
+
+                // 2. Identify output folder created by the framework build step
+                $buildOutput = match (true) {
+                    File::exists("{$destination}/.output/public") => "{$destination}/.output/public", // Nitro / TanStack / Nuxt
+                    File::exists("{$destination}/dist") => "{$destination}/dist",                      // Vite / Vue / React
+                    File::exists("{$destination}/build") => "{$destination}/build",                    // CRA / Svelte
+                    File::exists("{$destination}/out") => "{$destination}/out",                        // Next.js static export
+                    default => null,
+                };
+
+                if ($buildOutput) {
+                    File::deleteDirectory("{$destination}/public");
+                    @symlink($buildOutput, "{$destination}/public");
+                }
             }
 
-            // 3. Ensure permissions match CloudPanel site user
+            // Fallback for raw static HTML repositories without a public/ folder
+            if (! File::exists("{$destination}/public")) {
+                @symlink($destination, "{$destination}/public");
+            }
+
+            // Grant read/execute permissions to CloudPanel site user
             Process::run("chown -R caleho:caleho {$destination}");
             Process::run("chmod -R 755 {$destination}");
 
