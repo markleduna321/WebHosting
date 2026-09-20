@@ -45,6 +45,14 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('throttle:60,1')
         ->name('api.websites.files');
 
+    Route::get('/websites/{website}/files/content', [WebsiteFileController::class, 'show'])
+        ->middleware('throttle:60,1')
+        ->name('api.websites.files.show');
+
+    Route::put('/websites/{website}/files/content', [WebsiteFileController::class, 'update'])
+        ->middleware('throttle:30,1')
+        ->name('api.websites.files.update');
+
     Route::post('/websites/{website}/files', [WebsiteFileController::class, 'store'])
         ->middleware('throttle:30,1')
         ->name('api.websites.files.store');

@@ -76,6 +76,52 @@ class WebsiteFileService
     }
 
     /**
+     * Returns the raw text content of a single file.
+     *
+     * @throws RuntimeException
+     */
+    public function readFile(Website $website, string $filePath): string
+    {
+        $absolute = $this->resolvePath($website, $filePath);
+
+        if (is_dir($absolute)) {
+            throw new RuntimeException('That path is a folder, not a file.');
+        }
+
+        $maxBytes = (int) config('hosting.files.max_upload_bytes', 2 * 1024 * 1024);
+
+        if (filesize($absolute) > $maxBytes) {
+            throw new RuntimeException('This file is too large to edit in the browser.');
+        }
+
+        $content = file_get_contents($absolute);
+
+        if ($content === false) {
+            throw new RuntimeException('Could not read that file.');
+        }
+
+        return $content;
+    }
+
+    /**
+     * Overwrites a file with new content.
+     *
+     * @throws RuntimeException
+     */
+    public function updateFile(Website $website, string $filePath, string $content): void
+    {
+        $absolute = $this->resolvePath($website, $filePath);
+
+        if (is_dir($absolute)) {
+            throw new RuntimeException('That path is a folder, not a file.');
+        }
+
+        if (file_put_contents($absolute, $content) === false) {
+            throw new RuntimeException('Could not save that file.');
+        }
+    }
+
+    /**
      * Creates a file inside the given directory with the given content.
      *
      * @return array<string, mixed>

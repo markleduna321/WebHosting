@@ -37,6 +37,55 @@ class WebsiteFileController extends Controller
         return WebsiteFileResource::collection($entries)->response();
     }
 
+    public function show(Request $request, Website $website, WebsiteFileService $files): JsonResponse
+    {
+        $this->authorize('view', $website);
+
+        $validated = $request->validate([
+            'path' => ['required', 'string', 'max:1024'],
+        ]);
+
+        if ($website->status !== Website::STATUS_LIVE) {
+            return response()->json([
+                'message' => 'This site has not finished deploying yet.',
+                'code' => 'website_not_ready',
+            ], 409);
+        }
+
+        try {
+            $content = $files->readFile($website, $validated['path']);
+        } catch (RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return response()->json(['content' => $content]);
+    }
+
+    public function update(Request $request, Website $website, WebsiteFileService $files): JsonResponse
+    {
+        $this->authorize('update', $website);
+
+        $validated = $request->validate([
+            'path'    => ['required', 'string', 'max:1024'],
+            'content' => ['required', 'string', 'max:' . config('hosting.files.max_upload_bytes')],
+        ]);
+
+        if ($website->status !== Website::STATUS_LIVE) {
+            return response()->json([
+                'message' => 'This site has not finished deploying yet.',
+                'code'    => 'website_not_ready',
+            ], 409);
+        }
+
+        try {
+            $files->updateFile($website, $validated['path'], $validated['content']);
+        } catch (RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return response()->json(['message' => 'File saved.']);
+    }
+
     public function store(StoreWebsiteFileRequest $request, Website $website, WebsiteFileService $files): JsonResponse
     {
         $validated = $request->validated();

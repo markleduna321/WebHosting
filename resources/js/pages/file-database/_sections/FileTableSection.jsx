@@ -5,9 +5,11 @@ import {
     Home,
     Loader2,
     AlertCircle,
+    Pencil,
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useGetWebsiteFilesQuery } from "@/features/websites/websitesApi";
+import EditFileModal from "./EditFileModal";
 
 const EXT_COLORS = {
     html: "text-orange-400",
@@ -89,6 +91,7 @@ function Message({ icon: Icon, title, description, spin = false }) {
 
 export default function FileTableSection({ website }) {
     const [path, setPath] = useState("");
+    const [editFile, setEditFile] = useState(null);
 
     useEffect(() => {
         setPath("");
@@ -201,13 +204,14 @@ export default function FileTableSection({ website }) {
                             <th className="hidden px-5 py-2.5 font-medium sm:table-cell">
                                 Last modified
                             </th>
+                            <th className="w-10" />
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                         {entries.map((entry) => {
                             const isFolder = entry.type === "folder";
                             return (
-                                <tr key={entry.path} className="hover:bg-slate-50">
+                                <tr key={entry.path} className="group hover:bg-slate-50">
                                     <td className="px-5 py-3.5">
                                         {isFolder ? (
                                             <button
@@ -226,23 +230,39 @@ export default function FileTableSection({ website }) {
                                                 </span>
                                             </button>
                                         ) : (
-                                            <span className="flex items-center gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditFile(entry)}
+                                                className="flex items-center gap-3 text-left w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+                                            >
                                                 <FileText
                                                     className={`h-4 w-4 shrink-0 ${extColor(entry.name)}`}
                                                 />
                                                 <span className="min-w-0">
-                                                    <span className="block truncate text-sm font-medium text-slate-800">
+                                                    <span className="block truncate text-sm font-medium text-slate-800 group-hover:text-blue-600 transition-colors">
                                                         {entry.name}
                                                     </span>
                                                     <span className="block text-xs text-slate-400">
                                                         {formatSize(entry.size_bytes)}
                                                     </span>
                                                 </span>
-                                            </span>
+                                            </button>
                                         )}
                                     </td>
                                     <td className="hidden px-5 py-3.5 text-sm text-slate-500 sm:table-cell">
                                         {timeAgo(entry.updated_at)}
+                                    </td>
+                                    <td className="pr-3 py-3.5">
+                                        {!isFolder && (
+                                            <button
+                                                type="button"
+                                                title="Edit file"
+                                                onClick={() => setEditFile(entry)}
+                                                className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center justify-center h-7 w-7 rounded hover:bg-blue-50 text-slate-400 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                                            >
+                                                <Pencil className="h-3.5 w-3.5" />
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             );
@@ -250,6 +270,13 @@ export default function FileTableSection({ website }) {
                     </tbody>
                 </table>
             )}
+
+            <EditFileModal
+                open={editFile !== null}
+                onClose={() => setEditFile(null)}
+                website={website}
+                file={editFile}
+            />
         </div>
     );
 }
