@@ -54,7 +54,7 @@ export default function NavBarSection() {
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6 ">
                 <Link
                     href="/"
-                    className="flex items-center space-x-2.5 cursor-pointer "
+                    className="flex items-center space-x-2.5 cursor-pointer  "
                 >
                     <div className="flex items-center justify-center">
                         <img
@@ -89,7 +89,7 @@ export default function NavBarSection() {
                 {/* Desktop Right Actions */}
                 <div className="hidden lg:flex items-center space-x-5 text-sm font-medium">
                     {/* Enterprise Link */}
-                    <Link
+                    {/* <Link
                         href="/enterprise"
                         className="flex items-center space-x-1.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
                     >
@@ -107,7 +107,7 @@ export default function NavBarSection() {
                             />
                         </svg>
                         <span>Enterprise</span>
-                    </Link>
+                    </Link> */}
 
                     <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
 

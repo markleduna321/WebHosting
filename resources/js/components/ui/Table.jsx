@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Table = ({ columns, data }) => {
+const Table = ({ columns, data, onRowClick }) => {
     return (
         <div className=" overflow-hidden">
             {/* Mobile View: Card Layout */}
@@ -8,7 +8,8 @@ const Table = ({ columns, data }) => {
                 {data?.map((row, rowIndex) => (
                     <div
                         key={row.id || rowIndex}
-                        className="bg-white border border-gray-200 shadow-sm rounded-lg p-4 space-y-3"
+                        onClick={() => onRowClick?.(row)}
+                        className="cursor-pointer rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-colors hover:bg-gray-50"
                     >
                         {columns?.map((col, colIndex) => (
                             <div key={colIndex} className="flex justify-between items-center text-sm gap-4">
@@ -44,7 +45,8 @@ const Table = ({ columns, data }) => {
                         {data?.map((row, rowIndex) => (
                             <tr
                                 key={row.id || rowIndex}
-                                className="border-b border-gray-100 hover:bg-gray-50/80 transition-colors group"
+                                onClick={() => onRowClick?.(row)}
+                                className="cursor-pointer border-b border-gray-100 transition-colors hover:bg-gray-50/80 group"
                             >
                                 {columns.map((col, colIndex) => (
                                     <td key={colIndex} className="py-4 px-4">
