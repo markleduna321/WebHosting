@@ -14,6 +14,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Process;
 use Throwable;
 
 class CloneRepositoryJob implements ShouldQueue
@@ -47,8 +48,9 @@ class CloneRepositoryJob implements ShouldQueue
 
         $website->update(['status' => Website::STATUS_BUILDING]);
 
-        $relativePath = 'websites/'.$website->uuid;
-        $destination = storage_path('app/'.$relativePath);
+        // 1. Target the exact Nginx directory path on disk
+        $domainName = strtolower($website->subdomain).'.caleho.cloud';
+        $destination = "/home/caleho/htdocs/{$domainName}";
         $archivePath = null;
 
         try {
@@ -58,14 +60,28 @@ class CloneRepositoryJob implements ShouldQueue
                 $website->repository_default_branch,
             );
 
-            // Replace any previous contents so a redeploy never merges two trees.
-            File::deleteDirectory($destination);
+            // Clear previous contents for fresh redeployments
+            if (File::exists($destination)) {
+                File::deleteDirectory($destination);
+            }
 
+            // Extract extracted zipball directly to target directory
             $stats = $extractor->extract($archivePath, $destination);
+
+            // 2. Ensure a public/ directory exists (Fallback for static HTML/JS projects)
+            $publicDir = "{$destination}/public";
+            if (! File::exists($publicDir)) {
+                // Symlink root to public if repo has no dedicated public directory
+                @symlink($destination, $publicDir);
+            }
+
+            // 3. Ensure permissions match CloudPanel site user
+            Process::run("chown -R caleho:caleho {$destination}");
+            Process::run("chmod -R 755 {$destination}");
 
             $website->update([
                 'status' => Website::STATUS_LIVE,
-                'storage_path' => $relativePath,
+                'storage_path' => $destination,
                 'file_count' => $stats['file_count'],
                 'size_bytes' => $stats['size_bytes'],
                 'failure_reason' => null,
