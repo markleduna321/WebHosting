@@ -22,19 +22,35 @@ export default function Page() {
             {/* Left Branding Panel */}
             <div className="hidden lg:flex lg:w-3/5 flex-col justify-between bg-[#0B0F19] bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] p-12 text-white relative">
                 {/* Brand Header */}
-               <div className="flex items-center gap-1">
-                <img
-                    src="/images/logo 3.png"
-                    alt="CALEHO Host Logo"
-                    className="w-11 h-11 object-contain"
-                />
-                <span className="text-xl font-bold tracking-wide">
-                    <span className="bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-400 bg-clip-text text-transparent">
-                        CALEHO
-                    </span>{" "}
-                    <span className="text-blue-500">HOST</span>
-                </span>
-            </div>
+                <div className="flex items-center gap-1">
+                    <Link
+                        href="/"
+                        className="flex items-center space-x-2.5 cursor-pointer"
+                    >
+                        <a
+                            href="https://www.caleho.cloud/"
+                            className="flex items-center space-x-2.5 cursor-pointer"
+                            draggable="true"
+                        >
+                            <img
+                                src="/images/caleho.png"
+                                alt="CALEHO Host"
+                                draggable="true"
+                                className="
+                           w-[145px]
+                           sm:w-[155px]
+                           lg:w-[160px]
+                           h-auto
+                           object-contain
+                           block
+                           transition-transform
+                           duration-200
+                           group-hover:scale-[1.02]
+                       "
+                            />
+                        </a>
+                    </Link>
+                </div>
                 {/* Hero Content */}
                 <div className="max-w-xl space-y-6 my-auto">
                     <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl leading-tight">
@@ -67,7 +83,7 @@ export default function Page() {
 
                 {/* Footer Copyright */}
                 <div className="text-xs text-slate-500">
-                    © 2026 AsuraTech   Host. All rights reserved.
+                    © 2026 AsuraTech Host. All rights reserved.
                 </div>
             </div>
 

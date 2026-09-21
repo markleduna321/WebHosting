@@ -7,6 +7,7 @@ import UseCasesSection from './_sections/UseCasesSection';
 import TestimonialSection from './_sections/TestimonialSection';
 import AboutUsSection from './_sections/AboutUsSection';
 import FooterSection from './_sections/FooterSection';
+import FaqsSection from './_sections/FaqsSection';
 
 export default function HomePage() {
     return (
@@ -19,6 +20,7 @@ export default function HomePage() {
                 <FeatureSection />
                 <UseCasesSection />
                 <TestimonialSection />
+                <FaqsSection/>
                 <AboutUsSection />
             </main>
             <FooterSection />

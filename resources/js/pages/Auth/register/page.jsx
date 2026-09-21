@@ -12,7 +12,7 @@ export default function Page() {
     const [period, setPeriod] = useState(1);
     const hasPlan = Boolean(planName);
     const plan = hasPlan
-        ? getPlanByName(planName) ?? PLANS.find((p) => p.popular) ?? PLANS[0]
+        ? (getPlanByName(planName) ?? PLANS.find((p) => p.popular) ?? PLANS[0])
         : null;
 
     const toggleAddOn = useCallback((id) => {
@@ -32,18 +32,32 @@ export default function Page() {
             {/* ── Top Navbar ── */}
             <header className="sticky top-0 z-30 border-b border-gray-100 bg-white/90 backdrop-blur-sm">
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                    <Link href="/" className="flex items-center gap-2">
-                        <img
-                            src="/images/logo 3.png"
-                            alt="CALEHO Host Logo"
-                            className="h-9 w-9 object-contain"
-                        />
-                        <span className="text-lg font-black tracking-tight">
-                            <span className="bg-gradient-to-r from-blue-500 via-sky-500 to-cyan-500 bg-clip-text text-transparent">
-                                CALEHO
-                            </span>{" "}
-                            <span className="text-blue-600">HOST</span>
-                        </span>
+                    <Link
+                        href="/"
+                        className="flex items-center space-x-2.5 cursor-pointer"
+                    >
+                        <a
+                            href="https://www.caleho.cloud/"
+                            className="flex items-center space-x-2.5 cursor-pointer"
+                            draggable="true"
+                        >
+                            <img
+                                src="/images/caleho.png"
+                                alt="CALEHO Host"
+                                draggable="true"
+                                className="
+                                w-[125px]
+                                sm:w-[135px]
+                                lg:w-[140px]
+                                h-auto
+                                object-contain
+                                block
+                                transition-transform
+                                duration-200
+                                group-hover:scale-[1.02]
+                            "
+                            />
+                        </a>
                     </Link>
 
                     <Link
@@ -51,7 +65,9 @@ export default function Page() {
                         className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
                     >
                         Already have an account?{" "}
-                        <span className="font-semibold text-blue-600">Log in</span>
+                        <span className="font-semibold text-blue-600">
+                            Log in
+                        </span>
                     </Link>
                 </div>
             </header>
@@ -87,7 +103,9 @@ export default function Page() {
                                         availableAddons={availableAddons}
                                         selectedAddOnIds={selectedAddOnIds}
                                         onToggleAddOn={toggleAddOn}
-                                        onProceed={() => setStep("create-account")}
+                                        onProceed={() =>
+                                            setStep("create-account")
+                                        }
                                         period={period}
                                     />
                                 </div>

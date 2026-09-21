@@ -90,21 +90,28 @@ export default function NavBarSection() {
                     href="/"
                     className="flex items-center space-x-2.5 cursor-pointer"
                 >
-                    <div className="flex items-center justify-center">
+                    <a
+                        href="https://www.caleho.cloud/"
+                        className="flex items-center space-x-2.5 cursor-pointer"    
+                        draggable="true"
+                    >
                         <img
-                            src="/images/logo 3.png"
-                            alt="CALEHO Host Logo"
-                            className="w-12 h-12 object-contain"
+                            src="/images/caleho.png"
+                            alt="CALEHO Host"
+                            draggable="true"
+                            className="
+            w-[125px]
+            sm:w-[135px]
+            lg:w-[140px]
+            h-auto
+            object-contain
+            block
+            transition-transform
+            duration-200
+            group-hover:scale-[1.02]
+        "
                         />
-                    </div>
-                    <span className="text-xl font-bold tracking-tight">
-                        <span className="bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-400 bg-clip-text text-transparent">
-                            CALEHO
-                        </span>{" "}
-                        <span className="text-blue-600 dark:text-blue-500">
-                            HOST
-                        </span>
-                    </span>
+                    </a>
                 </Link>
 
                 {/* Desktop Navigation Links */}
