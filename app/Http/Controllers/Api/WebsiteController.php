@@ -101,11 +101,11 @@ class WebsiteController extends Controller
 
         $envPath = ['PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'];
 
-        // Run the command as caleho
+        // Run the command
         $process = Process::path($website->storage_path)
             ->env($envPath)
             ->timeout(60)
-            ->run("sudo -u caleho " . $command);
+            ->run($command);
 
         return response()->json([
             'output' => $process->output() . $process->errorOutput(),
