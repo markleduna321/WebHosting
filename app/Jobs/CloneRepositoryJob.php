@@ -59,6 +59,10 @@ class CloneRepositoryJob implements ShouldQueue
             // Extract zipball contents
             $stats = $extractor->extract($archivePath, $destination);
 
+            // Grant ownership and directory traversal permissions early so build steps can run as site user
+            Process::run("chown -R caleho:caleho {$destination}");
+            Process::run("chmod -R 755 {$destination}");
+
             // Environment path setup for binaries
             $envPath = ['PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'];
 
@@ -66,10 +70,11 @@ class CloneRepositoryJob implements ShouldQueue
             // 1. COMPOSER / LARAVEL BUILD STEP
             // =========================================================
             if (File::exists("{$destination}/composer.json")) {
-                Process::path($destination)->env($envPath)->run('composer install --no-dev --optimize-autoloader');
+                Process::path($destination)->env($envPath)->run('sudo -u caleho composer install --no-dev --optimize-autoloader');
                 if (File::exists("{$destination}/.env.example") && ! File::exists("{$destination}/.env")) {
                     File::copy("{$destination}/.env.example", "{$destination}/.env");
-                    Process::path($destination)->env($envPath)->run('php artisan key:generate --force');
+                    Process::run("chown caleho:caleho {$destination}/.env");
+                    Process::path($destination)->env($envPath)->run('sudo -u caleho php artisan key:generate --force');
                 }
             }
 
@@ -77,10 +82,10 @@ class CloneRepositoryJob implements ShouldQueue
             // 2. NODE / JAVASCRIPT BUILD STEP
             // =========================================================
             if (File::exists("{$destination}/package.json")) {
-                Process::path($destination)->env($envPath)->run('npm install');
+                Process::path($destination)->env($envPath)->run('sudo -u caleho npm install');
 
                 // Fallback attempt with npx vite build if standard script fails or outputs no index.html
-                Process::path($destination)->env($envPath)->run('npm run build');
+                Process::path($destination)->env($envPath)->run('sudo -u caleho npm run build');
 
                 // Determine framework static output target containing index.html
                 $buildOutput = match (true) {
@@ -105,10 +110,6 @@ class CloneRepositoryJob implements ShouldQueue
             if (! File::exists("{$destination}/public")) {
                 @symlink($destination, "{$destination}/public");
             }
-
-            // Grant ownership and directory traversal permissions
-            Process::run("chown -R caleho:caleho {$destination}");
-            Process::run("chmod -R 755 {$destination}");
 
             $website->update([
                 'status' => Website::STATUS_LIVE,
@@ -135,7 +136,7 @@ class CloneRepositoryJob implements ShouldQueue
 
     private function runViteFallback(string $destination, array $envPath): ?string
     {
-        Process::path($destination)->env($envPath)->run('npx vite build');
+        Process::path($destination)->env($envPath)->run('sudo -u caleho npx vite build');
         if (File::exists("{$destination}/dist/index.html")) {
             return "{$destination}/dist";
         }

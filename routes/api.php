@@ -64,6 +64,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/websites/{website}', [WebsiteController::class, 'destroy'])
         ->name('api.websites.destroy');
 
+    Route::post('/websites/{website}/cli', [WebsiteController::class, 'cli'])
+        ->middleware('throttle:30,1')
+        ->name('api.websites.cli');
+
     Route::get('/databases', [StudentDatabaseController::class, 'index'])
         ->name('api.databases.index');
     Route::post('/databases', [StudentDatabaseController::class, 'store'])

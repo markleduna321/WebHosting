@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import Tabs, { TabPanel } from "@/components/ui/Tabs";
-import { FolderOpen, Database, KeyRound } from "lucide-react";
+import { FolderOpen, Database, KeyRound, Terminal } from "lucide-react";
 import { usePage } from "@inertiajs/react";
 import FileSearchSection from "./_sections/FileSearchSection";
 import FileTableSection from "./_sections/FileTableSection";
@@ -11,11 +11,12 @@ import BackupHistorySection from "./_sections/BackupHistorySection";
 import EnvironmentSection from "./_sections/EnvironmentSection";
 import DatabaseCardSection from "./_sections/DatabaseCardSection";
 import CreateDatabaseSection from "./_sections/CreateDatabaseSection";
+import CliSection from "./_sections/CliSection";
 
 const TABS = [
     { id: "file-manager", label: "File manager", icon: <FolderOpen size={16} /> },
     { id: "databases", label: "Databases", icon: <Database size={16} /> },
-  
+    { id: "cli", label: "CLI", icon: <Terminal size={16} /> },
 ];
 
 export default function Page() {
@@ -57,6 +58,19 @@ export default function Page() {
 
             <TabPanel id="environment">
                 <EnvironmentSection />
+            </TabPanel>
+
+            <TabPanel id="cli">
+                <div className="space-y-4">
+                    <FileSearchSection onSelect={handleSelect} />
+                    {selectedWebsite ? (
+                        <CliSection website={selectedWebsite} />
+                    ) : (
+                        <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+                            <p className="text-gray-500">Please select a website to run CLI commands.</p>
+                        </div>
+                    )}
+                </div>
             </TabPanel>
         </Tabs>
     );

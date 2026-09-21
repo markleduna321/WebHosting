@@ -11,6 +11,7 @@ use App\Models\Website;
 use App\Services\WebsiteService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Process;
 
 class WebsiteController extends Controller
 {
@@ -63,5 +64,53 @@ class WebsiteController extends Controller
         $website->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function cli(Request $request, Website $website): JsonResponse
+    {
+        $this->authorize('update', $website);
+
+        $request->validate([
+            'command' => 'required|string|max:255',
+        ]);
+
+        $command = $request->command;
+
+        // Prevent command injection characters
+        if (preg_match('/[&|;`$><\n\r]/', $command)) {
+            return response()->json(['output' => "Error: Invalid characters in command.\n"], 403);
+        }
+
+        // Whitelist prefixes
+        $allowedPrefixes = ['php artisan', 'composer', 'npm', 'npx', 'node'];
+        $isAllowed = false;
+        foreach ($allowedPrefixes as $prefix) {
+            if (str_starts_with($command, $prefix)) {
+                $isAllowed = true;
+                break;
+            }
+        }
+
+        if (!$isAllowed) {
+            return response()->json(['output' => "Error: Command must start with one of: " . implode(', ', $allowedPrefixes) . "\n"], 403);
+        }
+
+        if (!$website->storage_path || !file_exists($website->storage_path)) {
+            return response()->json(['output' => "Error: Website storage path not found. Please deploy the website first.\n"], 404);
+        }
+
+        $envPath = ['PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'];
+
+        // Run the command as caleho
+        $process = Process::path($website->storage_path)
+            ->env($envPath)
+            ->timeout(60)
+            ->run("sudo -u caleho " . $command);
+
+        return response()->json([
+            'output' => $process->output() . $process->errorOutput(),
+            'successful' => $process->successful(),
+            'exit_code' => $process->exitCode()
+        ]);
     }
 }
