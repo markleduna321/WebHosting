@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { QrCode } from "lucide-react";
 import Button from "@/components/ui/Button";
-import { formatCurrency } from "@/data/hostingPlans";
+import { formatCurrency, getAddOnById } from "@/data/hostingPlans";
 import { useCreatePaymentMutation } from "@/features/checkout/checkoutApi";
 
 const CYCLES = [
@@ -20,6 +20,7 @@ function formatDate(date) {
 export default function InvoicePreviewSection({
     plan,
     cycle,
+    addons = [],
     onCycleChange,
     onCreated,
 }) {
@@ -27,7 +28,23 @@ export default function InvoicePreviewSection({
     const [error, setError] = useState(null);
 
     const annualAvailable = plan.annual_price !== null;
-    const price = cycle === "annual" ? plan.annual_price : plan.monthly_price;
+    const basePrice = cycle === "annual" ? plan.annual_price : plan.monthly_price;
+
+    const selectedAddOns = useMemo(
+        () => addons.map(getAddOnById).filter(Boolean),
+        [addons]
+    );
+
+    const addonsTotal = useMemo(() => {
+        return selectedAddOns.reduce((total, addOn) => {
+            const addOnPrice = cycle === "annual" && addOn.period === "month" 
+                ? addOn.price * 12 
+                : addOn.price;
+            return total + addOnPrice;
+        }, 0);
+    }, [selectedAddOns, cycle]);
+
+    const total = basePrice + addonsTotal;
 
     const period = useMemo(() => {
         const start = new Date();
@@ -49,6 +66,7 @@ export default function InvoicePreviewSection({
             const payment = await createPayment({
                 plan_slug: plan.slug,
                 billing_cycle: cycle,
+                addons: addons,
             }).unwrap();
 
             onCreated(payment);
@@ -114,14 +132,30 @@ export default function InvoicePreviewSection({
                         </span>
                     </dt>
                     <dd className="font-medium text-slate-900">
-                        {formatCurrency(price)}
+                        {formatCurrency(basePrice)}
                     </dd>
                 </div>
+
+                {selectedAddOns.map((addOn) => {
+                    const addOnPrice = cycle === "annual" && addOn.period === "month"
+                        ? addOn.price * 12
+                        : addOn.price;
+                    return (
+                        <div key={addOn.id} className="flex items-start justify-between gap-3">
+                            <dt className="text-slate-600">
+                                {addOn.label}
+                            </dt>
+                            <dd className="font-medium text-slate-900 text-right">
+                                {formatCurrency(addOnPrice)}
+                            </dd>
+                        </div>
+                    );
+                })}
 
                 <div className="flex items-center justify-between border-t border-gray-100 pt-3">
                     <dt className="text-slate-600">Subtotal</dt>
                     <dd className="font-medium text-slate-900">
-                        {formatCurrency(price)}
+                        {formatCurrency(total)}
                     </dd>
                 </div>
 
@@ -130,7 +164,7 @@ export default function InvoicePreviewSection({
                         Total due today
                     </dt>
                     <dd className="text-base font-bold text-slate-900">
-                        {formatCurrency(price)}
+                        {formatCurrency(total)}
                     </dd>
                 </div>
             </dl>

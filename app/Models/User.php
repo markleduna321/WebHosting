@@ -60,6 +60,13 @@ class User extends Authenticatable implements MustVerifyEmail
             ->latestOfMany();
     }
 
+    public function pendingSubscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)
+            ->where('status', Subscription::STATUS_PENDING_PAYMENT)
+            ->latestOfMany();
+    }
+
     public function githubConnection(): HasOne
     {
         return $this->hasOne(GithubConnection::class);

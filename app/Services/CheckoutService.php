@@ -15,13 +15,13 @@ class CheckoutService
     public function __construct(private readonly PayMongoService $paymongo) {}
 
     /**
-     * Starts a QR Ph payment for a plan.
+     * Starts a QR Ph payment for a plan and optional add-ons.
      *
      * @throws ValidationException|PaymentException
      */
-    public function start(User $user, Plan $plan, string $cycle): Payment
+    public function start(User $user, Plan $plan, string $cycle, array $addonIds = []): Payment
     {
-        $amount = $this->priceFor($plan, $cycle);
+        $amount = $this->priceFor($plan, $cycle, $addonIds);
 
         $payment = $user->payments()->create([
             'plan_id' => $plan->id,
@@ -29,6 +29,7 @@ class CheckoutService
             'amount' => $amount,
             'currency' => $plan->currency ?? 'PHP',
             'status' => Payment::STATUS_PENDING,
+            'addons' => $addonIds,
         ]);
 
         try {
@@ -39,6 +40,7 @@ class CheckoutService
                     'payment_uuid' => $payment->uuid,
                     'user_id' => (string) $user->id,
                     'plan_slug' => $plan->slug,
+                    'addons' => implode(',', $addonIds),
                 ]
             );
 
@@ -119,9 +121,13 @@ class CheckoutService
                 ? $starts->copy()->addYear()
                 : $starts->copy()->addMonth();
 
-            // A new paid plan supersedes whatever the user was on.
+            // A new paid plan supersedes whatever the user was on, including pending_payment.
             $payment->user->subscriptions()
-                ->live()
+                ->whereIn('status', [
+                    Subscription::STATUS_ACTIVE,
+                    Subscription::STATUS_TRIALING,
+                    Subscription::STATUS_PENDING_PAYMENT,
+                ])
                 ->update([
                     'status' => Subscription::STATUS_CANCELED,
                     'canceled_at' => $starts,
@@ -133,6 +139,7 @@ class CheckoutService
                 'billing_cycle' => $payment->billing_cycle,
                 'starts_at' => $starts,
                 'ends_at' => $ends,
+                'addons' => $payment->addons,
             ]);
 
             $payment->update([
@@ -158,11 +165,11 @@ class CheckoutService
     }
 
     /**
-     * The price is read from the plan row. Nothing the client sends influences it.
+     * The price is read from the plan row and config. Nothing the client sends influences it.
      *
      * @throws ValidationException
      */
-    private function priceFor(Plan $plan, string $cycle): string
+    private function priceFor(Plan $plan, string $cycle, array $addonIds = []): string
     {
         $price = $cycle === Payment::CYCLE_ANNUAL ? $plan->annual_price : $plan->monthly_price;
 
@@ -177,8 +184,24 @@ class CheckoutService
                 'plan_slug' => 'That plan cannot be purchased online.',
             ]);
         }
+        
+        $total = (float) $price;
+        $addonPrices = config('addons.prices', []);
 
-        return (string) $price;
+        foreach ($addonIds as $addonId) {
+            if (isset($addonPrices[$addonId])) {
+                $addonPrice = $addonPrices[$addonId]['price'];
+                $addonPeriod = $addonPrices[$addonId]['period'];
+                
+                if ($cycle === Payment::CYCLE_ANNUAL && $addonPeriod === 'month') {
+                    $total += (float) $addonPrice * 12;
+                } else {
+                    $total += (float) $addonPrice;
+                }
+            }
+        }
+
+        return (string) $total;
     }
 
     private function toCentavos(string $amount): int

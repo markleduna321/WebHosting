@@ -36,6 +36,7 @@ class Payment extends Model
         'expires_at',
         'paid_at',
         'failure_reason',
+        'addons',
     ];
 
     protected function casts(): array
@@ -44,6 +45,7 @@ class Payment extends Model
             'amount' => 'decimal:2',
             'expires_at' => 'datetime',
             'paid_at' => 'datetime',
+            'addons' => 'array',
         ];
     }
 

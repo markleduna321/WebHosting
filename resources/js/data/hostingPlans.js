@@ -3,6 +3,7 @@
 export const PLANS = [
     {
         name: "Student",
+        slug: "student",
         subtitle: "For your very first site",
         price: "₱129",
         monthlyPrice: 129,
@@ -21,6 +22,7 @@ export const PLANS = [
     },
     {
         name: "Pro",
+        slug: "pro",
         subtitle: "For growing student projects",
         price: "₱249",
         monthlyPrice: 249,
@@ -40,6 +42,7 @@ export const PLANS = [
     },
     {
         name: "Enterprise",
+        slug: "enterprise",
         subtitle: "For organizations and capstone teams",
         price: "Custom",
         monthlyPrice: null,

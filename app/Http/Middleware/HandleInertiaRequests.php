@@ -30,8 +30,9 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
-        $user?->loadMissing('activeSubscription.plan', 'githubConnection');
+        $user?->loadMissing('activeSubscription.plan', 'pendingSubscription.plan', 'githubConnection');
         $plan = $user?->activeSubscription?->plan;
+        $pending = $user?->pendingSubscription;
         $github = $user?->githubConnection;
 
         return [
@@ -48,6 +49,14 @@ class HandleInertiaRequests extends Middleware
                     'plan' => $plan ? [
                         'slug' => $plan->slug,
                         'name' => $plan->name,
+                    ] : null,
+                    'pending_subscription' => $pending ? [
+                        'status' => $pending->status,
+                        'billing_cycle' => $pending->billing_cycle,
+                        'plan' => $pending->plan ? [
+                            'slug' => $pending->plan->slug,
+                            'name' => $pending->plan->name,
+                        ] : null,
                     ] : null,
                     // Tokens are deliberately excluded.
                     'github' => $github ? [

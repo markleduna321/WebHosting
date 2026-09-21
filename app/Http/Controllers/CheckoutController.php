@@ -21,9 +21,15 @@ class CheckoutController extends Controller
             ? Payment::CYCLE_ANNUAL
             : Payment::CYCLE_MONTHLY;
 
+        $addons = $request->query('addons', []);
+        if (!is_array($addons)) {
+            $addons = [];
+        }
+
         return Inertia::render('checkout/page', [
             'plan' => (new PlanResource($plan))->resolve(),
             'cycle' => $cycle,
+            'initialAddons' => $addons,
         ]);
     }
 }

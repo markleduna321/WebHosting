@@ -13,6 +13,7 @@ import MonthlyRecurringRevenueSection from "./_sections/MonthlyRecurringRevenueS
 import HostCardSection from "./_sections/HostCardSection";
 import DashboardMetricsSection from "./_sections/DashboardMetricsSection";
 import VPSLoadChartSection from "./_sections/VPSLoadChartSection";
+import PendingPaymentBanner from "./_sections/PendingPaymentBanner";
 
 export default function Page() {
     const { auth } = usePage().props;
@@ -42,6 +43,7 @@ export default function Page() {
     return (
         <div className="space-y-6">
             <VerifyEmailBanner />
+            <PendingPaymentBanner subscription={auth?.user?.pending_subscription} />
             {/* <HeaderSection /> */}
             <ShortcutSection />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

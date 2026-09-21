@@ -14,6 +14,8 @@ class Subscription extends Model
 
     public const STATUS_ACTIVE = 'active';
 
+    public const STATUS_PENDING_PAYMENT = 'pending_payment';
+
     public const STATUS_TRIALING = 'trialing';
 
     public const STATUS_PAST_DUE = 'past_due';
@@ -34,6 +36,7 @@ class Subscription extends Model
         'starts_at',
         'ends_at',
         'canceled_at',
+        'addons',
     ];
 
     protected function casts(): array
@@ -42,6 +45,7 @@ class Subscription extends Model
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
             'canceled_at' => 'datetime',
+            'addons' => 'array',
         ];
     }
 

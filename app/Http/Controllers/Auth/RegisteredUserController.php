@@ -43,9 +43,29 @@ class RegisteredUserController extends Controller
 
         $user->assignRole('student');
 
+        if (!empty($validated['plan_slug'])) {
+            $plan = \App\Models\Plan::where('slug', $validated['plan_slug'])->first();
+            if ($plan) {
+                $user->subscriptions()->create([
+                    'plan_id' => $plan->id,
+                    'status' => \App\Models\Subscription::STATUS_PENDING_PAYMENT,
+                    'billing_cycle' => $validated['billing_cycle'] ?? 'monthly',
+                    'addons' => $validated['addons'] ?? [],
+                ]);
+            }
+        }
+
         event(new Registered($user));
 
         Auth::login($user);
+
+        if (!empty($validated['plan_slug']) && isset($plan)) {
+            return redirect(route('checkout', [
+                'plan' => $plan->slug,
+                'cycle' => $validated['billing_cycle'] ?? 'monthly',
+                'addons' => $validated['addons'] ?? [],
+            ]));
+        }
 
         return redirect(route('dashboard', absolute: false));
     }

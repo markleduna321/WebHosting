@@ -23,6 +23,7 @@ export default function ShortcutSection() {
     const page = usePage();
     const { auth, flash } = page.props;
     const hasPlan = Boolean(auth?.user?.plan);
+    const hasPendingPayment = Boolean(auth?.user?.pending_subscription) && !hasPlan;
     const isGithubConnected = Boolean(auth?.user?.github);
     const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
     const [isConnectGithubOpen, setIsConnectGithubOpen] = useState(false);
@@ -42,6 +43,17 @@ export default function ShortcutSection() {
     }, [flash?.github_error]);
 
     const openDeployFlow = () => {
+        if (hasPendingPayment) {
+            message.warning("Please complete your payment first.");
+            return;
+        }
+
+        if (!hasPlan && !hasPendingPayment) {
+            message.warning("Please choose a hosting plan first.");
+            // Optionally could route them to /hosting
+            return;
+        }
+
         if (isGithubConnected) {
             setIsDeployModalOpen(true);
         } else {
@@ -65,7 +77,7 @@ export default function ShortcutSection() {
                 <Button
                     variant="primary"
                     size="md"
-                    className="rounded-lg gap-1.5"
+                    className={`rounded-lg gap-1.5 ${(!hasPlan) ? 'opacity-50 cursor-not-allowed' : ''}`}
                     onClick={openDeployFlow}
                 >
                     <Plus className="w-3.5 h-3.5" />

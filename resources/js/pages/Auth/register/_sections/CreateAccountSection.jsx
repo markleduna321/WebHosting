@@ -60,8 +60,8 @@ function inputClass(hasError, isValid = false) {
     return `${inputBaseClass} border-slate-200 focus:border-blue-500 focus:ring-blue-500`;
 }
 
-export default function CreateAccountSection() {
-    const { data, setData, post, processing, errors, clearErrors } = useForm({
+export default function CreateAccountSection({ plan, period, selectedAddOnIds = [] }) {
+    const { data, setData, post, processing, errors, clearErrors, transform } = useForm({
         name: "",
         email: "",
         password: "",
@@ -111,6 +111,13 @@ export default function CreateAccountSection() {
         });
 
         if (!isFormValid) return;
+
+        transform((data) => ({
+            ...data,
+            plan_slug: plan?.slug,
+            billing_cycle: period > 1 ? "annual" : "monthly",
+            addons: selectedAddOnIds,
+        }));
 
         post(route("register"), {
             onFinish: () => {

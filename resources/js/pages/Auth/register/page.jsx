@@ -94,7 +94,11 @@ export default function Page() {
                     </>
                 ) : (
                     <div className="mx-auto max-w-xl py-4">
-                        <CreateAccountSection />
+                        <CreateAccountSection
+                            plan={plan}
+                            period={period}
+                            selectedAddOnIds={selectedAddOnIds}
+                        />
                     </div>
                 )}
             </main>

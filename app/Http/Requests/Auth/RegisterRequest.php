@@ -28,6 +28,10 @@ class RegisterRequest extends FormRequest
             ],
             'school' => ['nullable', 'string', 'max:255'],
             'agree_terms' => ['accepted'],
+            'plan_slug' => ['nullable', 'string', 'exists:plans,slug'],
+            'billing_cycle' => ['nullable', 'string', 'in:monthly,annual'],
+            'addons' => ['nullable', 'array'],
+            'addons.*' => ['string'],
         ];
     }
 

@@ -23,7 +23,8 @@ class CheckoutController extends Controller
             $payment = $this->checkout->start(
                 $request->user(),
                 $plan,
-                $request->validated('billing_cycle')
+                $request->validated('billing_cycle'),
+                $request->validated('addons') ?? []
             );
         } catch (PaymentException $e) {
             return response()->json([
