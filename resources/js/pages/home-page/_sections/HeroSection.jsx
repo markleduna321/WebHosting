@@ -126,10 +126,7 @@ export default function HeroSection() {
                             <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
                             <span>99.9% uptime</span>
                         </div>
-                        <div className="flex items-center space-x-2">
-                            <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                            <span>Cancel anytime</span>
-                        </div>
+                    
                     </div>
                 </div>
 

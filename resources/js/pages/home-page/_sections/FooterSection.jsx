@@ -101,11 +101,11 @@ export default function FooterSection() {
             <div className="mt-10">
               <h4 className="text-sm font-bold text-white">Contact</h4>
               <a
-                href="mailto:cv@asuratechsolutions.com"
+                href="mailto:support@calehohost.com"
                 className="mt-3 flex items-center gap-2 text-sm text-slate-300 transition-colors hover:text-white"
               >
                 <Mail className="w-4 h-4 shrink-0" />
-                cv@asuratechsolutions.com
+                support@calehohost.com
               </a>
               <a href="#support" className="mt-2 block text-sm text-slate-300 transition-colors hover:text-white">
                 Support Center

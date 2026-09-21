@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "@inertiajs/react";
+
 // Respect a saved preference first, otherwise fall back to the OS setting.
 function getInitialDarkMode() {
     if (typeof window === "undefined") return false;
@@ -11,6 +12,7 @@ function getInitialDarkMode() {
 export default function NavBarSection() {
     const [isDarkMode, setIsDarkMode] = useState(getInitialDarkMode);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
 
     useEffect(() => {
         document.documentElement.classList.toggle("dark", isDarkMode);
@@ -26,6 +28,32 @@ export default function NavBarSection() {
         media.addEventListener("change", handleSystemChange);
         return () => media.removeEventListener("change", handleSystemChange);
     }, []);
+
+    // Track scroll position to trigger background/border styles
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 20) {
+                setIsScrolled(true);
+            } else {
+                setIsScrolled(false);
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    // Disable background page scrolling when full-screen mobile menu is open
+    useEffect(() => {
+        if (isMenuOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "unset";
+        }
+        return () => {
+            document.body.style.overflow = "unset";
+        };
+    }, [isMenuOpen]);
 
     const toggleDarkMode = () => {
         setIsDarkMode((prev) => {
@@ -50,11 +78,17 @@ export default function NavBarSection() {
     };
 
     return (
-        <div className="w-full bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 font-sans transition-colors duration-200">
-            <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6 ">
+        <header
+            className={`sticky top-0 z-50 w-full font-sans transition-all duration-300 ${
+                isScrolled || isMenuOpen
+                    ? "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-gray-100 dark:border-slate-800 shadow-sm"
+                    : "bg-transparent border-b border-transparent"
+            }`}
+        >
+            <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
                 <Link
                     href="/"
-                    className="flex items-center space-x-2.5 cursor-pointer  "
+                    className="flex items-center space-x-2.5 cursor-pointer"
                 >
                     <div className="flex items-center justify-center">
                         <img
@@ -73,13 +107,14 @@ export default function NavBarSection() {
                     </span>
                 </Link>
 
+                {/* Desktop Navigation Links */}
                 <nav className="hidden lg:flex items-center space-x-14 text-sm font-medium text-slate-600 dark:text-slate-300">
                     {navLinks.map((link) => (
                         <a
                             key={link.name}
                             href={link.href}
                             onClick={(e) => handleNavClick(e, link.href)}
-                            className="hover:text-slate-900 dark:hover:text-white transition-colors hover-bg-gray-100 dark:hover:bg-slate-800 hover-border-gray-200 dark:hover:border-slate-700"
+                            className="hover:text-slate-900 dark:hover:text-white transition-colors"
                         >
                             {link.name}
                         </a>
@@ -88,27 +123,6 @@ export default function NavBarSection() {
 
                 {/* Desktop Right Actions */}
                 <div className="hidden lg:flex items-center space-x-5 text-sm font-medium">
-                    {/* Enterprise Link */}
-                    {/* <Link
-                        href="/enterprise"
-                        className="flex items-center space-x-1.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
-                    >
-                        <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            strokeWidth="2"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                            />
-                        </svg>
-                        <span>Enterprise</span>
-                    </Link> */}
-
                     <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
 
                     {/* Log In Link */}
@@ -128,48 +142,12 @@ export default function NavBarSection() {
                     </Link>
                 </div>
 
-                {/* Mobile Right Controls (Toggle + Hamburger) */}
+                {/* Mobile Right Controls (Hamburger Toggle) */}
                 <div className="flex items-center space-x-2 lg:hidden">
-                    <button
-                        onClick={toggleDarkMode}
-                        aria-label="Toggle Dark Mode"
-                        className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                    >
-                        {isDarkMode ? (
-                            <svg
-                                className="w-5 h-5 text-amber-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                strokeWidth="2"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                                />
-                            </svg>
-                        ) : (
-                            <svg
-                                className="w-5 h-5 text-slate-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                strokeWidth="2"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                                />
-                            </svg>
-                        )}
-                    </button>
-
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                         aria-label="Toggle Menu"
-                        className="p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                        className="p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white focus:outline-none"
                     >
                         {isMenuOpen ? (
                             <svg
@@ -204,60 +182,40 @@ export default function NavBarSection() {
                 </div>
             </div>
 
-            {/* Mobile Dropdown Menu */}
+            {/* Mobile Full-Screen Overlay Menu */}
             {isMenuOpen && (
-                <div className="lg:hidden border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 pt-4 pb-6 space-y-4">
-                    <nav className="flex flex-col space-y-3">
+                <div className="lg:hidden fixed inset-0 top-16 z-50 h-[calc(100vh-4rem)] bg-white dark:bg-slate-900 px-6 py-8 flex flex-col justify-between overflow-y-auto transition-all">
+                    <nav className="flex flex-col space-y-6">
                         {navLinks.map((link) => (
                             <a
                                 key={link.name}
                                 href={link.href}
                                 onClick={(e) => handleNavClick(e, link.href)}
-                                className="text-base font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                                className="text-xl font-semibold text-slate-800 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                             >
                                 {link.name}
                             </a>
                         ))}
                     </nav>
 
-                    <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex flex-col space-y-3">
-                        <Link
-                            href="/enterprise"
-                            onClick={() => setIsMenuOpen(false)}
-                            className="flex items-center space-x-1.5 text-base font-medium text-slate-600 dark:text-slate-300"
-                        >
-                            <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                strokeWidth="2"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                                />
-                            </svg>
-                            <span>Enterprise</span>
-                        </Link>
+                    <div className="pt-6 border-t border-gray-100 dark:border-slate-800 flex flex-col space-y-4">
                         <Link
                             href="/login"
                             onClick={() => setIsMenuOpen(false)}
-                            className="text-base font-medium text-slate-700 dark:text-slate-200"
+                            className="w-full text-center py-3 font-medium text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl"
                         >
                             Log In
                         </Link>
                         <Link
                             href="/register"
                             onClick={() => setIsMenuOpen(false)}
-                            className="w-full text-center bg-blue-600 dark:bg-blue-500 text-white font-medium py-2 rounded-xl"
+                            className="w-full text-center bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 rounded-xl shadow-md"
                         >
                             Sign Up
                         </Link>
                     </div>
                 </div>
             )}
-        </div>
+        </header>
     );
 }

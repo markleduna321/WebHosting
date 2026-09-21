@@ -54,16 +54,7 @@ export const PLANS = [
 // Shared add-on catalog — used by both the plan details panel (to select
 // add-ons) and the checkout summary (to price them).
 export const ADD_ONS = [
-    {
-        id: "professional-email",
-        label: "Professional Email",
-        price: 49,
-        period: "month",
-        description: [
-            "A custom @yourdomain inbox instead of a free webmail address.",
-            "Looks more credible on resumes, portfolios, and client work.",
-        ],
-    },
+
     {
         id: "extra-storage",
         label: "Extra 10 GB Storage",
@@ -74,26 +65,8 @@ export const ADD_ONS = [
             "Upgrade anytime without migrating your existing site.",
         ],
     },
-    {
-        id: "daily-backup",
-        label: "Daily Website Backup",
-        price: 149,
-        period: "month",
-        description: [
-            "Automatic daily snapshots of your files and database.",
-            "Restore in one click if something breaks during a deploy.",
-        ],
-    },
-    {
-        id: "website-maintenance",
-        label: "Website Maintenance",
-        price: 499,
-        period: "month",
-        description: [
-            "We monitor uptime and apply routine updates for you.",
-            "Frees you up to focus on coursework, not server upkeep.",
-        ],
-    },
+    
+  
     {
         id: "website-security",
         label: "Website Security",
@@ -104,17 +77,21 @@ export const ADD_ONS = [
             "Malware scanning and alerts with cleanup support.",
         ],
     },
-    {
-        id: "premium-ssl",
-        label: "Premium SSL Certificate",
-        price: 999,
-        period: "year",
-        description: [
-            "Extended-validation HTTPS encryption for your domain.",
-            "Boosts visitor trust and search ranking signals.",
-        ],
-    },
+
 ];
+
+// Discount tiers applied to the monthly price based on the selected billing
+// period — shared by the registration plan panel's period selector.
+export const PERIOD_DISCOUNTS = {
+    1: { percent: 0, label: "" },
+    12: { percent: 10, label: "Save 10%" },
+    24: { percent: 15, label: "Save 15%" },
+    48: { percent: 20, label: "Save 20% · Best Value" },
+};
+
+export function getPeriodDiscount(period) {
+    return PERIOD_DISCOUNTS[period] ?? { percent: 0, label: "" };
+}
 
 export function getPlanByName(name) {
     return PLANS.find((plan) => plan.name === name);

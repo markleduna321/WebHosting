@@ -11,7 +11,7 @@ import FooterSection from './_sections/FooterSection';
 export default function HomePage() {
     return (
         <>
-            
+            <Head title="CALEHO Host — Student Web Hosting Made Simple" />
             <NavBarSection />
             <main>
                 <HeroSection />
