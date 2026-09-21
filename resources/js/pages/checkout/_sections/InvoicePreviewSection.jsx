@@ -59,8 +59,8 @@ export default function InvoicePreviewSection({
 
             setError(
                 fieldError ??
-                    err?.data?.message ??
-                    "We could not start that payment. Please try again.",
+                err?.data?.message ??
+                "We could not start that payment. Please try again.",
             );
         }
     };
@@ -88,11 +88,10 @@ export default function InvoicePreviewSection({
                             onClick={() => onCycleChange(option.id)}
                             disabled={disabled || isLoading}
                             aria-pressed={active}
-                            className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-40 ${
-                                active
+                            className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-40 ${active
                                     ? "bg-white text-slate-900 shadow-sm"
                                     : "text-slate-500 hover:text-slate-700"
-                            }`}
+                                }`}
                         >
                             {option.label}
                         </button>

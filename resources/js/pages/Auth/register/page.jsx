@@ -1,67 +1,15 @@
-import { Head, usePage } from "@inertiajs/react";
-import { CheckCircle } from "lucide-react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import React, { useCallback, useState } from "react";
 import PlanDetailsSection from "./_sections/PlanDetailsSection";
 import CheckoutSummarySection from "./_sections/CheckoutSummarySection";
 import CreateAccountSection from "./_sections/CreateAccountSection";
 import { PLANS, getPlanByName } from "../../../data/hostingPlans";
 
-function GenericBrandingPanel() {
-    return (
-        <div className="hidden lg:flex lg:h-screen lg:w-1/2 lg:overflow-y-auto flex-col justify-between bg-[#0B0F19] bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] p-12 text-white relative">
-            <div className="flex items-center gap-1">
-                <img
-                    src="/images/logo 3.png"
-                    alt="CALEHO Host Logo"
-                    className="w-11 h-11 object-contain"
-                />
-                <span className="text-xl font-bold tracking-wide">
-                    <span className="bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-400 bg-clip-text text-transparent">
-                        CALEHO
-                    </span>{" "}
-                    <span className="text-blue-500">HOST</span>
-                </span>
-            </div>
-            <div className="max-w-xl space-y-10 my-auto">
-                <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl leading-tight">
-                    Hosting that keeps up with your semester.
-                </h1>
-
-                <ul className="space-y-6 text-slate-300 text-sm">
-                    <li className="flex items-start gap-2">
-                        <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                        <span>
-                            Free SSL and an asuratechhost.app subdomain on every
-                            plan
-                        </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                        <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                        <span>
-                            Deploy from Git or upload files — no server setup
-                        </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                        <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                        <span>
-                            Verified student pricing starting at ₱49/month
-                        </span>
-                    </li>
-                </ul>
-            </div>
-
-            {/* Footer Copyright */}
-            <div className="text-xs text-slate-500">
-                © 2026 CALEHO Host. All rights reserved.
-            </div>
-        </div>
-    );
-}
-
 export default function Page() {
     const { plan: planName } = usePage().props;
     const [step, setStep] = useState("checkout");
     const [selectedAddOnIds, setSelectedAddOnIds] = useState([]);
+    const [period, setPeriod] = useState(1);
     const hasPlan = Boolean(planName);
     const plan = hasPlan
         ? getPlanByName(planName) ?? PLANS.find((p) => p.popular) ?? PLANS[0]
@@ -78,39 +26,78 @@ export default function Page() {
     const isCheckoutStep = hasPlan && step === "checkout";
 
     return (
-        <div className="flex min-h-screen w-full font-sans antialiased lg:h-screen lg:overflow-hidden">
+        <div className="min-h-screen w-full bg-white font-sans antialiased">
             <Head title="Register" />
 
-            {hasPlan ? (
-                <PlanDetailsSection
-                    plan={plan}
-                    selectedAddOnIds={selectedAddOnIds}
-                    onToggleAddOn={toggleAddOn}
-                />
-            ) : (
-                <GenericBrandingPanel />
-            )}
-
-            <div
-                className={`flex w-full flex-col px-6 py-12 sm:px-12 lg:h-screen lg:w-1/2 lg:overflow-y-auto lg:px-10 ${
-                    isCheckoutStep
-                        ? "bg-[#0B0F19] bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px]"
-                        : "bg-white"
-                }`}
-            >
-                <div className="m-auto w-full">
-                    {isCheckoutStep ? (
-                        <CheckoutSummarySection
-                            plan={plan}
-                            selectedAddOnIds={selectedAddOnIds}
-                            onToggleAddOn={toggleAddOn}
-                            onProceed={() => setStep("create-account")}
+            {/* ── Top Navbar ── */}
+            <header className="sticky top-0 z-30 border-b border-gray-100 bg-white/90 backdrop-blur-sm">
+                <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+                    <Link href="/" className="flex items-center gap-2">
+                        <img
+                            src="/images/logo 3.png"
+                            alt="CALEHO Host Logo"
+                            className="h-9 w-9 object-contain"
                         />
-                    ) : (
-                        <CreateAccountSection />
-                    )}
+                        <span className="text-lg font-black tracking-tight">
+                            <span className="bg-gradient-to-r from-blue-500 via-sky-500 to-cyan-500 bg-clip-text text-transparent">
+                                CALEHO
+                            </span>{" "}
+                            <span className="text-blue-600">HOST</span>
+                        </span>
+                    </Link>
+
+                    <Link
+                        href="/login"
+                        className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+                    >
+                        Already have an account?{" "}
+                        <span className="font-semibold text-blue-600">Log in</span>
+                    </Link>
                 </div>
-            </div>
+            </header>
+
+            {/* ── Page Content ── */}
+            <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+                {isCheckoutStep ? (
+                    <>
+                        {/* "Your cart" heading */}
+                        <h1 className="text-2xl font-bold text-slate-900 mb-8">
+                            Your cart
+                        </h1>
+
+                        {/* Two-column: cart left, summary right */}
+                        <div className="flex flex-col lg:flex-row lg:items-start gap-8">
+                            {/* Left column — plan + add-ons */}
+                            <div className="flex-1 min-w-0">
+                                <PlanDetailsSection
+                                    plan={plan}
+                                    selectedAddOnIds={selectedAddOnIds}
+                                    onToggleAddOn={toggleAddOn}
+                                    period={period}
+                                    onPeriodChange={setPeriod}
+                                />
+                            </div>
+
+                            {/* Right column — order summary (sticky) */}
+                            <div className="w-full lg:w-[380px] lg:shrink-0">
+                                <div className="lg:sticky lg:top-24">
+                                    <CheckoutSummarySection
+                                        plan={plan}
+                                        selectedAddOnIds={selectedAddOnIds}
+                                        onToggleAddOn={toggleAddOn}
+                                        onProceed={() => setStep("create-account")}
+                                        period={period}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    <div className="mx-auto max-w-xl py-4">
+                        <CreateAccountSection />
+                    </div>
+                )}
+            </main>
         </div>
     );
 }

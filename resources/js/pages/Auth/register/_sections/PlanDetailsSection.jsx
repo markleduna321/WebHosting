@@ -8,7 +8,6 @@ import {
   RotateCcw,
   Server,
   Shield,
-  ShieldCheck,
   Sparkles,
   Wrench,
 } from "lucide-react";
@@ -28,168 +27,174 @@ export default function PlanDetailsSection({
   plan,
   selectedAddOnIds = [],
   onToggleAddOn,
+  period = 1,
+  onPeriodChange,
 }) {
+  const hasFixedPrice = plan?.monthlyPrice != null;
+
+  const PERIODS = [
+    { value: 1, label: "1 month" },
+    { value: 12, label: "12 months" },
+    { value: 24, label: "24 months" },
+    { value: 48, label: "48 months" },
+  ];
+
+  const totalPrice = hasFixedPrice ? plan.monthlyPrice * period : null;
+  const perMonthPrice = hasFixedPrice && period > 1
+    ? Math.round((totalPrice / period) * 100) / 100
+    : plan?.monthlyPrice;
+  const savings = hasFixedPrice && period > 1
+    ? plan.monthlyPrice * period - totalPrice
+    : 0;
+
   return (
-    <div className="relative hidden lg:flex lg:h-screen lg:w-1/2 lg:overflow-hidden min-h-screen w-full flex-col justify-between bg-[#0B0F19] bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] p-6 text-white lg:p-8">
-      {/* Header / Brand Logo */}
-      <header className="mb-6 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <img
-            src="/images/logo 3.png"
-            alt="CALEHO Host Logo"
-            className="h-10 w-10 object-contain"
-          />
-          <span className="text-2xl font-black tracking-tight">
-            <span className="bg-gradient-to-r from-blue-400 via-sky-400 to-cyan-400 bg-clip-text text-transparent">
-              CALEHO
-            </span>{" "}
-            <span className="text-blue-500">HOST</span>
+    <div className="space-y-6">
+      {/* ── Plan Card ── */}
+      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        {/* Plan header */}
+        <div className="flex items-start gap-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
+            <Server className="h-5 w-5" />
           </span>
-        </div>
-
-      </header>
-
-      {/* Main Focal Area */}
-      <div className="my-auto w-full space-y-4 rounded-2xl border border-slate-800/80 px-6 py-5 bg-slate-900/80  ">
-        {/* Primary Hero Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-2xl backdrop-blur-md sm:p-6  ">
-          {/* Subtle Glow Overlay */}
-          <div className="pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl" />
-
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-400">
-              <Sparkles className="h-3.5 w-3.5 text-blue-400" />
-              Selected Package
-            </span>
-            {plan?.popular && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-xs font-extrabold text-white shadow-md shadow-orange-500/20">
-                ★ Most Popular Choice
-              </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold text-blue-600">
+                {plan?.name ?? "Student"} plan
+              </h2>
+              {plan?.popular && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-0.5 text-[11px] font-bold text-white shadow-sm">
+                  <Sparkles className="h-3 w-3" />
+                  Popular
+                </span>
+              )}
+            </div>
+            {plan?.subtitle && (
+              <p className="mt-0.5 text-sm text-slate-500">{plan.subtitle}</p>
             )}
           </div>
+        </div>
 
-          <h1 className="mb-2 text-3xl font-black text-white sm:text-4xl">
-            {plan?.name ?? "Student"}
-          </h1>
-
-          {plan?.subtitle && (
-            <p className="max-w-xl text-sm font-normal text-slate-400 sm:text-base">
-              {plan.subtitle}
-            </p>
-          )}
-
-          <div className="mt-6 flex flex-wrap items-baseline justify-between gap-4 border-t border-slate-800/80 pt-5">
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black tracking-tight text-white sm:text-4xl">
-                {plan?.price ?? "₱129"}
-              </span>
-              <span className="text-sm font-semibold text-slate-400">
-                {plan?.billingNote ?? "/month"}
-              </span>
-            </div>
-            <span className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400">
-              Instant Activation
+        {/* Period & Price */}
+        <div className="mt-5 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-medium text-slate-400 mb-1.5">Period</p>
+            <select
+              value={period}
+              onChange={(e) => onPeriodChange?.(Number(e.target.value))}
+              className="appearance-none rounded-lg border border-gray-200 bg-white px-4 py-2.5 pr-9 text-sm font-medium text-slate-700 shadow-sm cursor-pointer focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m4%206%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px] bg-[right_12px_center] bg-no-repeat"
+            >
+              {PERIODS.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="text-right">
+            <span className="text-2xl font-black tracking-tight text-slate-900">
+              {hasFixedPrice ? formatCurrency(perMonthPrice) : plan?.price ?? "₱129"}
             </span>
+            <span className="text-sm font-medium text-slate-400">/mo</span>
+            {hasFixedPrice && period > 1 && (
+              <p className="mt-0.5 text-xs text-slate-400 line-through">
+                {formatCurrency(plan.monthlyPrice)}/mo
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Key Features List */}
+        {/* Renewal note */}
+        <p className="mt-3 text-xs text-slate-400">
+          {hasFixedPrice
+            ? `Renews after ${period} month${period > 1 ? "s" : ""} at ${formatCurrency(plan.monthlyPrice)}/mo. Cancel anytime.`
+            : "Custom pricing — our team will confirm details."}
+        </p>
+
+        {/* Included features */}
         {plan?.features?.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
-              <ShieldCheck className="h-4 w-4 text-blue-400" />
-              Included Specifications & Benefits
-            </h2>
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          <div className="mt-5 border-t border-gray-100 pt-5">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {plan.features.map((feature) => (
                 <div
                   key={feature}
-                  className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-3 shadow-sm transition-all hover:border-slate-700"
+                  className="flex items-center gap-2 text-sm text-slate-600"
                 >
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20">
-                    <CheckCircle2 className="h-4 w-4" />
-                  </div>
-                  <span className="text-sm font-medium text-slate-200">
-                    {feature}
-                  </span>
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                  <span>{feature}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
-
-        {/* Optional Add-ons Grid */}
-        <div className="pt-2">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
-              <span>Optional Power Add-ons</span>
-              <span className="rounded-full bg-slate-800 px-2.5 py-0.5 text-[10px] font-bold text-slate-300">
-                Customize
-              </span>
-            </h3>
-            {selectedAddOnIds.length > 0 && (
-              <span className="text-xs font-bold text-blue-400">
-                {selectedAddOnIds.length} added
-              </span>
-            )}
-          </div>
-
-          <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-            {(ADD_ONS || []).map((addOn) => {
-              const isSelected = selectedAddOnIds.includes(addOn.id);
-              const Icon = ADD_ON_ICONS[addOn.id] ?? Server;
-
-              return (
-                <li key={addOn.id}>
-                  <button
-                    type="button"
-                    onClick={() => onToggleAddOn?.(addOn.id)}
-                    aria-pressed={isSelected}
-                    className={`group flex w-full items-center justify-between gap-3 rounded-xl border p-3 text-left transition-all duration-200 ${
-                      isSelected
-                        ? "-translate-y-0.5 border-blue-500 bg-blue-950/40 text-white ring-1 ring-blue-500/50"
-                        : "border-slate-800 bg-slate-900/50 text-slate-300 hover:-translate-y-0.5 hover:border-slate-700 hover:bg-slate-800/80 hover:text-white"
-                    }`}
-                  >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <div
-                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-all ${
-                          isSelected
-                            ? "bg-blue-600 text-white"
-                            : "bg-slate-800 text-slate-400 group-hover:bg-blue-500/20 group-hover:text-blue-400"
-                        }`}
-                      >
-                        {isSelected ? (
-                          <Check className="h-4 w-4 stroke-[3]" />
-                        ) : (
-                          <Plus className="h-4 w-4 stroke-[2.5]" />
-                        )}
-                      </div>
-                      <Icon className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-300" />
-                      <span className="truncate text-sm font-semibold text-slate-200">
-                        {addOn.label}
-                      </span>
-                    </div>
-
-                    <span
-                      className={`shrink-0 rounded-md px-2 py-1 text-xs font-bold ${
-                        isSelected
-                          ? "bg-blue-500/20 text-blue-300"
-                          : "bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200"
-                      }`}
-                    >
-                      +{formatCurrency(addOn.price)}/{addOn.period}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
       </div>
 
-      {/* Footer Notice */}
-     
+      {/* ── Add-ons Section ── */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-slate-900">
+            Power add-ons
+          </h3>
+          {selectedAddOnIds.length > 0 && (
+            <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-600 border border-blue-100">
+              {selectedAddOnIds.length} added
+            </span>
+          )}
+        </div>
+
+        {(ADD_ONS || []).map((addOn) => {
+          const isSelected = selectedAddOnIds.includes(addOn.id);
+          const Icon = ADD_ON_ICONS[addOn.id] ?? Server;
+
+          return (
+            <button
+              key={addOn.id}
+              type="button"
+              onClick={() => onToggleAddOn?.(addOn.id)}
+              aria-pressed={isSelected}
+              className={`group flex w-full items-start gap-4 rounded-2xl border p-5 text-left transition-all duration-200 ${
+                isSelected
+                  ? "border-blue-500 bg-blue-50/40 ring-1 ring-blue-500/20 shadow-sm"
+                  : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+              }`}
+            >
+              {/* Checkbox */}
+              <div
+                className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-all ${
+                  isSelected
+                    ? "border-blue-600 bg-blue-600 text-white"
+                    : "border-gray-300 bg-white group-hover:border-gray-400"
+                }`}
+              >
+                {isSelected && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+              </div>
+
+              {/* Content */}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <Icon className="h-4 w-4 shrink-0 text-slate-400" />
+                  <span className="text-sm font-semibold text-slate-900">
+                    {addOn.label}
+                  </span>
+                  {addOn.id === "extra-storage" && (
+                    <span className="rounded bg-amber-50 border border-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-600">
+                      Recommended
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-slate-400 leading-relaxed">
+                  {addOn.description?.[0]}
+                </p>
+              </div>
+
+              {/* Price */}
+              <span className="shrink-0 text-sm font-bold text-slate-900">
+                +{formatCurrency(addOn.price)}
+                <span className="text-xs font-medium text-slate-400">/{addOn.period}</span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
