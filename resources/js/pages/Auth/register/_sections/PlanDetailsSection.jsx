@@ -12,7 +12,7 @@ import {
   Wrench,
 } from "lucide-react";
 import React from "react";
-import { ADD_ONS, formatCurrency, getPeriodDiscount } from "../../../../data/hostingPlans";
+import { formatCurrency, getPeriodDiscount } from "../../../../data/hostingPlans";
 
 const ADD_ON_ICONS = {
   "professional-email": Mail,
@@ -25,6 +25,7 @@ const ADD_ON_ICONS = {
 
 export default function PlanDetailsSection({
   plan,
+  availableAddons = [],
   selectedAddOnIds = [],
   onToggleAddOn,
   period = 1,
