@@ -67,7 +67,7 @@ export default function HeroSection() {
                         <span>
                             Verified student pricing —{" "}
                             <strong className="text-blue-600 dark:text-blue-400 font-bold">
-                                from ₱49/month
+                                from ₱129/month
                             </strong>
                         </span>
                     </div>
