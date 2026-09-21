@@ -164,7 +164,7 @@ export default function PlanDetailsSection({
           )}
         </div>
 
-        {(ADD_ONS || []).map((addOn) => {
+        {(availableAddons || []).map((addOn) => {
           const isSelected = selectedAddOnIds.includes(addOn.id);
           const Icon = ADD_ON_ICONS[addOn.id] ?? Server;
 

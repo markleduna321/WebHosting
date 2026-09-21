@@ -19,12 +19,21 @@ class CheckoutController extends Controller
     {
         $plan = Plan::where('slug', $request->validated('plan_slug'))->firstOrFail();
 
+        $pendingSub = $request->user()->subscriptions()
+            ->where('status', \App\Models\Subscription::STATUS_PENDING_PAYMENT)
+            ->where('plan_id', $plan->id)
+            ->first();
+
+        $addons = $pendingSub && is_array($pendingSub->addons) 
+            ? $pendingSub->addons 
+            : ($request->validated('addons') ?? []);
+
         try {
             $payment = $this->checkout->start(
                 $request->user(),
                 $plan,
                 $request->validated('billing_cycle'),
-                $request->validated('addons') ?? []
+                $addons
             );
         } catch (PaymentException $e) {
             return response()->json([

@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from "react";
+import { usePage } from "@inertiajs/react";
 import { QrCode } from "lucide-react";
 import Button from "@/components/ui/Button";
-import { formatCurrency, getAddOnById } from "@/data/hostingPlans";
+import { formatCurrency } from "@/data/hostingPlans";
 import { useCreatePaymentMutation } from "@/features/checkout/checkoutApi";
 
 const CYCLES = [
@@ -21,9 +22,11 @@ export default function InvoicePreviewSection({
     plan,
     cycle,
     addons = [],
+    availableAddons = [],
     onCycleChange,
     onCreated,
 }) {
+    const { auth } = usePage().props;
     const [createPayment, { isLoading }] = useCreatePaymentMutation();
     const [error, setError] = useState(null);
 
@@ -31,8 +34,8 @@ export default function InvoicePreviewSection({
     const basePrice = cycle === "annual" ? plan.annual_price : plan.monthly_price;
 
     const selectedAddOns = useMemo(
-        () => addons.map(getAddOnById).filter(Boolean),
-        [addons]
+        () => addons.map(id => availableAddons.find(a => a.id === id)).filter(Boolean),
+        [addons, availableAddons]
     );
 
     const addonsTotal = useMemo(() => {
@@ -190,9 +193,14 @@ export default function InvoicePreviewSection({
                 Pay with QR Ph
             </Button>
 
-            <p className="mt-3 text-center text-xs text-slate-400">
-                Scan the QR code with any bank or e-wallet app that supports QR
-                Ph.
+            {auth?.user?.plan && (
+                <p className="mt-3 text-center text-xs text-orange-600 font-medium bg-orange-50 p-2 rounded-md">
+                    Warning: Purchasing a new plan will immediately cancel your current active plan.
+                </p>
+            )}
+
+            <p className="mt-2 text-center text-xs text-slate-400">
+                Scan the QR code with any bank or e-wallet app that supports QR Ph.
             </p>
         </div>
     );

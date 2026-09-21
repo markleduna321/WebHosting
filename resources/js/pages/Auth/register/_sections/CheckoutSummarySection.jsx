@@ -4,10 +4,11 @@ import {
     Shield,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
-import { ADD_ONS, formatCurrency } from "../../../../data/hostingPlans";
+import { formatCurrency } from "../../../../data/hostingPlans";
 
 export default function CheckoutSummarySection({
     plan,
+    availableAddons = [],
     selectedAddOnIds = [],
     onToggleAddOn,
     onProceed,
@@ -18,8 +19,8 @@ export default function CheckoutSummarySection({
     const shouldReduceMotion = useReducedMotion();
 
     const selectedAddOns = useMemo(
-        () => ADD_ONS.filter((addOn) => selectedAddOnIds.includes(addOn.id)),
-        [selectedAddOnIds],
+        () => availableAddons.filter((addOn) => selectedAddOnIds.includes(addOn.id)),
+        [selectedAddOnIds, availableAddons],
     );
 
     const addOnsTotal = useMemo(

@@ -6,7 +6,7 @@ import CreateAccountSection from "./_sections/CreateAccountSection";
 import { PLANS, getPlanByName } from "../../../data/hostingPlans";
 
 export default function Page() {
-    const { plan: planName } = usePage().props;
+    const { plan: planName, availableAddons = [] } = usePage().props;
     const [step, setStep] = useState("checkout");
     const [selectedAddOnIds, setSelectedAddOnIds] = useState([]);
     const [period, setPeriod] = useState(1);
@@ -71,6 +71,7 @@ export default function Page() {
                             <div className="flex-1 min-w-0">
                                 <PlanDetailsSection
                                     plan={plan}
+                                    availableAddons={availableAddons}
                                     selectedAddOnIds={selectedAddOnIds}
                                     onToggleAddOn={toggleAddOn}
                                     period={period}
@@ -83,6 +84,7 @@ export default function Page() {
                                 <div className="lg:sticky lg:top-24">
                                     <CheckoutSummarySection
                                         plan={plan}
+                                        availableAddons={availableAddons}
                                         selectedAddOnIds={selectedAddOnIds}
                                         onToggleAddOn={toggleAddOn}
                                         onProceed={() => setStep("create-account")}

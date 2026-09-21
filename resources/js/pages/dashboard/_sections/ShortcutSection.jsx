@@ -77,7 +77,7 @@ export default function ShortcutSection() {
                 <Button
                     variant="primary"
                     size="md"
-                    className={`rounded-lg gap-1.5 ${(!hasPlan) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className="rounded-lg gap-1.5"
                     onClick={openDeployFlow}
                 >
                     <Plus className="w-3.5 h-3.5" />

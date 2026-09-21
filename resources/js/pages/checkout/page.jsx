@@ -58,6 +58,7 @@ export default function Page({ plan, cycle: initialCycle = "monthly", initialAdd
                                     plan={plan}
                                     cycle={cycle}
                                     addons={addons}
+                                    availableAddons={availableAddons}
                                     onCycleChange={setCycle}
                                     onCreated={setPayment}
                                 />

@@ -121,7 +121,8 @@ class CheckoutService
                 ? $starts->copy()->addYear()
                 : $starts->copy()->addMonth();
 
-            // A new paid plan supersedes whatever the user was on, including pending_payment.
+            // A new paid plan supersedes the pending_payment it originated from, 
+            // as well as any older active subscriptions the user might be upgrading from.
             $payment->user->subscriptions()
                 ->whereIn('status', [
                     Subscription::STATUS_ACTIVE,
@@ -165,43 +166,54 @@ class CheckoutService
     }
 
     /**
-     * The price is read from the plan row and config. Nothing the client sends influences it.
+     * The price is calculated cleanly in centavos, reading directly from the DB.
      *
      * @throws ValidationException
      */
     private function priceFor(Plan $plan, string $cycle, array $addonIds = []): string
     {
-        $price = $cycle === Payment::CYCLE_ANNUAL ? $plan->annual_price : $plan->monthly_price;
+        $basePrice = $cycle === Payment::CYCLE_ANNUAL ? $plan->annual_price : $plan->monthly_price;
 
-        if ($price === null) {
+        if ($basePrice === null) {
             throw ValidationException::withMessages([
                 'plan_slug' => 'That plan is quote-only. Please contact sales.',
             ]);
         }
 
-        if ((float) $price <= 0) {
+        if ((float) $basePrice <= 0) {
             throw ValidationException::withMessages([
                 'plan_slug' => 'That plan cannot be purchased online.',
             ]);
         }
-        
-        $total = (float) $price;
-        $addonPrices = config('addons.prices', []);
 
-        foreach ($addonIds as $addonId) {
-            if (isset($addonPrices[$addonId])) {
-                $addonPrice = $addonPrices[$addonId]['price'];
-                $addonPeriod = $addonPrices[$addonId]['period'];
+        // Base price in centavos
+        $totalCentavos = (int) round(((float) $basePrice) * 100);
+
+        if (!empty($addonIds)) {
+            $addons = \App\Models\Addon::whereIn('slug', $addonIds)
+                ->where('is_active', true)
+                ->get();
                 
-                if ($cycle === Payment::CYCLE_ANNUAL && $addonPeriod === 'month') {
-                    $total += (float) $addonPrice * 12;
+            if ($addons->count() !== count($addonIds)) {
+                throw ValidationException::withMessages([
+                    'addons' => 'One or more selected add-ons are invalid or no longer available.',
+                ]);
+            }
+            
+            foreach ($addons as $addon) {
+                // Addon price is already stored in centavos!
+                $addonCentavos = $addon->price;
+                
+                if ($cycle === Payment::CYCLE_ANNUAL && $addon->billing_period === 'month') {
+                    $totalCentavos += $addonCentavos * 12;
                 } else {
-                    $total += (float) $addonPrice;
+                    $totalCentavos += $addonCentavos;
                 }
             }
         }
 
-        return (string) $total;
+        // Convert final centavos back to a decimal string for the Payment model
+        return sprintf('%.2f', $totalCentavos / 100);
     }
 
     private function toCentavos(string $amount): int

@@ -21,8 +21,11 @@ class RegisteredUserController extends Controller
      */
     public function create(Request $request): Response
     {
+        $addons = \App\Models\Addon::where('is_active', true)->get();
+
         return Inertia::render('Auth/register/page', [
             'plan' => $request->query('plan'),
+            'availableAddons' => \App\Http\Resources\AddonResource::collection($addons)->resolve(),
         ]);
     }
 

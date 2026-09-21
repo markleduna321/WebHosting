@@ -54,35 +54,6 @@ export const PLANS = [
     },
 ];
 
-// Shared add-on catalog — used by both the plan details panel (to select
-// add-ons) and the checkout summary (to price them).
-export const ADD_ONS = [
-
-    {
-        id: "extra-storage",
-        label: "Extra 10 GB Storage",
-        price: 50,
-        period: "month",
-        description: [
-            "Room for bigger media libraries, datasets, or multiple projects.",
-            "Upgrade anytime without migrating your existing site.",
-        ],
-    },
-    
-  
-    {
-        id: "website-security",
-        label: "Website Security",
-        price: 199,
-        period: "month",
-        description: [
-            "Web Application Firewall (WAF) blocks common attacks.",
-            "Malware scanning and alerts with cleanup support.",
-        ],
-    },
-
-];
-
 // Discount tiers applied to the monthly price based on the selected billing
 // period — shared by the registration plan panel's period selector.
 export const PERIOD_DISCOUNTS = {
@@ -98,10 +69,6 @@ export function getPeriodDiscount(period) {
 
 export function getPlanByName(name) {
     return PLANS.find((plan) => plan.name === name);
-}
-
-export function getAddOnById(id) {
-    return ADD_ONS.find((addOn) => addOn.id === id);
 }
 
 export function formatCurrency(amount) {

@@ -16,9 +16,14 @@ class HostingPlanController extends Controller
             ->orderBy('sort_order')
             ->get();
 
+        $addons = \App\Models\Addon::query()
+            ->where('is_active', true)
+            ->get();
+
         return Inertia::render('hosting-plan/page', [
             // resolve() strips the "data" wrapper so the prop is a plain array.
             'plans' => PlanResource::collection($plans)->resolve(),
+            'addons' => \App\Http\Resources\AddonResource::collection($addons)->resolve(),
         ]);
     }
 }
