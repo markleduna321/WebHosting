@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Button from "@/components/ui/Button";
-import { Play, Loader2, Database, KeyRound, Eraser, Sprout } from "lucide-react";
+import { Play, Loader2, Database, KeyRound, Eraser, Sprout, Package, Zap } from "lucide-react";
 import axios from "axios";
 
 export default function CliSection({ website }) {
@@ -46,65 +46,93 @@ export default function CliSection({ website }) {
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Command Line Interface - {website.subdomain}</h3>
             
-            <div className="mb-6">
-                <p className="text-sm text-gray-500 mb-3">Quick Actions</p>
-                <div className="flex flex-wrap gap-2">
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        disabled={isRunning}
-                        onClick={() => runCommand("php artisan migrate --force")}
-                        className="flex items-center gap-2"
-                    >
-                        <Database size={14} />
-                        Migrate
-                    </Button>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        disabled={isRunning}
-                        onClick={() => runCommand("php artisan key:generate --force")}
-                        className="flex items-center gap-2"
-                    >
-                        <KeyRound size={14} />
-                        Key Generate
-                    </Button>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        disabled={isRunning}
-                        onClick={() => runCommand("php artisan optimize:clear")}
-                        className="flex items-center gap-2"
-                    >
-                        <Eraser size={14} />
-                        Optimize Clear
-                    </Button>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        disabled={isRunning}
-                        onClick={() => runCommand("php artisan db:seed --force")}
-                        className="flex items-center gap-2"
-                    >
-                        <Sprout size={14} />
-                        Seed DB
-                    </Button>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        disabled={isRunning}
-                        onClick={() => runCommand("php artisan migrate:fresh --seed --force")}
-                        className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                    >
-                        <Database size={14} />
-                        Migrate Fresh + Seed
-                    </Button>
+            <div className="mb-6 space-y-4">
+                <div>
+                    <p className="text-sm font-medium text-gray-700 mb-2">Laravel Actions</p>
+                    <div className="flex flex-wrap gap-2">
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            disabled={isRunning}
+                            onClick={() => runCommand("php artisan migrate --force")}
+                            className="flex items-center gap-2"
+                        >
+                            <Database size={14} />
+                            Migrate
+                        </Button>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            disabled={isRunning}
+                            onClick={() => runCommand("php artisan key:generate --force")}
+                            className="flex items-center gap-2"
+                        >
+                            <KeyRound size={14} />
+                            Key Generate
+                        </Button>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            disabled={isRunning}
+                            onClick={() => runCommand("php artisan optimize:clear")}
+                            className="flex items-center gap-2"
+                        >
+                            <Eraser size={14} />
+                            Optimize Clear
+                        </Button>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            disabled={isRunning}
+                            onClick={() => runCommand("php artisan db:seed --force")}
+                            className="flex items-center gap-2"
+                        >
+                            <Sprout size={14} />
+                            Seed DB
+                        </Button>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            disabled={isRunning}
+                            onClick={() => runCommand("php artisan migrate:fresh --seed --force")}
+                            className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                        >
+                            <Database size={14} />
+                            Migrate Fresh + Seed
+                        </Button>
+                    </div>
+                </div>
+
+                <div>
+                    <p className="text-sm font-medium text-gray-700 mb-2">Node / Frontend Actions</p>
+                    <div className="flex flex-wrap gap-2">
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            disabled={isRunning}
+                            onClick={() => runCommand("npm install")}
+                            className="flex items-center gap-2"
+                        >
+                            <Package size={14} />
+                            NPM Install
+                        </Button>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            disabled={isRunning}
+                            onClick={() => runCommand("npm run build")}
+                            className="flex items-center gap-2"
+                        >
+                            <Zap size={14} />
+                            NPM Build
+                        </Button>
+                    </div>
                 </div>
             </div>
 
             <div className="mb-4">
                 <div className="bg-gray-900 rounded-t-md border border-gray-800 p-2 flex justify-between items-center">
-                    <span className="text-xs text-gray-400 font-mono">Terminal (caleho)</span>
+                    <span className="text-xs text-gray-400 font-mono">Terminal</span>
                     <button 
                         onClick={() => setOutput("")}
                         className="text-xs text-gray-400 hover:text-white transition-colors"
