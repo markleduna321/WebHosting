@@ -38,6 +38,11 @@ class CloneRepositoryJob implements ShouldQueue
             return;
         }
 
+        if (! $website->user->activeSubscription) {
+            $this->markFailed($website, 'You do not have an active subscription plan.');
+            return;
+        }
+
         $website->update(['status' => Website::STATUS_BUILDING]);
 
         $domainName = strtolower($website->subdomain) . '.caleho.cloud';
@@ -57,6 +62,8 @@ class CloneRepositoryJob implements ShouldQueue
             }
 
             // Extract zipball contents
+            $diskSpaceLimitMb = $website->user->activeSubscription?->plan?->disk_space_mb ?? 50;
+            $extractor->setMaxTotalBytes($diskSpaceLimitMb * 1024 * 1024);
             $stats = $extractor->extract($archivePath, $destination);
 
             // Environment path setup for binaries

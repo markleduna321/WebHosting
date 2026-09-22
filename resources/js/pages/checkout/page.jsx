@@ -5,7 +5,7 @@ import PlanSummarySection from "./_sections/PlanSummarySection";
 import InvoicePreviewSection from "./_sections/InvoicePreviewSection";
 import QrPaymentSection from "./_sections/QrPaymentSection";
 
-export default function Page({ plan, cycle: initialCycle = "monthly", initialAddons = [] }) {
+export default function Page({ plan, cycle: initialCycle = "monthly", initialAddons = [], availableAddons = [] }) {
     const [cycle, setCycle] = useState(initialCycle);
     const [addons, setAddons] = useState(initialAddons);
     const [payment, setPayment] = useState(null);

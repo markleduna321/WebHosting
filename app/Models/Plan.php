@@ -15,22 +15,30 @@ class Plan extends Model
         'name',
         'subtitle',
         'monthly_price',
-        'annual_price',
         'currency',
+        'prices',
         'features',
         'is_popular',
         'is_active',
         'sort_order',
+        'max_websites',
+        'max_databases',
+        'disk_space_mb',
+        'db_size_mb',
     ];
 
     protected function casts(): array
     {
         return [
             'features' => 'array',
+            'prices' => 'array',
             'monthly_price' => 'decimal:2',
-            'annual_price' => 'decimal:2',
             'is_popular' => 'boolean',
             'is_active' => 'boolean',
+            'max_websites' => 'integer',
+            'max_databases' => 'integer',
+            'disk_space_mb' => 'integer',
+            'db_size_mb' => 'integer',
         ];
     }
 

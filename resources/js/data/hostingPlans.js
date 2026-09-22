@@ -7,6 +7,12 @@ export const PLANS = [
         subtitle: "For your very first site",
         price: "₱129",
         monthlyPrice: 129,
+        prices: {
+            1: 129,
+            12: 1000,
+            24: 1800,
+            48: 3000,
+        },
         billingNote: "/month",
         annualNote: "or ₱1,000 billed annually",
         features: [
@@ -26,6 +32,12 @@ export const PLANS = [
         subtitle: "For growing student projects",
         price: "₱249",
         monthlyPrice: 249,
+        prices: {
+            1: 249,
+            12: 2200,
+            24: 4000,
+            48: 7000,
+        },
         billingNote: "/month",
         annualNote: "or ₱2,200 billed annually",
         features: [
@@ -46,6 +58,7 @@ export const PLANS = [
         subtitle: "For organizations and capstone teams",
         price: "Custom",
         monthlyPrice: null,
+        prices: {},
         billingNote: "",
         annualNote: "Contact for pricing",
         features: ["Free Domain (1 Year)", "Automated Git + Priority Sync"],
@@ -54,17 +67,15 @@ export const PLANS = [
     },
 ];
 
-// Discount tiers applied to the monthly price based on the selected billing
-// period — shared by the registration plan panel's period selector.
-export const PERIOD_DISCOUNTS = {
-    1: { percent: 0, label: "" },
-    12: { percent: 10, label: "Save 10%" },
-    24: { percent: 15, label: "Save 15%" },
-    48: { percent: 20, label: "Save 20% · Best Value" },
+export const PERIOD_LABELS = {
+    1: "",
+    12: "",
+    24: "",
+    48: "Best Value",
 };
 
-export function getPeriodDiscount(period) {
-    return PERIOD_DISCOUNTS[period] ?? { percent: 0, label: "" };
+export function getPeriodLabel(period) {
+    return PERIOD_LABELS[period] ?? "";
 }
 
 export function getPlanByName(name) {

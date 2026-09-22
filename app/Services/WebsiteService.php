@@ -18,6 +18,8 @@ class WebsiteService
      */
     public function createForUser(User $user, array $data): Website
     {
+        $this->assertWithinQuota($user);
+
         $connection = $user->githubConnection;
 
         if (! $connection) {
@@ -47,5 +49,17 @@ class WebsiteService
         CloneRepositoryJob::dispatch($website);
 
         return $website;
+    }
+
+    /** @throws ValidationException */
+    private function assertWithinQuota(User $user): void
+    {
+        $limit = $user->activeSubscription?->plan?->max_websites ?? 0;
+
+        if ($user->websites()->count() >= $limit) {
+            throw ValidationException::withMessages([
+                'name' => "Your plan allows up to {$limit} websites. Upgrade your plan to create more.",
+            ]);
+        }
     }
 }

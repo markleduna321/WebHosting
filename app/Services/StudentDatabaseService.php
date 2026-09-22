@@ -47,7 +47,7 @@ class StudentDatabaseService
             'db_password' => $password,
             'host' => (string) config('hosting.databases.host'),
             'port' => (int) config('hosting.databases.port'),
-            'quota_mb' => (int) config('hosting.databases.quota_mb'),
+            'quota_mb' => $user->activeSubscription?->plan?->db_size_mb ?? (int) config('hosting.databases.quota_mb'),
             'status' => StudentDatabase::STATUS_PROVISIONING,
         ]);
 
@@ -91,6 +91,30 @@ class StudentDatabaseService
         }
 
         $database->delete();
+    }
+
+    /**
+     * Locks the database account, suspending access without destroying data.
+     */
+    public function lockAccount(StudentDatabase $database): void
+    {
+        $dbUser = $this->assertSafeIdentifier($database->db_user);
+        $grantHost = $this->assertSafeHost((string) config('hosting.databases.grant_host'));
+
+        $connection = $this->connection();
+        $connection->unprepared("ALTER USER '{$dbUser}'@'{$grantHost}' ACCOUNT LOCK");
+    }
+
+    /**
+     * Unlocks a suspended database account.
+     */
+    public function unlockAccount(StudentDatabase $database): void
+    {
+        $dbUser = $this->assertSafeIdentifier($database->db_user);
+        $grantHost = $this->assertSafeHost((string) config('hosting.databases.grant_host'));
+
+        $connection = $this->connection();
+        $connection->unprepared("ALTER USER '{$dbUser}'@'{$grantHost}' ACCOUNT UNLOCK");
     }
 
     /**
@@ -336,7 +360,7 @@ class StudentDatabaseService
     /** @throws ValidationException */
     private function assertWithinQuota(User $user): void
     {
-        $limit = (int) config('hosting.databases.max_per_user');
+        $limit = $user->activeSubscription?->plan?->max_databases ?? 0;
 
         if ($user->studentDatabases()->count() >= $limit) {
             throw ValidationException::withMessages([

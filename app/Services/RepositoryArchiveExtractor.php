@@ -27,6 +27,11 @@ class RepositoryArchiveExtractor
         $this->maxTotalBytes = (int) config('hosting.clone.max_total_bytes');
     }
 
+    public function setMaxTotalBytes(int $bytes): void
+    {
+        $this->maxTotalBytes = $bytes;
+    }
+
     /**
      * @return array{file_count: int, size_bytes: int}
      *

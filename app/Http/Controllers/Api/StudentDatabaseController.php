@@ -28,11 +28,13 @@ class StudentDatabaseController extends Controller
 
         $this->databases->refreshUsage($databases);
 
+        $plan = $request->user()->activeSubscription?->plan;
+
         return StudentDatabaseResource::collection($databases)
             ->additional([
                 'meta' => [
-                    'max_per_user' => (int) config('hosting.databases.max_per_user'),
-                    'quota_mb' => (int) config('hosting.databases.quota_mb'),
+                    'max_per_user' => $plan?->max_databases ?? (int) config('hosting.databases.max_per_user'),
+                    'quota_mb' => $plan?->db_size_mb ?? (int) config('hosting.databases.quota_mb'),
                     'phpmyadmin_url' => (string) config('hosting.databases.phpmyadmin_url'),
                     // Lets the create form preview the schema name the server will build.
                     'name_prefix' => config('hosting.databases.prefix').'_'.$request->user()->id.'_',
