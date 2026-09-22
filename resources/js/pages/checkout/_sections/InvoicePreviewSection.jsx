@@ -30,8 +30,8 @@ export default function InvoicePreviewSection({
     const [createPayment, { isLoading }] = useCreatePaymentMutation();
     const [error, setError] = useState(null);
 
-    const annualAvailable = plan.annual_price !== null;
-    const basePrice = cycle === "annual" ? plan.annual_price : plan.monthly_price;
+    const annualAvailable = plan.prices && plan.prices[12] !== undefined;
+    const basePrice = cycle === "annual" ? plan.prices[12] : plan.monthlyPrice;
 
     const selectedAddOns = useMemo(
         () => addons.map(id => availableAddons.find(a => a.id === id)).filter(Boolean),
