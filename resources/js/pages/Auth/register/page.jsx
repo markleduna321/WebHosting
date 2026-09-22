@@ -3,16 +3,17 @@ import React, { useCallback, useState } from "react";
 import PlanDetailsSection from "./_sections/PlanDetailsSection";
 import CheckoutSummarySection from "./_sections/CheckoutSummarySection";
 import CreateAccountSection from "./_sections/CreateAccountSection";
-import { PLANS, getPlanByName } from "../../../data/hostingPlans";
 
 export default function Page() {
-    const { plan: planName, availableAddons = [] } = usePage().props;
+    const { plan: planName, plans = [], availableAddons = [] } = usePage().props;
     const [step, setStep] = useState("checkout");
     const [selectedAddOnIds, setSelectedAddOnIds] = useState([]);
     const [period, setPeriod] = useState(1);
     const hasPlan = Boolean(planName);
+    
+    // Find the requested plan in the DB plans array, fallback to a popular plan, then the first plan.
     const plan = hasPlan
-        ? (getPlanByName(planName) ?? PLANS.find((p) => p.popular) ?? PLANS[0])
+        ? (plans.find(p => p.name === planName) ?? plans.find((p) => p.popular) ?? plans[0])
         : null;
 
     const toggleAddOn = useCallback((id) => {

@@ -9,14 +9,14 @@ import AboutUsSection from './_sections/AboutUsSection';
 import FooterSection from './_sections/FooterSection';
 import FaqsSection from './_sections/FaqsSection';
 
-export default function HomePage() {
+export default function HomePage({ plans }) {
     return (
         <>
             <Head title="CALEHO Host — Simple & Reliable Web Hosting" />
             <NavBarSection />
             <main>
                 <HeroSection />
-                <HostPlanSection />
+                <HostPlanSection plans={plans} />
                 <FeatureSection />
                 <UseCasesSection />
                 <TestimonialSection />

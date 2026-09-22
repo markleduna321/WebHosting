@@ -1,10 +1,6 @@
 import { ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
 import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import { router } from "@inertiajs/react";
-import { PLANS } from "../../../data/hostingPlans";
-
-const EXTENDED_PLANS = [...PLANS, ...PLANS, ...PLANS];
-const TOTAL_COUNT = PLANS.length;
 
 const CheckIcon = () => (
     <CheckCircle className="w-5 h-5 text-emerald-500 dark:text-emerald-400 mr-3 shrink-0" />
@@ -103,7 +99,10 @@ const PlanCard = memo(
     },
 );
 
-export default function HostPlan() {
+export default function HostPlan({ plans = [] }) {
+    const EXTENDED_PLANS = [...plans, ...plans, ...plans];
+    const TOTAL_COUNT = plans.length;
+
     const [visible, setVisible] = useState(3);
     const [index, setIndex] = useState(TOTAL_COUNT);
     const [withTransition, setWithTransition] = useState(true);
@@ -318,7 +317,7 @@ export default function HostPlan() {
                     <div className="flex flex-col items-center gap-4 mt-6 sm:mt-10">
                         {/* Pagination Dots */}
                         <div className="flex justify-center items-center gap-2">
-                            {PLANS.map((plan, dotIndex) => (
+                            {plans.map((plan, dotIndex) => (
                                 <button
                                     key={dotIndex}
                                     type="button"

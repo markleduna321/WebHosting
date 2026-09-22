@@ -4,18 +4,13 @@ import { PackageOpen } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import { formatCurrency } from '../../../data/hostingPlans'
 
-const priceLabel = (plan) =>
-  plan.monthly_price !== null ? formatCurrency(plan.monthly_price) : 'Custom'
+const priceLabel = (plan) => plan.price
 
-const billingNote = (plan) => (plan.monthly_price !== null ? '/month' : '')
+const billingNote = (plan) => plan.billingNote
 
-const annualNote = (plan) =>
-  plan.annual_price !== null
-    ? `or ${formatCurrency(plan.annual_price)} billed annually`
-    : 'Contact for pricing'
+const annualNote = (plan) => plan.annualNote
 
-const ctaLabel = (plan) =>
-  plan.monthly_price !== null ? 'Choose Plan' : 'Contact Sales'
+const ctaLabel = (plan) => plan.cta
 
 export default function HostPlanCardSection({ plans = [] }) {
   const { auth } = usePage().props
@@ -72,7 +67,7 @@ export default function HostPlanCardSection({ plans = [] }) {
                     Current
                   </span>
                 ) : (
-                  plan.is_popular && (
+                  plan.popular && (
                     <span className="bg-amber-50 text-amber-700 text-xs px-2.5 py-0.5 rounded-full font-medium">
                       Popular
                     </span>
@@ -128,7 +123,7 @@ export default function HostPlanCardSection({ plans = [] }) {
             ) : (
               <Link
                 href={
-                  plan.monthly_price !== null
+                  plan.monthlyPrice !== null
                     ? `/checkout/${plan.slug}`
                     : "/support"
                 }

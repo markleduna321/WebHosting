@@ -9,11 +9,22 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
+    $plans = \App\Models\Plan::query()
+        ->where('is_active', true)
+        ->orderBy('sort_order')
+        ->get();
+
+    $addons = \App\Models\Addon::query()
+        ->where('is_active', true)
+        ->get();
+
     return Inertia::render('home-page/page', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
+        'plans' => \App\Http\Resources\PlanResource::collection($plans)->resolve(),
+        'addons' => \App\Http\Resources\AddonResource::collection($addons)->resolve(),
     ]);
 });
 

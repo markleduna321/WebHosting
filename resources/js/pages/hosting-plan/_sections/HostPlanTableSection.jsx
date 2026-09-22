@@ -3,7 +3,7 @@ import { Download, Search, MoreHorizontal, Check, Pencil, Copy, Power, Trash2, F
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import Table from '@/components/ui/Table';
-import { PLANS, formatCurrency } from '../../../data/hostingPlans';
+import { formatCurrency } from '../../../data/hostingPlans';
 import EditPlanSection from './EditPlanSection';
 import DeletePlanSection from './DeletePlanSection';
 import DisablePlanSection from './DisablePlanSection';
@@ -12,11 +12,11 @@ import DuplicatePlanSection from './DuplicatePlanSection';
 const FEATURE_LABELS = ['SSL', 'Git', 'Deploys'];
 
 function getPlanPrice(plan) {
-    return plan.monthly_price ?? plan.monthlyPrice ?? null;
+    return plan.monthlyPrice ?? null;
 }
 
 function getAnnualPrice(plan) {
-    return plan.annual_price ?? plan.annualPrice ?? null;
+    return plan.prices?.[12] ?? null;
 }
 
 function getPlanSubtitle(plan) {
@@ -59,12 +59,12 @@ function buildRows(plans) {
         databases: getPlanPrice(plan) === null ? 'Unlimited' : String([1, 2, 5, 10][index] ?? 10),
         subscribers: 2,
         status: 'Active',
-        popular: Boolean(plan.popular ?? plan.is_popular),
+        popular: Boolean(plan.popular),
         features: getPlanFeatures(plan),
     }));
 }
 
-export default function HostPlanTableSection({ plans = PLANS }) {
+export default function HostPlanTableSection({ plans = [] }) {
     const [search, setSearch] = useState('');
     const [openEdit, setOpenEdit] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
