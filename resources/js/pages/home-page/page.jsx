@@ -12,7 +12,7 @@ import FaqsSection from './_sections/FaqsSection';
 export default function HomePage() {
     return (
         <>
-            <Head title="CALEHO Host — Student Web Hosting Made Simple" />
+            <Head title="CALEHO Host — Simple & Reliable Web Hosting" />
             <NavBarSection />
             <main>
                 <HeroSection />
