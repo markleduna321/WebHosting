@@ -67,8 +67,8 @@ export default function NavBarSection() {
         { name: "Home", id: "home" },
         { name: "Hosting Plans", id: "hosting-plans" },
         { name: "Features", id: "features" },
-        { name: "Partners", id: "partners" },
-        { name: "About Us", id: "about-us" },
+        // { name: "Partners", id: "partners" },
+        { name: "About Us", id: "faqs" },
     ];
 
     // These section ids only exist on the home page. If we're already there,
