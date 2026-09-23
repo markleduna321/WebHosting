@@ -43,7 +43,7 @@ export default function SubscriptionHeaderSection() {
             </div>
 
             {/* Auto-renew checkbox */}
-            <div className="mt-4 flex items-center gap-2">
+            {/* <div className="mt-4 flex items-center gap-2">
                 <input
                     id="auto-renew"
                     type="checkbox"
@@ -57,7 +57,7 @@ export default function SubscriptionHeaderSection() {
                 >
                     Automatically renew Student Pro each month
                 </label>
-            </div>
+            </div> */}
         </div>
     );
 }
