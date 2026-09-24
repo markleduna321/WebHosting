@@ -117,6 +117,19 @@ class CloneRepositoryJob implements ShouldQueue
                 @symlink($destination, "{$destination}/public");
             }
 
+            // =========================================================
+            // 4. VERIFY DEPLOYMENT INTEGRITY
+            // =========================================================
+            if (! File::exists("{$destination}/public/index.php") && ! File::exists("{$destination}/public/index.html")) {
+                if (File::exists("{$destination}/package.json") && !File::exists("{$destination}/composer.json")) {
+                    $packageJson = json_decode(File::get("{$destination}/package.json"), true);
+                    if (isset($packageJson['dependencies']['next']) || isset($packageJson['devDependencies']['next'])) {
+                        throw new \Exception("Next.js applications must be configured for static export. Please add 'output: \"export\"' to your next.config.js or next.config.mjs file.");
+                    }
+                }
+                throw new \Exception("Deployment failed: No index.php or index.html found in the public directory. If using a frontend framework, ensure it is configured to export static files.");
+            }
+
             $website->update([
                 'status' => Website::STATUS_LIVE,
                 'storage_path' => $destination,
