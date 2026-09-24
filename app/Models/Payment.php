@@ -20,6 +20,26 @@ class Payment extends Model
     public const CYCLE_MONTHLY = 'monthly';
     public const CYCLE_ANNUAL = 'annual';
 
+    /**
+     * All valid billing cycle values (in months).
+     * Legacy string values are also accepted for backward compatibility.
+     */
+    public const VALID_CYCLES = ['monthly', 'annual', '1', '12', '24', '48'];
+
+    /**
+     * Converts a billing cycle value to the number of months.
+     */
+    public static function cycleToMonths(string $cycle): int
+    {
+        return match ($cycle) {
+            'monthly', '1' => 1,
+            'annual', '12' => 12,
+            '24' => 24,
+            '48' => 48,
+            default => 1,
+        };
+    }
+
     protected $fillable = [
         'uuid',
         'user_id',

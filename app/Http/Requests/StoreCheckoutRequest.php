@@ -23,7 +23,7 @@ class StoreCheckoutRequest extends FormRequest
     {
         return [
             'plan_slug' => ['required', 'string', Rule::exists('plans', 'slug')->where('is_active', true)],
-            'billing_cycle' => ['required', Rule::in([Payment::CYCLE_MONTHLY, Payment::CYCLE_ANNUAL])],
+            'billing_cycle' => ['required', Rule::in(Payment::VALID_CYCLES)],
             'addons' => ['nullable', 'array'],
             'addons.*' => ['string'],
         ];

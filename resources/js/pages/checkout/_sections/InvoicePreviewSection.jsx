@@ -5,10 +5,12 @@ import Button from "@/components/ui/Button";
 import { formatCurrency } from "@/data/hostingPlans";
 import { useCreatePaymentMutation } from "@/features/checkout/checkoutApi";
 
-const CYCLES = [
-    { id: "monthly", label: "Monthly" },
-    { id: "annual", label: "Annual" },
-];
+const CYCLE_LABELS = {
+    1: "Monthly",
+    12: "1 Year",
+    24: "2 Years",
+    48: "4 Years",
+};
 
 function formatDate(date) {
     return date.toLocaleDateString(undefined, {
@@ -30,8 +32,36 @@ export default function InvoicePreviewSection({
     const [createPayment, { isLoading }] = useCreatePaymentMutation();
     const [error, setError] = useState(null);
 
-    const annualAvailable = plan.prices && plan.prices[12] !== undefined;
-    const basePrice = cycle === "annual" ? plan.prices[12] : plan.monthlyPrice;
+    // Build available cycle options from the plan's prices JSON + always include monthly.
+    const availableCycles = useMemo(() => {
+        const prices = plan.prices ?? {};
+        const cycles = [{ id: "1", label: "Monthly", months: 1 }];
+
+        Object.keys(prices)
+            .map(Number)
+            .filter((m) => m > 1)
+            .sort((a, b) => a - b)
+            .forEach((m) => {
+                cycles.push({
+                    id: String(m),
+                    label: CYCLE_LABELS[m] ?? `${m} Months`,
+                    months: m,
+                });
+            });
+
+        return cycles;
+    }, [plan.prices]);
+
+    // Use Number() to convert the string cycle back to an integer, default to 1 (monthly).
+    // The previous implementation used "monthly" and "annual" strings. We map "annual" to 12.
+    const months = useMemo(() => {
+        if (cycle === "annual") return 12;
+        if (cycle === "monthly") return 1;
+        return Number(cycle) || 1;
+    }, [cycle]);
+
+    const prices = plan.prices ?? {};
+    const basePrice = months === 1 ? plan.monthlyPrice : prices[months];
 
     const selectedAddOns = useMemo(
         () => addons.map(id => availableAddons.find(a => a.id === id)).filter(Boolean),
@@ -40,27 +70,21 @@ export default function InvoicePreviewSection({
 
     const addonsTotal = useMemo(() => {
         return selectedAddOns.reduce((total, addOn) => {
-            const addOnPrice = cycle === "annual" && addOn.period === "month" 
-                ? addOn.price * 12 
+            const addOnPrice = months > 1 && addOn.period === "month" 
+                ? addOn.price * months 
                 : addOn.price;
             return total + addOnPrice;
         }, 0);
-    }, [selectedAddOns, cycle]);
+    }, [selectedAddOns, months]);
 
-    const total = basePrice + addonsTotal;
+    const total = (basePrice ?? 0) + addonsTotal;
 
     const period = useMemo(() => {
         const start = new Date();
         const end = new Date(start);
-
-        if (cycle === "annual") {
-            end.setFullYear(end.getFullYear() + 1);
-        } else {
-            end.setMonth(end.getMonth() + 1);
-        }
-
+        end.setMonth(end.getMonth() + months);
         return `${formatDate(start)} – ${formatDate(end)}`;
-    }, [cycle]);
+    }, [months]);
 
     const handlePay = async () => {
         setError(null);
@@ -68,7 +92,7 @@ export default function InvoicePreviewSection({
         try {
             const payment = await createPayment({
                 plan_slug: plan.slug,
-                billing_cycle: cycle,
+                billing_cycle: cycle === "annual" ? "12" : (cycle === "monthly" ? "1" : String(cycle)),
                 addons: addons,
             }).unwrap();
 
@@ -98,16 +122,15 @@ export default function InvoicePreviewSection({
                 aria-label="Billing cycle"
                 className="mt-4 flex rounded-lg bg-slate-100 p-1"
             >
-                {CYCLES.map((option) => {
-                    const disabled = option.id === "annual" && !annualAvailable;
-                    const active = cycle === option.id;
+                {availableCycles.map((option) => {
+                    const active = String(months) === option.id;
 
                     return (
                         <button
                             key={option.id}
                             type="button"
                             onClick={() => onCycleChange(option.id)}
-                            disabled={disabled || isLoading}
+                            disabled={isLoading}
                             aria-pressed={active}
                             className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-40 ${active
                                     ? "bg-white text-slate-900 shadow-sm"
@@ -120,28 +143,22 @@ export default function InvoicePreviewSection({
                 })}
             </div>
 
-            {!annualAvailable && (
-                <p className="mt-2 text-xs text-slate-400">
-                    Annual billing isn&apos;t offered on this plan.
-                </p>
-            )}
-
             <dl className="mt-5 space-y-3 text-sm">
                 <div className="flex items-start justify-between gap-3">
                     <dt className="text-slate-600">
-                        {plan.name} · {cycle === "annual" ? "1 year" : "1 month"}
+                        {plan.name} · {CYCLE_LABELS[months] ?? `${months} Months`}
                         <span className="mt-0.5 block text-xs text-slate-400">
                             {period}
                         </span>
                     </dt>
                     <dd className="font-medium text-slate-900">
-                        {formatCurrency(basePrice)}
+                        {basePrice != null ? formatCurrency(basePrice) : "—"}
                     </dd>
                 </div>
 
                 {selectedAddOns.map((addOn) => {
-                    const addOnPrice = cycle === "annual" && addOn.period === "month"
-                        ? addOn.price * 12
+                    const addOnPrice = months > 1 && addOn.period === "month"
+                        ? addOn.price * months
                         : addOn.price;
                     return (
                         <div key={addOn.id} className="flex items-start justify-between gap-3">

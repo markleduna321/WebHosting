@@ -117,9 +117,8 @@ class CheckoutService
 
         DB::transaction(function () use ($payment, $paymongoPaymentId) {
             $starts = now();
-            $ends = $payment->billing_cycle === Payment::CYCLE_ANNUAL
-                ? $starts->copy()->addYear()
-                : $starts->copy()->addMonth();
+            $months = Payment::cycleToMonths($payment->billing_cycle);
+            $ends = $starts->copy()->addMonths($months);
 
             // A new paid plan supersedes the pending_payment it originated from, 
             // as well as any older active subscriptions the user might be upgrading from.
@@ -172,7 +171,16 @@ class CheckoutService
      */
     private function priceFor(Plan $plan, string $cycle, array $addonIds = []): string
     {
-        $basePrice = $cycle === Payment::CYCLE_ANNUAL ? $plan->annual_price : $plan->monthly_price;
+        $months = Payment::cycleToMonths($cycle);
+        $prices = $plan->prices ?? [];
+
+        // For monthly (1 month), use the monthly_price column as the canonical source.
+        // For longer cycles, look up the total in the prices JSON map.
+        if ($months === 1) {
+            $basePrice = $plan->monthly_price;
+        } else {
+            $basePrice = $prices[$months] ?? null;
+        }
 
         if ($basePrice === null) {
             throw ValidationException::withMessages([
@@ -204,8 +212,8 @@ class CheckoutService
                 // Addon price is already stored in centavos!
                 $addonCentavos = $addon->price;
                 
-                if ($cycle === Payment::CYCLE_ANNUAL && $addon->billing_period === 'month') {
-                    $totalCentavos += $addonCentavos * 12;
+                if ($months > 1 && $addon->billing_period === 'month') {
+                    $totalCentavos += $addonCentavos * $months;
                 } else {
                     $totalCentavos += $addonCentavos;
                 }
