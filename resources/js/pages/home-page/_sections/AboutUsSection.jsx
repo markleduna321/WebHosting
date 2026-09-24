@@ -25,7 +25,7 @@ const STEPS = [
 export default function AboutUsSection() {
   return (
     <>
-      <section id="about-us" className="scroll-mt-16 bg-slate-50/50 dark:bg-slate-950 py-28 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
+      <section id="" className="scroll-mt-16 bg-slate-50/50 dark:bg-slate-950 py-28 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
         <div className="mx-auto max-w-7xl">
           {/* Section Header */}
           <div className="text-center mb-20">

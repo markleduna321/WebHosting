@@ -209,7 +209,7 @@ export default function Page() {
                         </button>
                     </form>
 
-                    {/* Divider */}
+                    {/* Divider
                     <div className="relative my-8">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-slate-200" />
@@ -222,7 +222,7 @@ export default function Page() {
                     </div>
 
                     {/* Social Auth */}
-                    <button
+                    {/* <button
                         type="button"
                         className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3.5 text-base font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors"
                     >
@@ -245,7 +245,7 @@ export default function Page() {
                             />
                         </svg>
                         Continue with Google
-                    </button>
+                    </button> */} 
 
                     {/* Registration Footer */}
                     <p className="mt-8 text-center text-sm text-slate-500">

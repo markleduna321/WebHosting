@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 
 // Respect a saved preference first, otherwise fall back to the OS setting.
 function getInitialDarkMode() {
@@ -64,17 +64,30 @@ export default function NavBarSection() {
     };
 
     const navLinks = [
-        { name: "Home", href: "home" },
-        { name: "Hosting Plans", href: "hosting-plans" },
-        { name: "Features", href: "features" },
-        { name: "Partners", href: "partners" },
-        { name: "About Us", href: "about-us" },
+        { name: "Home", id: "home" },
+        { name: "Hosting Plans", id: "hosting-plans" },
+        { name: "Features", id: "features" },
+        // { name: "Partners", id: "partners" },
+        { name: "About Us", id: "faqs" },
     ];
 
+    // These section ids only exist on the home page. If we're already there,
+    // scroll in place; otherwise navigate home first, then scroll — never
+    // exposing a "#id" hash in the address bar.
     const handleNavClick = (e, id) => {
         e.preventDefault();
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
         setIsMenuOpen(false);
+        if (window.location.pathname === "/") {
+            document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+        } else {
+            router.visit("/", {
+                onSuccess: () => {
+                    requestAnimationFrame(() => {
+                        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+                    });
+                },
+            });
+        }
     };
 
     return (
@@ -119,8 +132,8 @@ export default function NavBarSection() {
                     {navLinks.map((link) => (
                         <a
                             key={link.name}
-                            href={link.href}
-                            onClick={(e) => handleNavClick(e, link.href)}
+                            href="/"
+                            onClick={(e) => handleNavClick(e, link.id)}
                             className="hover:text-slate-900 dark:hover:text-white transition-colors"
                         >
                             {link.name}
@@ -196,8 +209,8 @@ export default function NavBarSection() {
                         {navLinks.map((link) => (
                             <a
                                 key={link.name}
-                                href={link.href}
-                                onClick={(e) => handleNavClick(e, link.href)}
+                                href="/"
+                                onClick={(e) => handleNavClick(e, link.id)}
                                 className="text-xl font-semibold text-slate-800 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                             >
                                 {link.name}

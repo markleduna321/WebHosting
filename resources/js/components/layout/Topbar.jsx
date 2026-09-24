@@ -41,13 +41,13 @@ export default function Topbar({ title = 'Dashboard', subtitle }) {
                     Upgrade plan
                 </Link>
 
-                <button
+                {/* <button
                     type="button"
                     aria-label="Notifications"
                     className={`relative p-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors ${FOCUS_RING}`}
                 >
                     <Bell aria-hidden="true" className="w-5 h-5" />
-                </button>
+                </button> */}
 
                 <Link
                     href="/account-billing?tab=profile"
