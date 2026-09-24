@@ -99,12 +99,18 @@ class WebsiteController extends Controller
             return response()->json(['output' => "Error: Website storage path not found. Please deploy the website first.\n"], 404);
         }
 
-        $envPath = ['PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'];
+        // Prevent environment variable bleeding from the parent WebHosting project
+        // by explicitly unsetting them in the child process environment.
+        $dotenv = \Dotenv\Dotenv::createArrayBacked(base_path())->safeLoad();
+        $cleanEnv = [];
+        foreach (array_keys($dotenv) as $key) {
+            $cleanEnv[$key] = false;
+        }
 
         // Run the command
         $process = Process::path($website->storage_path)
-            ->env($envPath)
-            ->timeout(60)
+            ->env($cleanEnv)
+            ->timeout(600)
             ->run($command);
 
         return response()->json([

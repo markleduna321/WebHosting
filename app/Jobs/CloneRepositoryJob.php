@@ -66,8 +66,12 @@ class CloneRepositoryJob implements ShouldQueue
             $extractor->setMaxTotalBytes($diskSpaceLimitMb * 1024 * 1024);
             $stats = $extractor->extract($archivePath, $destination);
 
-            // Environment path setup for binaries
-            $envPath = ['PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'];
+            // Prevent environment variable bleeding from the parent WebHosting project
+            $dotenv = \Dotenv\Dotenv::createArrayBacked(base_path())->safeLoad();
+            $envPath = [];
+            foreach (array_keys($dotenv) as $key) {
+                $envPath[$key] = false;
+            }
 
             // =========================================================
             // 1. COMPOSER / LARAVEL BUILD STEP
