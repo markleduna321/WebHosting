@@ -2,11 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Exceptions\GithubAuthorizationException;
-use App\Exceptions\RepositoryExtractionException;
 use App\Models\Website;
 use App\Services\GithubService;
 use App\Services\RepositoryArchiveExtractor;
+use App\Services\StudentDatabaseService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -22,13 +21,16 @@ class CloneRepositoryJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
-    public int $timeout = 600; // Increased to 10m to allow npm builds
+    public int $timeout = 600;
     public array $backoff = [10, 60];
 
     public function __construct(public readonly Website $website) {}
 
-    public function handle(GithubService $github, RepositoryArchiveExtractor $extractor): void
-    {
+    public function handle(
+        GithubService $github, 
+        RepositoryArchiveExtractor $extractor,
+        StudentDatabaseService $dbService
+    ): void {
         $website = $this->website->fresh();
         if (! $website) return;
 
@@ -66,21 +68,58 @@ class CloneRepositoryJob implements ShouldQueue
             $extractor->setMaxTotalBytes($diskSpaceLimitMb * 1024 * 1024);
             $stats = $extractor->extract($archivePath, $destination);
 
-            // Prevent environment variable bleeding from the parent WebHosting project
-            $dotenv = \Dotenv\Dotenv::createArrayBacked(base_path())->safeLoad();
-            $envPath = [];
-            foreach (array_keys($dotenv) as $key) {
-                $envPath[$key] = false;
-            }
+            // Set ownership to the site user early
+            Process::run("chown -R caleho:caleho {$destination}");
+            Process::run("chmod -R 755 {$destination}");
 
             // =========================================================
-            // 1. COMPOSER / LARAVEL BUILD STEP
+            // 1. PHP / LARAVEL BUILD & MYSQL MIGRATIONS STEP
             // =========================================================
+            $isLaravel = File::exists("{$destination}/artisan");
+
             if (File::exists("{$destination}/composer.json")) {
-                Process::path($destination)->env($envPath)->run('composer install --no-dev --optimize-autoloader');
+                $this->runAsSiteUser("cd {$destination} && composer install --no-dev --optimize-autoloader");
+
+                // Environment file setup
                 if (File::exists("{$destination}/.env.example") && ! File::exists("{$destination}/.env")) {
                     File::copy("{$destination}/.env.example", "{$destination}/.env");
-                    Process::path($destination)->env($envPath)->run('php artisan key:generate --force');
+                    $this->runAsSiteUser("cd {$destination} && php artisan key:generate --force");
+                }
+
+                // Provision MySQL Database and Inject Credentials
+                if ($isLaravel) {
+                    $user = $website->user;
+                    $studentDb = $user->studentDatabases()->where('label', $website->subdomain)->first();
+                    
+                    if (! $studentDb) {
+                        try {
+                            $studentDb = $dbService->createForUser($user, [
+                                'name' => $website->subdomain,
+                                'password' => \Illuminate\Support\Str::password(16),
+                            ]);
+                        } catch (Throwable $dbErr) {
+                            Log::warning("MySQL provisioning failed for {$website->subdomain}: " . $dbErr->getMessage());
+                        }
+                    }
+
+                    if ($studentDb && File::exists("{$destination}/.env")) {
+                        $envContent = File::get("{$destination}/.env");
+                        $replacements = [
+                            '/DB_CONNECTION=.*/' => 'DB_CONNECTION=mysql',
+                            '/DB_HOST=.*/' => 'DB_HOST=127.0.0.1',
+                            '/DB_PORT=.*/' => 'DB_PORT=' . $studentDb->port,
+                            '/DB_DATABASE=.*/' => 'DB_DATABASE=' . $studentDb->db_name,
+                            '/DB_USERNAME=.*/' => 'DB_USERNAME=' . $studentDb->db_user,
+                            '/DB_PASSWORD=.*/' => 'DB_PASSWORD="' . addslashes($studentDb->db_password) . '"',
+                        ];
+                        foreach ($replacements as $pattern => $replacement) {
+                            $envContent = preg_replace($pattern, $replacement, $envContent);
+                        }
+                        File::put("{$destination}/.env", $envContent);
+                    }
+
+                    $this->runAsSiteUser("cd {$destination} && php artisan migrate --force");
+                    $this->runAsSiteUser("cd {$destination} && chmod -R 775 storage bootstrap/cache");
                 }
             }
 
@@ -88,36 +127,35 @@ class CloneRepositoryJob implements ShouldQueue
             // 2. NODE / JAVASCRIPT BUILD STEP
             // =========================================================
             if (File::exists("{$destination}/package.json")) {
-                Process::path($destination)->env($envPath)->run('npm install');
+                $this->runAsSiteUser("cd {$destination} && npm install");
+                $this->runAsSiteUser("cd {$destination} && npm run build");
 
-                // Fallback attempt with npx vite build if standard script fails or outputs no index.html
-                Process::path($destination)->env($envPath)->run('npm run build');
-                // Detect Next.js projects and run static export if needed
+                // Next.js static export detection
                 $packageJson = json_decode(File::get("{$destination}/package.json"), true);
                 if (isset($packageJson['dependencies']['next']) || isset($packageJson['devDependencies']['next'])) {
-                    Process::path($destination)->env($envPath)->run('npm run export || npx next export');
+                    $this->runAsSiteUser("cd {$destination} && npm run export || npx next export");
                     $nextExportPath = "{$destination}/out";
                     if (File::exists("{$nextExportPath}/index.html")) {
                         $buildOutput = $nextExportPath;
                     }
                 }
 
-                // Determine framework static output target containing index.html
-                if (!isset($buildOutput) || $buildOutput === null) {
-                    $buildOutput = match (true) {
-                        File::exists("{$destination}/dist/index.html") => "{$destination}/dist",
-                        File::exists("{$destination}/.output/public/index.html") => "{$destination}/.output/public",
-                        File::exists("{$destination}/build/index.html") => "{$destination}/build",
-                        File::exists("{$destination}/out/index.html") => "{$destination}/out",
-                        // Fallback check for assets-only output: attempt direct Vite SPA fallback
-                        File::exists("{$destination}/vite.config.ts") || File::exists("{$destination}/vite.config.js") => $this->runViteFallback($destination, $envPath),
-                        default => null,
-                    };
-                }
+                if (! $isLaravel) {
+                    if (!isset($buildOutput) || $buildOutput === null) {
+                        $buildOutput = match (true) {
+                            File::exists("{$destination}/dist/index.html") => "{$destination}/dist",
+                            File::exists("{$destination}/.output/public/index.html") => "{$destination}/.output/public",
+                            File::exists("{$destination}/build/index.html") => "{$destination}/build",
+                            File::exists("{$destination}/out/index.html") => "{$destination}/out",
+                            File::exists("{$destination}/vite.config.ts") || File::exists("{$destination}/vite.config.js") => $this->runViteFallback($destination),
+                            default => null,
+                        };
+                    }
 
-                if ($buildOutput && File::exists($buildOutput)) {
-                    File::deleteDirectory("{$destination}/public");
-                    @symlink($buildOutput, "{$destination}/public");
+                    if ($buildOutput && File::exists($buildOutput)) {
+                        File::deleteDirectory("{$destination}/public");
+                        @symlink($buildOutput, "{$destination}/public");
+                    }
                 }
             }
 
@@ -127,6 +165,10 @@ class CloneRepositoryJob implements ShouldQueue
             if (! File::exists("{$destination}/public")) {
                 @symlink($destination, "{$destination}/public");
             }
+
+            // Final permissions fix
+            Process::run("chown -R caleho:caleho {$destination}");
+            Process::run("chmod -R 755 {$destination}");
 
             // =========================================================
             // 4. VERIFY DEPLOYMENT INTEGRITY
@@ -164,9 +206,21 @@ class CloneRepositoryJob implements ShouldQueue
         }
     }
 
-    private function runViteFallback(string $destination, array $envPath): ?string
+    private function runAsSiteUser(string $command): void
     {
-        Process::path($destination)->env($envPath)->run('npx vite build');
+        $escapedCommand = addslashes($command);
+        $result = Process::run("su - caleho -s /bin/bash -c \"{$escapedCommand}\"");
+
+        if (! $result->successful()) {
+            Log::warning("Command failed during execution: {$command}", [
+                'error' => $result->errorOutput()
+            ]);
+        }
+    }
+
+    private function runViteFallback(string $destination): ?string
+    {
+        $this->runAsSiteUser("cd {$destination} && npx vite build");
         if (File::exists("{$destination}/dist/index.html")) {
             return "{$destination}/dist";
         }
