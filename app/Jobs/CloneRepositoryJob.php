@@ -92,17 +92,28 @@ class CloneRepositoryJob implements ShouldQueue
 
                 // Fallback attempt with npx vite build if standard script fails or outputs no index.html
                 Process::path($destination)->env($envPath)->run('npm run build');
+                // Detect Next.js projects and run static export if needed
+                $packageJson = json_decode(File::get("{$destination}/package.json"), true);
+                if (isset($packageJson['dependencies']['next']) || isset($packageJson['devDependencies']['next'])) {
+                    Process::path($destination)->env($envPath)->run('npm run export || npx next export');
+                    $nextExportPath = "{$destination}/out";
+                    if (File::exists("{$nextExportPath}/index.html")) {
+                        $buildOutput = $nextExportPath;
+                    }
+                }
 
                 // Determine framework static output target containing index.html
-                $buildOutput = match (true) {
-                    File::exists("{$destination}/dist/index.html") => "{$destination}/dist",
-                    File::exists("{$destination}/.output/public/index.html") => "{$destination}/.output/public",
-                    File::exists("{$destination}/build/index.html") => "{$destination}/build",
-                    File::exists("{$destination}/out/index.html") => "{$destination}/out",
-                    // Fallback check for assets-only output: attempt direct Vite SPA fallback
-                    File::exists("{$destination}/vite.config.ts") || File::exists("{$destination}/vite.config.js") => $this->runViteFallback($destination, $envPath),
-                    default => null,
-                };
+                if (!isset($buildOutput) || $buildOutput === null) {
+                    $buildOutput = match (true) {
+                        File::exists("{$destination}/dist/index.html") => "{$destination}/dist",
+                        File::exists("{$destination}/.output/public/index.html") => "{$destination}/.output/public",
+                        File::exists("{$destination}/build/index.html") => "{$destination}/build",
+                        File::exists("{$destination}/out/index.html") => "{$destination}/out",
+                        // Fallback check for assets-only output: attempt direct Vite SPA fallback
+                        File::exists("{$destination}/vite.config.ts") || File::exists("{$destination}/vite.config.js") => $this->runViteFallback($destination, $envPath),
+                        default => null,
+                    };
+                }
 
                 if ($buildOutput && File::exists($buildOutput)) {
                     File::deleteDirectory("{$destination}/public");
