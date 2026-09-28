@@ -1,6 +1,8 @@
-import { HardDrive, Cpu, Layers, MemoryStick, Globe, Info, Rocket } from "lucide-react";
+import { HardDrive, Cpu, Layers, MemoryStick, Globe, Info, Rocket, Database } from "lucide-react";
 import { Link, usePage } from "@inertiajs/react";
 import React from "react";
+import { useGetWebsitesQuery } from "@/features/websites/websitesApi";
+import { useGetDatabasesQuery } from "@/features/databases/databasesApi";
 
 function MiniSparkline({ color = "#7c3aed" }) {
     // Small deterministic-looking wobble line, purely decorative.
@@ -57,6 +59,9 @@ export default function PlanResourceUsageSection() {
     const { auth } = usePage().props;
     const plan = auth?.user?.plan;
 
+    const { data: sites = [] } = useGetWebsitesQuery(undefined, { skip: !plan });
+    const { data: databases = [] } = useGetDatabasesQuery(undefined, { skip: !plan });
+
     if (!plan) {
         return (
             <div className="rounded-xl border border-gray-200 bg-white p-6 flex-1">
@@ -86,6 +91,20 @@ export default function PlanResourceUsageSection() {
         );
     }
 
+    const diskMaxGB = (plan.disk_space_mb / 1024).toFixed(0);
+    // Mock current usage for disk since no real API exists for it yet
+    const diskUsedGB = (databases.length * 0.1 + sites.length * 0.2).toFixed(2);
+    
+    const dbMax = plan.max_databases;
+    const dbUsed = databases.length;
+    
+    const sitesMax = plan.max_websites;
+    const sitesUsed = sites.length;
+    
+    const diskPercentage = diskMaxGB > 0 ? Math.min(1, diskUsedGB / diskMaxGB) : 0;
+    const dbPercentage = dbMax > 0 ? Math.min(1, dbUsed / dbMax) : 0;
+    const sitesPercentage = sitesMax > 0 ? Math.min(1, sitesUsed / sitesMax) : 0;
+
     return (
         <div className="rounded-xl border border-gray-200 bg-white p-6 flex-1">
             <div className="flex items-center justify-between mb-6">
@@ -98,7 +117,7 @@ export default function PlanResourceUsageSection() {
             </div>
 
             <div className="flex items-stretch gap-8">
-                {/* Left: disk usage ring + inodes + websites */}
+                {/* Left: disk usage ring + databases + websites */}
                 <div className="flex items-center gap-4">
                     <div className="relative w-16 h-16 shrink-0">
                         <svg viewBox="0 0 44 44" className="w-16 h-16 -rotate-90">
@@ -118,7 +137,7 @@ export default function PlanResourceUsageSection() {
                                 stroke="#16a34a"
                                 strokeWidth="4"
                                 strokeDasharray={2 * Math.PI * 18}
-                                strokeDashoffset={2 * Math.PI * 18 * (1 - 0.19)}
+                                strokeDashoffset={2 * Math.PI * 18 * (1 - diskPercentage)}
                                 strokeLinecap="round"
                             />
                             <circle
@@ -129,7 +148,7 @@ export default function PlanResourceUsageSection() {
                                 stroke="#7c3aed"
                                 strokeWidth="4"
                                 strokeDasharray={2 * Math.PI * 18}
-                                strokeDashoffset={2 * Math.PI * 18 * (1 - 0.05)}
+                                strokeDashoffset={2 * Math.PI * 18 * (1 - dbPercentage)}
                                 strokeLinecap="round"
                                 transform="rotate(68.4 22 22)"
                             />
@@ -141,7 +160,7 @@ export default function PlanResourceUsageSection() {
                                 stroke="#2563eb"
                                 strokeWidth="4"
                                 strokeDasharray={2 * Math.PI * 18}
-                                strokeDashoffset={2 * Math.PI * 18 * (1 - 0.5)}
+                                strokeDashoffset={2 * Math.PI * 18 * (1 - sitesPercentage)}
                                 strokeLinecap="round"
                                 transform="rotate(86.4 22 22)"
                             />
@@ -151,23 +170,23 @@ export default function PlanResourceUsageSection() {
                         <MetricRow
                             icon={<HardDrive className="w-4 h-4" />}
                             label="Disk usage"
-                            value="0.99 GB"
+                            value={`${diskUsedGB} GB`}
                             valueColor="text-purple-600"
-                            suffix="20 GB"
+                            suffix={`${diskMaxGB} GB`}
                         />
                         <MetricRow
-                            icon={<Layers className="w-4 h-4" />}
-                            label="Inodes"
-                            value="77.06K"
+                            icon={<Database className="w-4 h-4" />}
+                            label="Databases"
+                            value={dbUsed}
                             valueColor="text-green-600"
-                            suffix="400K"
+                            suffix={dbMax}
                         />
                         <MetricRow
                             icon={<Globe className="w-4 h-4" />}
                             label="Websites"
-                            value="4"
+                            value={sitesUsed}
                             valueColor="text-blue-600"
-                            suffix="3"
+                            suffix={sitesMax}
                         />
                     </div>
                 </div>

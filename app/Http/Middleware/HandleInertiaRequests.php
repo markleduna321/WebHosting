@@ -49,6 +49,9 @@ class HandleInertiaRequests extends Middleware
                     'plan' => $plan ? [
                         'slug' => $plan->slug,
                         'name' => $plan->name,
+                        'max_websites' => $plan->max_websites,
+                        'max_databases' => $plan->max_databases,
+                        'disk_space_mb' => $plan->disk_space_mb,
                     ] : null,
                     'pending_subscription' => $pending ? [
                         'status' => $pending->status,
