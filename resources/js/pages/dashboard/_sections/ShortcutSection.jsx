@@ -10,7 +10,12 @@ const SHORTCUTS = [
     { label: "Domains",        icon: Globe,     href: "/site-domain?tab=domains" },
     { label: "Databases",      icon: Database,  href: "/files-database?tab=databases" },
     { label: "phpMyAdmin",      icon: Table,  href: "/files-database?tab=databases" },
-    { label: "Refer a friend", icon: Gift,       href: "/account-billing?tab=referrals" },
+    {
+        label: "Refer a friend",
+        icon: Gift,
+        href: "/account-billing?tab=referrals",
+        disabled: true,
+    },
 ];
 
 const STATUS_ITEMS = [
@@ -84,19 +89,39 @@ export default function ShortcutSection() {
                     Deploy New Site
                 </Button>
 
-                {shortcuts.map(({ label, icon: Icon, href }) => (
-                    <Link key={label} href={href}>
+                {shortcuts.map(({ label, icon: Icon, href, disabled }) => {
+                    const shortcutButton = (
                         <Button
                             variant="light"
                             size="md"
                             outlined
-                            className="rounded-lg gap-1.5 text-slate-700"
+                            onClick={
+                                disabled
+                                    ? (event) => {
+                                          event.preventDefault();
+                                          message.info("Temporarily unavailable.");
+                                      }
+                                    : undefined
+                            }
+                            className={`rounded-lg gap-1.5 text-slate-700 ${
+                                disabled ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
                         >
                             <Icon className="w-3.5 h-3.5 text-slate-500" />
                             {label}
                         </Button>
-                    </Link>
-                ))}
+                    );
+
+                    return disabled ? (
+                        <span key={label} className="inline-flex">
+                            {shortcutButton}
+                        </span>
+                    ) : (
+                        <Link key={label} href={href}>
+                            {shortcutButton}
+                        </Link>
+                    );
+                })}
             </div>
 
             {/* Status row */}
