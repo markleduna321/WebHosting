@@ -11,6 +11,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.31",
         "laravel/tinker": "^2.9",
+        "resend/resend-php": "^1.16",
         "spatie/laravel-permission": "^6.25",
         "tightenco/ziggy": "^2.0"
     },
