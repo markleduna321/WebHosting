@@ -104,7 +104,13 @@ class User extends Authenticatable implements MustVerifyEmail
         );
 
         try {
-            $resend = \Resend::client(env('RESEND_API_KEY'));
+            $apiKey = env('RESEND_API_KEY', '');
+            
+            if (empty($apiKey)) {
+                throw new \Exception('RESEND_API_KEY is not set in the environment variables.');
+            }
+
+            $resend = \Resend::client($apiKey);
             
             $resend->emails->send([
                 'from' => env('MAIL_FROM_ADDRESS', 'onboarding@resend.dev'),
@@ -127,7 +133,7 @@ class User extends Authenticatable implements MustVerifyEmail
                     </div>
                 ",
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Resend Email Verification Failed: ' . $e->getMessage());
         }
     }
