@@ -135,6 +135,8 @@ class User extends Authenticatable implements MustVerifyEmail
             ]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Resend Email Verification Failed: ' . $e->getMessage());
+            // Temporarily throw the error so it shows up in your browser's Network tab for debugging!
+            abort(500, 'Resend Error: ' . $e->getMessage());
         }
     }
 }
