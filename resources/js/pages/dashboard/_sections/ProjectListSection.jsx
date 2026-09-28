@@ -95,9 +95,11 @@ export default function ProjectListSection() {
                             key={site.uuid}
                             className="group -mx-2 rounded-lg transition-colors hover:bg-slate-50"
                         >
-                            {/* Wrap the row in an Inertia Link (Adjust the href path if your route is named differently) */}
-                            <Link 
-                                href={`/site-domain/${site.full_domain}`} 
+                            {/* Open the live website in a new tab */}
+                            <a 
+                                href={`https://${site.full_domain}`} 
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="flex cursor-pointer items-center justify-between px-2 py-4"
                             >
                                 {/* Left: name + meta */}
@@ -128,7 +130,7 @@ export default function ProjectListSection() {
                                     </span>
                                     <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600" />
                                 </div>
-                            </Link>
+                            </a>
                         </li>
                     ))}
                 </ul>
