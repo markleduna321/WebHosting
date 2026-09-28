@@ -56,9 +56,17 @@ class Website extends Model
             $website->uuid ??= (string) Str::uuid();
         });
 
-        // Path is derived from the uuid only, never from user input.
         static::deleting(function (self $website) {
-            File::deleteDirectory(storage_path('app/websites/'.$website->uuid));
+            // Delete the actual deployed files in htdocs
+            if (!empty($website->storage_path) && File::exists($website->storage_path)) {
+                File::deleteDirectory($website->storage_path);
+            }
+            
+            // Fallback: Delete old UUID-based directory just in case
+            $legacyPath = storage_path('app/websites/'.$website->uuid);
+            if (File::exists($legacyPath)) {
+                File::deleteDirectory($legacyPath);
+            }
         });
     }
 
