@@ -27,7 +27,7 @@ class DomainController extends Controller
 
     public function store(StoreDomainRequest $request)
     {
-        $website = $request->user()->websites()->findOrFail($request->website_id);
+        $website = $request->user()->websites()->where('uuid', $request->website_uuid)->firstOrFail();
 
         $domain = $website->domains()->create([
             'domain_name' => $request->domain_name,

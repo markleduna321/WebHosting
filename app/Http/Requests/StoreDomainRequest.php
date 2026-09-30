@@ -22,7 +22,7 @@ class StoreDomainRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'website_id' => ['required', 'exists:websites,id'],
+            'website_uuid' => ['required', 'exists:websites,uuid'],
             'domain_name' => ['required', 'string', 'max:255', 'unique:domains,domain_name', 'regex:/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i'],
         ];
     }

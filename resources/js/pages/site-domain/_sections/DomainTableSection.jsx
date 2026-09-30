@@ -136,7 +136,7 @@ export default function DomainTableSection() {
         if (!trimmed || !selectedSite) return;
 
         try {
-            await addDomain({ domain_name: trimmed, website_id: selectedSite.id }).unwrap();
+            await addDomain({ domain_name: trimmed, website_uuid: selectedSite.uuid }).unwrap();
             setDomainInput("");
             setSelectedSite(null);
         } catch (err) {
