@@ -41,7 +41,8 @@ class CheckoutService
                     'user_id' => (string) $user->id,
                     'plan_slug' => $plan->slug,
                     'addons' => implode(',', $addonIds),
-                ]
+                ],
+                'CALEHO HOST'
             );
 
             $intentId = $intent['data']['id'];

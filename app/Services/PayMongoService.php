@@ -6,6 +6,7 @@ use App\Exceptions\PaymentException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /**
  * Thin client over the PayMongo v1 API.
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Log;
  */
 class PayMongoService
 {
-    public function createPaymentIntent(int $amountCentavos, string $description, array $metadata = []): array
+    public function createPaymentIntent(int $amountCentavos, string $description, array $metadata = [], string $statementDescriptor = 'Caleho Host'): array
     {
         return $this->post('/payment_intents', [
             'data' => [
@@ -25,6 +26,7 @@ class PayMongoService
                     'currency' => 'PHP',
                     'payment_method_allowed' => ['qrph'],
                     'description' => $description,
+                    'statement_descriptor' => Str::limit($statementDescriptor, 22, ''),
                     'metadata' => $metadata,
                 ],
             ],

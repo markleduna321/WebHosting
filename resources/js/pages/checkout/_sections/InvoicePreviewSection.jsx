@@ -70,8 +70,8 @@ export default function InvoicePreviewSection({
 
     const addonsTotal = useMemo(() => {
         return selectedAddOns.reduce((total, addOn) => {
-            const addOnPrice = months > 1 && addOn.period === "month" 
-                ? addOn.price * months 
+            const addOnPrice = months > 1 && addOn.period === "month"
+                ? addOn.price * months
                 : addOn.price;
             return total + addOnPrice;
         }, 0);
@@ -133,8 +133,8 @@ export default function InvoicePreviewSection({
                             disabled={isLoading}
                             aria-pressed={active}
                             className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-40 ${active
-                                    ? "bg-white text-slate-900 shadow-sm"
-                                    : "text-slate-500 hover:text-slate-700"
+                                ? "bg-white text-slate-900 shadow-sm"
+                                : "text-slate-500 hover:text-slate-700"
                                 }`}
                         >
                             {option.label}

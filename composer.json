@@ -13,6 +13,7 @@
         "laravel/tinker": "^2.9",
         "resend/resend-php": "^1.16",
         "spatie/laravel-permission": "^6.25",
+        "srmklive/paypal": "^3.0",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {
