@@ -22,6 +22,13 @@ export const domainsApi = api.injectEndpoints({
             }),
             invalidatesTags: ['Domain'],
         }),
+        verifyDomain: builder.mutation({
+            query: (id) => ({
+                url: `/domains/${id}/verify`,
+                method: 'POST',
+            }),
+            invalidatesTags: ['Domain'],
+        }),
     }),
 });
 
@@ -29,4 +36,5 @@ export const {
     useGetDomainsQuery,
     useAddDomainMutation,
     useDeleteDomainMutation,
+    useVerifyDomainMutation,
 } = domainsApi;

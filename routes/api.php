@@ -106,5 +106,6 @@ Route::middleware('auth:sanctum')->group(function () {
         ->name('api.two-factor.resend');
 
     // Domains
+    Route::post('domains/{domain}/verify', [\App\Http\Controllers\Api\DomainController::class, 'verify'])->name('api.domains.verify');
     Route::apiResource('domains', \App\Http\Controllers\Api\DomainController::class)->only(['index', 'store', 'destroy']);
 });

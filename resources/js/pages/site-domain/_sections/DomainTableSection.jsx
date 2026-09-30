@@ -6,7 +6,8 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { useGetWebsitesQuery } from "@/features/websites/websitesApi";
-import { useGetDomainsQuery, useAddDomainMutation, useDeleteDomainMutation } from "@/features/domains/domainsApi";
+import { useGetDomainsQuery, useAddDomainMutation, useDeleteDomainMutation, useVerifyDomainMutation } from "@/features/domains/domainsApi";
+import { message } from "antd";
 
 const BADGE_STYLES = {
     verified: "border-green-200 bg-green-50 text-green-600",
@@ -59,10 +60,20 @@ function DomainCell({ row }) {
 
 function ActionsCell({ row, onShowGuide }) {
     const [deleteDomain, { isLoading: isDeleting }] = useDeleteDomainMutation();
+    const [verifyDomain, { isLoading: isVerifying }] = useVerifyDomainMutation();
 
     const handleDelete = () => {
         if (confirm("Are you sure you want to remove this domain?")) {
             deleteDomain(row.id);
+        }
+    };
+
+    const handleVerify = async () => {
+        try {
+            await verifyDomain(row.id).unwrap();
+            message.success("Domain verified successfully!");
+        } catch (err) {
+            message.error(err?.data?.message || "Verification failed. DNS still propagating.");
         }
     };
 
@@ -94,10 +105,14 @@ function ActionsCell({ row, onShowGuide }) {
             {/* Refresh — for pending / failed */}
             {(row.status === "pending" || row.status === "failed") && (
                 <button
+                    onClick={handleVerify}
+                    disabled={isVerifying}
                     aria-label="Retry"
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-50 transition-colors"
+                    className={`p-1.5 rounded-lg transition-colors ${
+                        isVerifying ? "text-blue-500 bg-blue-50" : "text-slate-400 hover:text-blue-500 hover:bg-slate-50"
+                    }`}
                 >
-                    <RefreshCw className="w-4 h-4" />
+                    <RefreshCw className={`w-4 h-4 ${isVerifying ? "animate-spin" : ""}`} />
                 </button>
             )}
 
