@@ -66,6 +66,7 @@ class HandleInertiaRequests extends Middleware
                         'username' => $github->github_username,
                         'avatar_url' => $github->avatar_url,
                     ] : null,
+                    'two_factor_enabled' => (bool) $user->two_factor_enabled,
                 ] : null,
             ],
             'flash' => [

@@ -1,117 +1,140 @@
 import { Download } from "lucide-react";
 import React from "react";
+import { usePage } from "@inertiajs/react";
 import Button from "@/components/ui/Button";
 import Table from "@/components/ui/Table";
 
-const INVOICES = [
-    {
-        id: "INV-2026-08",
-        period: "August 2026",
-        issued: "Issued Aug 1, 2026",
-        paidWith: "GCash ●●●● 4821",
-        amount: "₱199.00",
-        status: "paid",
-    },
-    {
-        id: "INV-2026-07",
-        period: "July 2026",
-        issued: "Issued Jul 1, 2026",
-        paidWith: "GCash ●●●● 4821",
-        amount: "₱199.00",
-        status: "paid",
-    },
-    {
-        id: "INV-2026-06",
-        period: "June 2026",
-        issued: "Issued Jun 1, 2026",
-        paidWith: "Visa ●●●● 0294",
-        amount: "₱199.00",
-        status: "paid",
-    },
-    {
-        id: "INV-2026-05",
-        period: "May 2026",
-        issued: "Issued May 1, 2026",
-        paidWith: "Visa ●●●● 0294",
-        amount: "₱99.00",
-        status: "paid",
-    },
-    {
-        id: "INV-2026-04",
-        period: "April 2026",
-        issued: "Issued Apr 2, 2026",
-        paidWith: "Maya ●●●● 7710",
-        amount: "₱99.00",
-        status: "failed",
-    },
-];
+/**
+ * Format a date string for display.
+ */
+function formatDate(dateStr) {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
+}
+
+/**
+ * Format the billing cycle label for display.
+ */
+function formatCycleLabel(cycle) {
+    switch (cycle) {
+        case "monthly":
+        case "1":
+            return "Monthly";
+        case "annual":
+        case "12":
+            return "Annual";
+        case "24":
+            return "2-Year";
+        case "48":
+            return "4-Year";
+        default:
+            return cycle;
+    }
+}
 
 const COLUMNS = [
     {
         header: "Invoice",
-        accessor: "id",
+        accessor: "uuid",
         render: (row) => (
             <span className="text-sm font-semibold text-slate-800">
-                {row.id}
+                {row.uuid?.substring(0, 8).toUpperCase()}
             </span>
         ),
     },
     {
-        header: "Period",
-        accessor: "period",
+        header: "Plan",
+        accessor: "plan",
         render: (row) => (
             <div>
-                <p className="text-sm text-slate-800">{row.period}</p>
-                <p className="text-xs text-slate-400">{row.issued}</p>
+                <p className="text-sm text-slate-800">
+                    {row.plan?.name ?? "—"}
+                </p>
+                <p className="text-xs text-slate-400">
+                    {formatCycleLabel(row.billing_cycle)}
+                </p>
             </div>
         ),
     },
     {
-        header: "Paid with",
-        accessor: "paidWith",
+        header: "Date",
+        accessor: "created_at",
         render: (row) => (
-            <span className="text-sm text-slate-700">{row.paidWith}</span>
+            <div>
+                <p className="text-sm text-slate-800">
+                    {row.paid_at
+                        ? formatDate(row.paid_at)
+                        : formatDate(row.created_at)}
+                </p>
+                <p className="text-xs text-slate-400">
+                    Created {formatDate(row.created_at)}
+                </p>
+            </div>
         ),
     },
     {
         header: "Amount",
         accessor: "amount",
-        render: (row) => (
-            <span className="text-sm text-slate-800">{row.amount}</span>
-        ),
+        render: (row) => {
+            const symbol = row.currency === "PHP" ? "₱" : "$";
+            return (
+                <span className="text-sm text-slate-800">
+                    {symbol}
+                    {Number(row.amount).toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                    })}
+                </span>
+            );
+        },
     },
     {
         header: "Status",
         accessor: "status",
-        render: (row) =>
-            row.status === "paid" ? (
-                <span className="inline-flex items-center rounded-full border border-green-300 px-2.5 py-0.5 text-xs font-medium text-green-600">
-                    Paid
+        render: (row) => {
+            const map = {
+                paid: {
+                    label: "Paid",
+                    className:
+                        "border-green-300 text-green-600",
+                },
+                failed: {
+                    label: "Failed",
+                    className:
+                        "border-red-300 text-red-500",
+                },
+                pending: {
+                    label: "Pending",
+                    className:
+                        "border-yellow-300 text-yellow-600",
+                },
+                expired: {
+                    label: "Expired",
+                    className:
+                        "border-gray-300 text-gray-500",
+                },
+            };
+            const s = map[row.status] || map.pending;
+            return (
+                <span
+                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${s.className}`}
+                >
+                    {s.label}
                 </span>
-            ) : (
-                <span className="inline-flex items-center rounded-full border border-red-300 px-2.5 py-0.5 text-xs font-medium text-red-500">
-                    Failed
-                </span>
-            ),
-    },
-    {
-        header: "Receipt",
-        accessor: "receipt",
-        render: () => (
-            <Button
-                variant="light"
-                size="xs"
-                outlined
-                className="rounded-lg gap-1.5 text-blue-600 border-0 hover:bg-blue-50"
-            >
-                <Download className="w-3.5 h-3.5" />
-                Download
-            </Button>
-        ),
+            );
+        },
     },
 ];
 
 export default function SubscriptionInvoiceHistorySection({ onSelectInvoice }) {
+    const { invoices } = usePage().props;
+
+    const data = invoices ?? [];
+
     return (
         <div className="rounded-xl border border-gray-200 bg-white px-6 py-5">
             {/* Header */}
@@ -119,17 +142,19 @@ export default function SubscriptionInvoiceHistorySection({ onSelectInvoice }) {
                 <h2 className="text-sm font-bold text-slate-900">
                     Invoice history
                 </h2>
-                <Button
-                    variant="light"
-                    size="xs"
-                    outlined
-                    className="rounded-lg border-0 text-blue-600 hover:bg-blue-50"
-                >
-                    Export all
-                </Button>
             </div>
 
-            <Table columns={COLUMNS} data={INVOICES} onRowClick={onSelectInvoice} />
+            {data.length === 0 ? (
+                <p className="text-sm text-slate-400 py-4 text-center">
+                    No invoices yet. Your payment history will appear here.
+                </p>
+            ) : (
+                <Table
+                    columns={COLUMNS}
+                    data={data}
+                    onRowClick={onSelectInvoice}
+                />
+            )}
         </div>
     );
 }

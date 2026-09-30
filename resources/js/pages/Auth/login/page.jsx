@@ -1,4 +1,4 @@
-import { Link, useForm } from "@inertiajs/react";
+import { Head, Link, useForm } from "@inertiajs/react";
 import { ArrowLeft, CheckCircle, Eye, EyeOff } from "lucide-react";
 import React, { useState } from "react";
 
@@ -19,6 +19,7 @@ export default function Page() {
 
     return (
         <div className="flex min-h-screen w-full font-sans antialiased">
+            <Head title="Login" />
             {/* Left Branding Panel */}
             <div className="hidden lg:flex lg:w-3/5 flex-col justify-between bg-[#0B0F19] bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] p-12 text-white relative">
                 {/* Brand Header */}
@@ -61,7 +62,7 @@ export default function Page() {
                         <li className="flex items-start gap-2">
                             <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                             <span>
-                                Free SSL and an asuratechhost.app subdomain on
+                                Free SSL and an caleho.cloud subdomain on
                                 every plan
                             </span>
                         </li>
@@ -75,7 +76,7 @@ export default function Page() {
                         <li className="flex items-start gap-2">
                             <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                             <span>
-                                Verified student pricing starting at ₱49/month
+                                Verified student pricing starting at ₱129/month
                             </span>
                         </li>
                     </ul>
@@ -102,7 +103,7 @@ export default function Page() {
                     {/* Form Header */}
                     <div className="mb-10">
                         <h2 className="text-3xl font-extrabold text-black">
-                            Log in to Asura Host
+                            Log in to CALEHO
                         </h2>
                         <p className="mt-2 text-base text-slate-500">
                             Manage your websites, domains, and deployments.
@@ -245,7 +246,7 @@ export default function Page() {
                             />
                         </svg>
                         Continue with Google
-                    </button> */} 
+                    </button> */}
 
                     {/* Registration Footer */}
                     <p className="mt-8 text-center text-sm text-slate-500">

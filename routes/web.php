@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountBillingController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HostingPlanController;
 use App\Http\Controllers\ProfileController;
@@ -52,9 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/files-database', fn (Request $request) => Inertia::render('file-database/page', [
         'tab' => $request->query('tab'),
     ]))->name('files-database');
-    Route::get('/account-billing', fn (Request $request) => Inertia::render('account-billing/page', [
-        'tab' => $request->query('tab'),
-    ]))->name('account-billing');
+    Route::get('/account-billing', [AccountBillingController::class, 'index'])->name('account-billing');
     Route::get('/deployments', fn () => Inertia::render('deployments/page'))->name('deployments');
     Route::get('/billing', fn () => Inertia::render('billing/page'))->name('billing');
     Route::get('/knowledge-base', fn () => Inertia::render('knowledge-base/page'))->name('knowledge-base');

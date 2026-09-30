@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\PayMongoWebhookController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\StudentDatabaseController;
+use App\Http\Controllers\Api\TwoFactorController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\WebsiteController;
 use App\Http\Controllers\Api\WebsiteFileController;
@@ -89,4 +90,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/checkout/{payment}', [CheckoutController::class, 'show'])
         ->middleware('throttle:120,1')
         ->name('api.checkout.show');
+
+    // Two-Factor Authentication
+    Route::post('/two-factor/enable', [TwoFactorController::class, 'enable'])
+        ->middleware('throttle:5,1')
+        ->name('api.two-factor.enable');
+    Route::post('/two-factor/verify', [TwoFactorController::class, 'verify'])
+        ->middleware('throttle:10,1')
+        ->name('api.two-factor.verify');
+    Route::post('/two-factor/disable', [TwoFactorController::class, 'disable'])
+        ->middleware('throttle:5,1')
+        ->name('api.two-factor.disable');
+    Route::post('/two-factor/resend', [TwoFactorController::class, 'resend'])
+        ->middleware('throttle:3,1')
+        ->name('api.two-factor.resend');
 });
