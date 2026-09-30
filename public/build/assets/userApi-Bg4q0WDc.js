@@ -1,0 +1,1 @@
+import{c as s}from"./app-D8zJFnUL.js";const o=s.injectEndpoints({endpoints:t=>({updateUser:t.mutation({query:e=>({url:"/user",method:"PUT",body:e}),invalidatesTags:["User"]})})}),{useUpdateUserMutation:i}=o;export{i as u};

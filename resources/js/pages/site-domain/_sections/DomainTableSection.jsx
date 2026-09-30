@@ -167,7 +167,7 @@ function SetupGuideModal({ domain, onClose }) {
                         <div className="w-full">
                             <h4 className="text-sm font-semibold text-slate-900">Add an A Record</h4>
                             <p className="mt-1 text-sm text-slate-500 mb-3">
-                                Create a new A Record pointing to our server's IP address. If you already have an A Record for `@`, edit its value.
+                                Create a new A Record pointing to our server's IP address. Set the <strong>TTL to 300</strong> (5 minutes) if possible for faster propagation.
                             </p>
                             
                             <div className="rounded-lg border border-slate-200 overflow-hidden text-sm">
