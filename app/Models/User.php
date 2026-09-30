@@ -148,4 +148,55 @@ class User extends Authenticatable implements MustVerifyEmail
             abort(500, 'Resend Error: ' . $e->getMessage());
         }
     }
+    /**
+     * Send the password reset notification using Resend.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $url = url(route('password.reset', [
+            'token' => $token,
+            'email' => $this->getEmailForPasswordReset(),
+        ], false));
+
+        try {
+            $apiKey = env('RESEND_API_KEY', '');
+            
+            if (empty($apiKey)) {
+                throw new \Exception('RESEND_API_KEY is not set in the environment variables.');
+            }
+
+            $resend = \Resend::client($apiKey);
+            
+            $resend->emails->send([
+                'from' => env('MAIL_FROM_ADDRESS', 'onboarding@resend.dev'),
+                'to' => [$this->email],
+                'subject' => 'Reset Your Password',
+                'html' => "
+                    <div style=\"font-family: sans-serif; max-width: 600px; margin: 0 auto;\">
+                        <h2 style=\"color: #1e293b;\">Password Reset Request</h2>
+                        <p style=\"color: #475569; font-size: 16px; line-height: 1.5;\">
+                            You are receiving this email because we received a password reset request for your account.
+                        </p>
+                        <div style=\"margin: 30px 0;\">
+                            <a href=\"{$url}\" style=\"display: inline-block; padding: 12px 24px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold;\">
+                                Reset Password
+                            </a>
+                        </div>
+                        <p style=\"color: #64748b; font-size: 14px; line-height: 1.5;\">
+                            This password reset link will expire in 60 minutes.
+                        </p>
+                        <p style=\"color: #64748b; font-size: 14px;\">
+                            If you did not request a password reset, no further action is required.
+                        </p>
+                    </div>
+                ",
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Resend Password Reset Failed: ' . $e->getMessage());
+            abort(500, 'Resend Error: ' . $e->getMessage());
+        }
+    }
 }

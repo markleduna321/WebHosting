@@ -137,12 +137,12 @@ export default function Page() {
                                 <label className="block text-sm font-medium text-slate-700">
                                     Password
                                 </label>
-                                <a
-                                    href="#"
+                                <Link
+                                    href={route("password.request")}
                                     className="text-sm font-medium text-blue-600 hover:text-blue-500"
                                 >
                                     Forgot Password?
-                                </a>
+                                </Link>
                             </div>
                             <div className="relative">
                                 <input
