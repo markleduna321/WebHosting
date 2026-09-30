@@ -7,7 +7,7 @@ import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import store from './store';
 
-const appName = import.meta.env.VITE_APP_NAME || 'AsuraHost';
+const appName = import.meta.env.VITE_APP_NAME || 'Caleho';
 
 createInertiaApp({
     title: (title) => `${title} ${appName}`,
