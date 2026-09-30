@@ -113,12 +113,19 @@ export default function InvoiceSection({ invoice }) {
                     {/* Item */}
                     <div className="grid grid-cols-[1fr_130px_130px] border-b border-gray-100 py-5 text-sm">
                         <div>
-                            <span className="text-gray-700">
+                            <span className="text-gray-700 font-medium">
                                 {invoice.plan?.name ?? "Hosting Plan"}
                             </span>
-                            <span className="ml-2 text-xs text-gray-400">
+                            <span className="ml-2 text-xs text-gray-400 capitalize">
                                 ({invoice.billing_cycle})
                             </span>
+                            {invoice.plan?.features && invoice.plan.features.length > 0 && (
+                                <ul className="mt-2 space-y-1 text-xs text-gray-500 list-disc list-inside">
+                                    {invoice.plan.features.map((feature, i) => (
+                                        <li key={i}>{feature}</li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
 
                         <span className="text-right text-gray-600">

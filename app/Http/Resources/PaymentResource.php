@@ -30,6 +30,7 @@ class PaymentResource extends JsonResource
             'plan' => $this->whenLoaded('plan', fn () => [
                 'slug' => $this->plan->slug,
                 'name' => $this->plan->name,
+                'features' => $this->plan->features,
             ]),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
