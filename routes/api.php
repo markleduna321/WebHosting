@@ -104,4 +104,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/two-factor/resend', [TwoFactorController::class, 'resend'])
         ->middleware('throttle:3,1')
         ->name('api.two-factor.resend');
+
+    // Domains
+    Route::apiResource('domains', \App\Http\Controllers\Api\DomainController::class)->only(['index', 'store', 'destroy']);
 });

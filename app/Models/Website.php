@@ -84,4 +84,9 @@ class Website extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function domains()
+    {
+        return $this->hasMany(Domain::class);
+    }
 }

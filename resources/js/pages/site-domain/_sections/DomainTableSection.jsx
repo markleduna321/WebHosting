@@ -5,45 +5,7 @@ import DropDown from "@/components/ui/Dropdown";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { useGetWebsitesQuery } from "@/features/websites/websitesApi";
-
-const INITIAL_DOMAINS = [
-    {
-        id: 1,
-        domain: "mariaclara.dev",
-        primary: true,
-        site: "Portfolio 2026",
-        ssl: "SSL active",
-        renews: "Mar 4, 2027",
-        status: "verified",
-    },
-    {
-        id: 2,
-        domain: "thesis-traffic.ph",
-        primary: false,
-        site: "CS Thesis — Traffic Model",
-        ssl: "SSL active",
-        renews: "Jan 22, 2027",
-        status: "verified",
-    },
-    {
-        id: 3,
-        domain: "acmchapter.org",
-        primary: false,
-        site: "ACM Student Chapter",
-        ssl: "SSL issuing",
-        renews: "Aug 30, 2027",
-        status: "pending",
-    },
-    {
-        id: 4,
-        domain: "kadiwa.shop",
-        primary: false,
-        site: "Kadiwa Marketplace (demo)",
-        ssl: "No SSL",
-        renews: "Nov 12, 2026",
-        status: "failed",
-    },
-];
+import { useGetDomainsQuery, useAddDomainMutation, useDeleteDomainMutation } from "@/features/domains/domainsApi";
 
 const BADGE_STYLES = {
     verified: "border-green-200 bg-green-50 text-green-600",
@@ -61,7 +23,7 @@ function StatusBadge({ status }) {
 
     return (
         <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium capitalize ${BADGE_STYLES[status]}`}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium capitalize ${BADGE_STYLES[status] || BADGE_STYLES.pending}`}
         >
             <Icon className={`w-3.5 h-3.5 ${status === "pending" ? "animate-spin" : ""}`} />
             {status}
@@ -87,7 +49,7 @@ function DomainCell({ row }) {
                     )}
                 </div>
                 <p className="text-xs text-slate-400 mt-0.5">
-                    {row.site} · {row.ssl} · renews {row.renews}
+                    {row.site || "No site linked"} · SSL: {row.ssl} · Added {new Date(row.created_at).toLocaleDateString()}
                 </p>
             </div>
         </div>
@@ -95,6 +57,14 @@ function DomainCell({ row }) {
 }
 
 function ActionsCell({ row }) {
+    const [deleteDomain, { isLoading: isDeleting }] = useDeleteDomainMutation();
+
+    const handleDelete = () => {
+        if (confirm("Are you sure you want to remove this domain?")) {
+            deleteDomain(row.id);
+        }
+    };
+
     return (
         <div className="flex items-center justify-end gap-2">
             <StatusBadge status={row.status} />
@@ -121,10 +91,12 @@ function ActionsCell({ row }) {
 
             {/* Delete */}
             <button
+                onClick={handleDelete}
+                disabled={isDeleting}
                 aria-label="Delete domain"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-slate-50 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-slate-50 transition-colors disabled:opacity-50"
             >
-                <Trash2 className="w-4 h-4" />
+                {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
             </button>
         </div>
     );
@@ -145,40 +117,37 @@ const COLUMNS = [
 
 export default function DomainTableSection() {
     const { data: sites = [] } = useGetWebsitesQuery();
-    const [domains, setDomains] = useState(INITIAL_DOMAINS);
+    const { data: domains = [], isLoading: isLoadingDomains } = useGetDomainsQuery();
+    const [addDomain, { isLoading: isAdding }] = useAddDomainMutation();
     const [domainInput, setDomainInput] = useState("");
     const [selectedSite, setSelectedSite] = useState(null);
+    const [error, setError] = useState(null);
 
     const siteItems = sites.map((site) => ({
         label: site.name,
         onClick: () => setSelectedSite(site),
     }));
 
-    const handleAddDomain = (e) => {
+    const handleAddDomain = async (e) => {
         e.preventDefault();
+        setError(null);
 
         const trimmed = domainInput.trim();
         if (!trimmed || !selectedSite) return;
 
-        setDomains((prev) => [
-            {
-                id: (prev.at(-1)?.id ?? 0) + 1,
-                domain: trimmed,
-                primary: false,
-                site: selectedSite.name,
-                ssl: "SSL issuing",
-                renews: "—",
-                status: "pending",
-            },
-            ...prev,
-        ]);
-        setDomainInput("");
+        try {
+            await addDomain({ domain_name: trimmed, website_id: selectedSite.id }).unwrap();
+            setDomainInput("");
+            setSelectedSite(null);
+        } catch (err) {
+            setError(err?.data?.errors?.domain_name?.[0] || err?.data?.message || "Failed to add domain.");
+        }
     };
 
     return (
         <div className="rounded-xl border border-gray-200 bg-white px-6 py-5">
             {/* Header */}
-            <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
+            <div className="mb-4 flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
                 <div>
                     <h2 className="text-sm font-bold text-slate-900">
                         Connected domains
@@ -191,15 +160,20 @@ export default function DomainTableSection() {
 
                 <form
                     onSubmit={handleAddDomain}
-                    className="flex flex-wrap items-center gap-3"
+                    className="flex flex-wrap items-center gap-3 w-full md:w-auto"
                 >
-                    <div className="w-48">
+                    <div className="w-full md:w-48 relative">
                         <Input
                             name="new-domain"
                             placeholder="myproject.dev"
                             value={domainInput}
                             onChange={(e) => setDomainInput(e.target.value)}
                         />
+                        {error && (
+                            <div className="absolute -bottom-5 left-0 text-[10px] text-red-500">
+                                {error}
+                            </div>
+                        )}
                     </div>
                     <DropDown
                         buttonText={selectedSite?.name ?? "Select website"}
@@ -208,15 +182,29 @@ export default function DomainTableSection() {
                     />
                     <Button
                         type="submit"
-                        disabled={!domainInput.trim() || !selectedSite}
+                        disabled={!domainInput.trim() || !selectedSite || isAdding}
                         className="rounded-full px-5"
                     >
-                        Add domain
+                        {isAdding ? "Adding..." : "Add domain"}
                     </Button>
                 </form>
             </div>
 
-            <Table columns={COLUMNS} data={domains} />
+            {isLoadingDomains ? (
+                <div className="py-12 flex justify-center text-slate-400">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
+            ) : domains.length > 0 ? (
+                <Table columns={COLUMNS} data={domains} />
+            ) : (
+                <div className="py-10 text-center border rounded-lg border-dashed mt-4 bg-slate-50 border-slate-200">
+                    <Globe className="h-8 w-8 mx-auto text-slate-300 mb-3" />
+                    <h3 className="text-sm font-medium text-slate-900">No domains connected</h3>
+                    <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                        You haven't connected any custom domains to your websites yet. Select a website and enter a domain above to get started.
+                    </p>
+                </div>
+            )}
         </div>
     );
 }
