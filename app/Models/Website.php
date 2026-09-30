@@ -32,6 +32,7 @@ class Website extends Model
         'repository_full_name',
         'repository_default_branch',
         'repository_private',
+        'auto_pull_enabled',
         'status',
         'storage_path',
         'size_bytes',
@@ -44,6 +45,7 @@ class Website extends Model
     {
         return [
             'repository_private' => 'boolean',
+            'auto_pull_enabled' => 'boolean',
             'size_bytes' => 'integer',
             'file_count' => 'integer',
             'last_deployed_at' => 'datetime',

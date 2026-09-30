@@ -49,6 +49,14 @@ export const websitesApi = api.injectEndpoints({
             }),
             invalidatesTags: ["Website", "WebsiteFile"],
         }),
+        updateAutoPullWebsite: builder.mutation({
+            query: ({ uuid, auto_pull_enabled }) => ({
+                url: `/websites/${uuid}/auto-pull`,
+                method: "PATCH",
+                body: { auto_pull_enabled },
+            }),
+            invalidatesTags: ["Website"],
+        }),
         deleteWebsite: builder.mutation({
             query: (uuid) => ({ url: `/websites/${uuid}`, method: "DELETE" }),
             invalidatesTags: ["Website", "WebsiteFile"],
@@ -78,6 +86,7 @@ export const {
     useGetWebsiteFilesQuery,
     useCreateWebsiteFileMutation,
     useRedeployWebsiteMutation,
+    useUpdateAutoPullWebsiteMutation,
     useDeleteWebsiteMutation,
     useGetWebsiteFileContentQuery,
     useUpdateWebsiteFileMutation,

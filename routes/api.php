@@ -26,6 +26,10 @@ use App\Http\Controllers\Api\WebsiteFileController;
 Route::post('/webhooks/paymongo', [PayMongoWebhookController::class, 'handle'])
     ->name('api.webhooks.paymongo');
 
+// GitHub push event webhook listener
+Route::post('/webhooks/github', [\App\Http\Controllers\Api\GithubWebhookController::class, 'handle'])
+    ->name('api.webhooks.github');
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [UserController::class, 'me']);
     Route::put('/user', [UserController::class, 'update']);
@@ -61,6 +65,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/websites/{website}/redeploy', [WebsiteController::class, 'redeploy'])
         ->middleware('throttle:10,1')
         ->name('api.websites.redeploy');
+
+    Route::patch('/websites/{website}/auto-pull', [WebsiteController::class, 'updateAutoPull'])
+        ->name('api.websites.auto-pull');
 
     Route::delete('/websites/{website}', [WebsiteController::class, 'destroy'])
         ->name('api.websites.destroy');

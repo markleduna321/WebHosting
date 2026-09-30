@@ -56,6 +56,29 @@ class WebsiteController extends Controller
         return (new WebsiteResource($website->fresh()))->response();
     }
 
+    public function updateAutoPull(Request $request, Website $website): JsonResponse
+    {
+        $this->authorize('update', $website);
+
+        $request->validate([
+            'auto_pull_enabled' => 'required|boolean',
+        ]);
+
+        // Require Pro plan
+        $planSlug = $request->user()->activeSubscription?->plan?->slug ?? 'student';
+        if ($planSlug !== 'pro') {
+            return response()->json([
+                'message' => 'Auto Pull is only available on the Pro plan.',
+            ], 403);
+        }
+
+        $website->update([
+            'auto_pull_enabled' => $request->auto_pull_enabled,
+        ]);
+
+        return (new WebsiteResource($website->fresh()))->response();
+    }
+
     public function destroy(Website $website): JsonResponse
     {
         $this->authorize('delete', $website);

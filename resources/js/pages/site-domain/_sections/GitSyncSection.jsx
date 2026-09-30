@@ -2,8 +2,9 @@ import React from "react";
 import { FolderGit2, GitBranch, RefreshCw, CheckCircle, Loader2, AlertCircle, Lock, Globe } from "lucide-react";
 import Table from "@/components/ui/Table";
 import Button from "@/components/ui/Button";
-import { useGetWebsitesQuery, useRedeployWebsiteMutation } from "@/features/websites/websitesApi";
-import { message } from "antd";
+import { useGetWebsitesQuery, useRedeployWebsiteMutation, useUpdateAutoPullWebsiteMutation } from "@/features/websites/websitesApi";
+import { message, Switch, Tooltip } from "antd";
+import { usePage } from "@inertiajs/react";
 
 function StatusBadge({ status }) {
     const STATUS_STYLES = {
@@ -72,7 +73,10 @@ function RepositoryCell({ row }) {
 }
 
 function ActionsCell({ row }) {
+    const { auth } = usePage().props;
+    const isPro = auth?.user?.plan?.slug === "pro";
     const [redeployWebsite, { isLoading }] = useRedeployWebsiteMutation();
+    const [updateAutoPull, { isLoading: isUpdatingPull }] = useUpdateAutoPullWebsiteMutation();
 
     const handleSync = async (e) => {
         e.stopPropagation();
@@ -84,8 +88,32 @@ function ActionsCell({ row }) {
         }
     };
 
+    const handleToggleAutoPull = async (checked, e) => {
+        e.stopPropagation();
+        try {
+            await updateAutoPull({ uuid: row.uuid, auto_pull_enabled: checked }).unwrap();
+            message.success(`Auto Pull ${checked ? "enabled" : "disabled"} for ${row.name}`);
+        } catch (err) {
+            message.error(err?.data?.message || "Failed to update Auto Pull setting.");
+        }
+    };
+
     return (
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center justify-end gap-5">
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                <span className={`text-xs font-medium ${isPro ? (row.auto_pull_enabled ? "text-blue-600" : "text-slate-500") : "text-slate-400"}`}>
+                    Auto Pull
+                </span>
+                <Tooltip title={!isPro ? "Upgrade to Pro to enable Auto Pull on push" : ""}>
+                    <Switch
+                        size="small"
+                        checked={row.auto_pull_enabled}
+                        onChange={handleToggleAutoPull}
+                        disabled={!isPro || isUpdatingPull}
+                    />
+                </Tooltip>
+            </div>
+
             <StatusBadge status={row.status} />
             
             <Button
