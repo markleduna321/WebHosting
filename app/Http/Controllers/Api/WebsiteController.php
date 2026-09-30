@@ -56,7 +56,7 @@ class WebsiteController extends Controller
         return (new WebsiteResource($website->fresh()))->response();
     }
 
-    public function updateAutoPull(Request $request, Website $website): JsonResponse
+    public function updateAutoPull(Request $request, Website $website, \App\Services\GithubService $githubService): JsonResponse
     {
         $this->authorize('update', $website);
 
@@ -72,8 +72,32 @@ class WebsiteController extends Controller
             ], 403);
         }
 
+        $autoPullEnabled = $request->auto_pull_enabled;
+
+        // Sync with GitHub Webhooks
+        $githubConnection = $request->user()->githubConnection;
+        if ($githubConnection) {
+            try {
+                if ($autoPullEnabled) {
+                    $githubService->setupWebhook($githubConnection, $website->repository_full_name);
+                } else {
+                    $otherWebsitesUsingRepo = \App\Models\Website::where('user_id', $request->user()->id)
+                        ->where('repository_full_name', $website->repository_full_name)
+                        ->where('auto_pull_enabled', true)
+                        ->where('id', '!=', $website->id)
+                        ->exists();
+
+                    if (!$otherWebsitesUsingRepo) {
+                        $githubService->removeWebhook($githubConnection, $website->repository_full_name);
+                    }
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning("Failed to sync GitHub webhook for website {$website->uuid}: " . $e->getMessage());
+            }
+        }
+
         $website->update([
-            'auto_pull_enabled' => $request->auto_pull_enabled,
+            'auto_pull_enabled' => $autoPullEnabled,
         ]);
 
         return (new WebsiteResource($website->fresh()))->response();
