@@ -56,6 +56,53 @@ class WebsiteController extends Controller
         return (new WebsiteResource($website->fresh()))->response();
     }
 
+    public function updateAutoPull(Request $request, Website $website, \App\Services\GithubService $githubService): JsonResponse
+    {
+        $this->authorize('update', $website);
+
+        $request->validate([
+            'auto_pull_enabled' => 'required|boolean',
+        ]);
+
+        // Require Pro plan
+        $planSlug = $request->user()->activeSubscription?->plan?->slug ?? 'student';
+        if ($planSlug !== 'pro') {
+            return response()->json([
+                'message' => 'Auto Pull is only available on the Pro plan.',
+            ], 403);
+        }
+
+        $autoPullEnabled = $request->auto_pull_enabled;
+
+        // Sync with GitHub Webhooks
+        $githubConnection = $request->user()->githubConnection;
+        if ($githubConnection) {
+            try {
+                if ($autoPullEnabled) {
+                    $githubService->setupWebhook($githubConnection, $website->repository_full_name);
+                } else {
+                    $otherWebsitesUsingRepo = \App\Models\Website::where('user_id', $request->user()->id)
+                        ->where('repository_full_name', $website->repository_full_name)
+                        ->where('auto_pull_enabled', true)
+                        ->where('id', '!=', $website->id)
+                        ->exists();
+
+                    if (!$otherWebsitesUsingRepo) {
+                        $githubService->removeWebhook($githubConnection, $website->repository_full_name);
+                    }
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning("Failed to sync GitHub webhook for website {$website->uuid}: " . $e->getMessage());
+            }
+        }
+
+        $website->update([
+            'auto_pull_enabled' => $autoPullEnabled,
+        ]);
+
+        return (new WebsiteResource($website->fresh()))->response();
+    }
+
     public function destroy(Website $website): JsonResponse
     {
         $this->authorize('delete', $website);
@@ -99,12 +146,18 @@ class WebsiteController extends Controller
             return response()->json(['output' => "Error: Website storage path not found. Please deploy the website first.\n"], 404);
         }
 
-        $envPath = ['PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'];
+        // Prevent environment variable bleeding from the parent WebHosting project
+        // by explicitly unsetting them in the child process environment.
+        $dotenv = \Dotenv\Dotenv::createArrayBacked(base_path())->safeLoad();
+        $cleanEnv = [];
+        foreach (array_keys($dotenv) as $key) {
+            $cleanEnv[$key] = false;
+        }
 
         // Run the command
         $process = Process::path($website->storage_path)
-            ->env($envPath)
-            ->timeout(60)
+            ->env($cleanEnv)
+            ->timeout(600)
             ->run($command);
 
         return response()->json([

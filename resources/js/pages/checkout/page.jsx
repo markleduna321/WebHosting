@@ -5,7 +5,7 @@ import PlanSummarySection from "./_sections/PlanSummarySection";
 import InvoicePreviewSection from "./_sections/InvoicePreviewSection";
 import QrPaymentSection from "./_sections/QrPaymentSection";
 
-export default function Page({ plan, cycle: initialCycle = "monthly", initialAddons = [], availableAddons = [] }) {
+export default function Page({ plan, cycle: initialCycle = "monthly", initialAddons = [], availableAddons = [], paymentMethods = [] }) {
     const [cycle, setCycle] = useState(initialCycle);
     const [addons, setAddons] = useState(initialAddons);
     const [payment, setPayment] = useState(null);
@@ -13,7 +13,7 @@ export default function Page({ plan, cycle: initialCycle = "monthly", initialAdd
     return (
         <div className="min-h-screen w-full bg-slate-50 font-sans antialiased">
             <Head title="Checkout" />
-            
+
             <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur-sm">
                 <div className="mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
                     <Link href="/" className="flex items-center gap-2">
@@ -59,6 +59,7 @@ export default function Page({ plan, cycle: initialCycle = "monthly", initialAdd
                                     cycle={cycle}
                                     addons={addons}
                                     availableAddons={availableAddons}
+                                    paymentMethods={paymentMethods}
                                     onCycleChange={setCycle}
                                     onCreated={setPayment}
                                 />

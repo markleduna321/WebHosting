@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\AccountBillingController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CheckoutReturnController;
+use App\Http\Controllers\InvoiceDownloadController;
 use App\Http\Controllers\HostingPlanController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -36,6 +39,8 @@ Route::get('/terms-of-service', function () {
     return Inertia::render('terms-of-service/page');
 })->name('terms-of-service');
 
+Route::get('/support', fn () => Inertia::render('support/page'))->name('support');
+
 Route::get('/dashboard', function () {
     return Inertia::render('dashboard/page');
 })->middleware('auth')->name('dashboard');
@@ -43,6 +48,7 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/hosting', [HostingPlanController::class, 'index'])->name('hosting');
     Route::get('/checkout/{plan:slug}', [CheckoutController::class, 'show'])->name('checkout');
+    Route::get('/checkout/return/{payment:uuid}', [CheckoutReturnController::class, 'show'])->name('checkout.return');
     Route::get('/websites', fn () => Inertia::render('websites/page'))->name('websites');
     Route::get('/websites/files', fn () => Inertia::render('websites/files/page'))->name('websites.files');
     Route::get('/websites/databases', fn () => Inertia::render('websites/databases/page'))->name('websites.databases');
@@ -52,13 +58,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/files-database', fn (Request $request) => Inertia::render('file-database/page', [
         'tab' => $request->query('tab'),
     ]))->name('files-database');
-    Route::get('/account-billing', fn (Request $request) => Inertia::render('account-billing/page', [
-        'tab' => $request->query('tab'),
-    ]))->name('account-billing');
+    Route::get('/account-billing', [AccountBillingController::class, 'index'])->name('account-billing');
+    // Streams a PDF file, so it cannot be an Inertia render; it lives here to share the session guard.
+    Route::get('/account-billing/invoices/{payment:uuid}/download', [InvoiceDownloadController::class, 'show'])
+        ->middleware('throttle:30,1')
+        ->name('invoices.download');
     Route::get('/deployments', fn () => Inertia::render('deployments/page'))->name('deployments');
     Route::get('/billing', fn () => Inertia::render('billing/page'))->name('billing');
     Route::get('/knowledge-base', fn () => Inertia::render('knowledge-base/page'))->name('knowledge-base');
-    Route::get('/support', fn () => Inertia::render('support/page'))->name('support');
     Route::get('/account/settings', fn () => Inertia::render('account/settings/page'))->name('account.settings');
 });
 

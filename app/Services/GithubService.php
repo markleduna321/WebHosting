@@ -104,4 +104,97 @@ class GithubService
 
         return $temporaryPath;
     }
+
+    /**
+     * Set up a webhook on the given repository to point to our endpoint.
+     *
+     * @throws GithubAuthorizationException
+     */
+    public function setupWebhook(GithubConnection $connection, string $fullName): void
+    {
+        $webhookUrl = 'https://www.caleho.cloud/api/webhooks/github';
+        $secret = env('GITHUB_WEBHOOK_SECRET');
+
+        $response = Http::withToken($connection->access_token)
+            ->withHeaders([
+                'Accept' => 'application/vnd.github+json',
+                'X-GitHub-Api-Version' => '2022-11-28',
+            ])
+            ->timeout(10)
+            ->get(self::API_URL."/repos/{$fullName}/hooks");
+
+        if ($response->status() === 401) {
+            throw new GithubAuthorizationException();
+        }
+
+        if ($response->successful()) {
+            $hooks = $response->json();
+            foreach ($hooks as $hook) {
+                if (isset($hook['config']['url']) && $hook['config']['url'] === $webhookUrl) {
+                    return;
+                }
+            }
+        }
+
+        $payload = [
+            'name' => 'web',
+            'active' => true,
+            'events' => ['push'],
+            'config' => [
+                'url' => $webhookUrl,
+                'content_type' => 'json',
+                'insecure_ssl' => '0',
+            ],
+        ];
+
+        if ($secret) {
+            $payload['config']['secret'] = $secret;
+        }
+
+        Http::withToken($connection->access_token)
+            ->withHeaders([
+                'Accept' => 'application/vnd.github+json',
+                'X-GitHub-Api-Version' => '2022-11-28',
+            ])
+            ->timeout(10)
+            ->post(self::API_URL."/repos/{$fullName}/hooks", $payload);
+    }
+
+    /**
+     * Remove our webhook from the given repository.
+     *
+     * @throws GithubAuthorizationException
+     */
+    public function removeWebhook(GithubConnection $connection, string $fullName): void
+    {
+        $webhookUrl = 'https://www.caleho.cloud/api/webhooks/github';
+
+        $response = Http::withToken($connection->access_token)
+            ->withHeaders([
+                'Accept' => 'application/vnd.github+json',
+                'X-GitHub-Api-Version' => '2022-11-28',
+            ])
+            ->timeout(10)
+            ->get(self::API_URL."/repos/{$fullName}/hooks");
+
+        if ($response->status() === 401) {
+            throw new GithubAuthorizationException();
+        }
+
+        if ($response->successful()) {
+            $hooks = $response->json();
+            foreach ($hooks as $hook) {
+                if (isset($hook['config']['url']) && $hook['config']['url'] === $webhookUrl) {
+                    Http::withToken($connection->access_token)
+                        ->withHeaders([
+                            'Accept' => 'application/vnd.github+json',
+                            'X-GitHub-Api-Version' => '2022-11-28',
+                        ])
+                        ->timeout(10)
+                        ->delete(self::API_URL."/repos/{$fullName}/hooks/{$hook['id']}");
+                    return;
+                }
+            }
+        }
+    }
 }

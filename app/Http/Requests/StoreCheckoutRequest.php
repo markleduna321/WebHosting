@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Payment;
+use App\Services\PaymentMethodRegistry;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -21,12 +22,30 @@ class StoreCheckoutRequest extends FormRequest
      */
     public function rules(): array
     {
+        $methods = app(PaymentMethodRegistry::class);
+
         return [
             'plan_slug' => ['required', 'string', Rule::exists('plans', 'slug')->where('is_active', true)],
             'billing_cycle' => ['required', Rule::in(Payment::VALID_CYCLES)],
             'addons' => ['nullable', 'array'],
             'addons.*' => ['string'],
+            'payment_method' => [
+                'bail',
+                'sometimes',
+                'string',
+                Rule::in($methods->ids()),
+                function (string $attribute, mixed $value, \Closure $fail) use ($methods) {
+                    if (! $methods->isEnabled($value)) {
+                        $fail('This payment method is temporarily unavailable. Please use QR Ph.');
+                    }
+                },
+            ],
         ];
+    }
+
+    public function paymentMethod(): string
+    {
+        return $this->validated('payment_method') ?? PaymentMethodRegistry::QRPH;
     }
 
     /**
@@ -36,6 +55,7 @@ class StoreCheckoutRequest extends FormRequest
     {
         return [
             'plan_slug.exists' => 'That plan is not available.',
+            'payment_method.in' => 'That payment method is not supported.',
         ];
     }
 }

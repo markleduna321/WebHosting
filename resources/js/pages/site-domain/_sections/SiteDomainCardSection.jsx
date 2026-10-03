@@ -6,8 +6,8 @@ import {
     RefreshCw,
     Trash2,
 } from "lucide-react";
-import React from "react";
-import { Link } from "@inertiajs/react";
+import React, { useState, useEffect } from "react";
+import { Link, usePage } from "@inertiajs/react";
 import { Modal, message } from "antd";
 import Card from "@/components/ui/Card";
 import {
@@ -15,6 +15,8 @@ import {
     useRedeployWebsiteMutation,
     useDeleteWebsiteMutation,
 } from "@/features/websites/websitesApi";
+import DeployModalSection from "../../dashboard/_sections/DeployModalSection";
+import ConnectGithubSection from "../../dashboard/_sections/ConnectGithubSection";
 
 function timeAgo(value) {
     if (!value) return "—";
@@ -78,6 +80,22 @@ function SkeletonCard() {
 }
 
 export default function SiteDomainCardSection() {
+    const page = usePage();
+    const { auth } = page.props;
+    const hasPlan = Boolean(auth?.user?.plan);
+    const hasPendingPayment = Boolean(auth?.user?.pending_subscription) && !hasPlan;
+    const isGithubConnected = Boolean(auth?.user?.github);
+
+    const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
+    const [isConnectGithubOpen, setIsConnectGithubOpen] = useState(false);
+
+    useEffect(() => {
+        if (page.url.includes("github=connected") && isGithubConnected) {
+            setIsConnectGithubOpen(false);
+            setIsDeployModalOpen(true);
+        }
+    }, [page.url, isGithubConnected]);
+
     const { data: sites = [], isLoading } = useGetWebsitesQuery();
     const [redeployWebsite, { isLoading: isRedeploying }] =
         useRedeployWebsiteMutation();
@@ -113,6 +131,24 @@ export default function SiteDomainCardSection() {
         });
     };
 
+    const openDeployFlow = () => {
+        if (hasPendingPayment) {
+            message.warning("Please complete your payment first.");
+            return;
+        }
+
+        if (!hasPlan && !hasPendingPayment) {
+            message.warning("Please choose a hosting plan first.");
+            return;
+        }
+
+        if (isGithubConnected) {
+            setIsDeployModalOpen(true);
+        } else {
+            setIsConnectGithubOpen(true);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -124,29 +160,51 @@ export default function SiteDomainCardSection() {
 
     if (sites.length === 0) {
         return (
-            <div className="rounded-xl border border-gray-200 bg-white p-10 text-center">
-                <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                    <Globe aria-hidden="true" className="h-6 w-6" />
-                </span>
-                <p className="mt-4 text-sm font-semibold text-slate-900">
-                    No sites yet
-                </p>
-                <p className="mt-1 text-sm text-slate-500">
-                    Deploy your first site from a GitHub repository to see it here.
-                </p>
-                <Link
-                    href="/dashboard"
-                    className="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                >
-                    Deploy a site
-                </Link>
-            </div>
+            <>
+                <div className="rounded-xl border border-gray-200 bg-white p-10 text-center">
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                        <Globe aria-hidden="true" className="h-6 w-6" />
+                    </span>
+                    <p className="mt-4 text-sm font-semibold text-slate-900">
+                        No sites yet
+                    </p>
+                    <p className="mt-1 text-sm text-slate-500">
+                        Deploy your first site from a GitHub repository to see it here.
+                    </p>
+                    <button
+                        onClick={openDeployFlow}
+                        className="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    >
+                        Deploy a site
+                    </button>
+                </div>
+                
+                <DeployModalSection
+                    open={isDeployModalOpen}
+                    onCancel={() => setIsDeployModalOpen(false)}
+                    onCreate={() => setIsDeployModalOpen(false)}
+                />
+                <ConnectGithubSection
+                    open={isConnectGithubOpen}
+                    onCancel={() => setIsConnectGithubOpen(false)}
+                />
+            </>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {sites.map((site) => (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between">
+                <h2 className="text-base font-bold text-slate-900">Your Sites</h2>
+                <button
+                    onClick={openDeployFlow}
+                    className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                >
+                    Deploy a site
+                </button>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {sites.map((site) => (
                 <Card
                     key={site.uuid}
                     padding="p-5"
@@ -236,6 +294,17 @@ export default function SiteDomainCardSection() {
                     </div>
                 </Card>
             ))}
+            </div>
+
+            <DeployModalSection
+                open={isDeployModalOpen}
+                onCancel={() => setIsDeployModalOpen(false)}
+                onCreate={() => setIsDeployModalOpen(false)}
+            />
+            <ConnectGithubSection
+                open={isConnectGithubOpen}
+                onCancel={() => setIsConnectGithubOpen(false)}
+            />
         </div>
     );
 }

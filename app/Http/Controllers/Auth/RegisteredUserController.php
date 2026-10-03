@@ -50,7 +50,9 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        $user->assignRole('student');
+        // Ensure the student role exists to avoid 500 errors if the DB wasn't fully seeded
+        $role = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'student', 'guard_name' => 'web']);
+        $user->assignRole($role);
 
         if (!empty($validated['plan_slug'])) {
             $plan = \App\Models\Plan::where('slug', $validated['plan_slug'])->first();
@@ -64,7 +66,11 @@ class RegisteredUserController extends Controller
             }
         }
 
-        event(new Registered($user));
+        try {
+            event(new Registered($user));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Registration event failed (likely SMTP error): ' . $e->getMessage());
+        }
 
         Auth::login($user);
 

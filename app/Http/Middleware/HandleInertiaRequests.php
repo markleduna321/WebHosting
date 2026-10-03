@@ -49,6 +49,9 @@ class HandleInertiaRequests extends Middleware
                     'plan' => $plan ? [
                         'slug' => $plan->slug,
                         'name' => $plan->name,
+                        'max_websites' => $plan->max_websites,
+                        'max_databases' => $plan->max_databases,
+                        'disk_space_mb' => $plan->disk_space_mb,
                     ] : null,
                     'pending_subscription' => $pending ? [
                         'status' => $pending->status,
@@ -63,6 +66,7 @@ class HandleInertiaRequests extends Middleware
                         'username' => $github->github_username,
                         'avatar_url' => $github->avatar_url,
                     ] : null,
+                    'two_factor_enabled' => (bool) $user->two_factor_enabled,
                 ] : null,
             ],
             'flash' => [

@@ -20,6 +20,7 @@ class WebsiteResource extends JsonResource
             'repository_full_name' => $this->repository_full_name,
             'repository_default_branch' => $this->repository_default_branch,
             'repository_private' => $this->repository_private,
+            'auto_pull_enabled' => $this->auto_pull_enabled,
             'status' => $this->status,
             'size_bytes' => $this->size_bytes,
             'file_count' => $this->file_count,

@@ -1,5 +1,6 @@
 import { ChevronRight, Loader2, AlertCircle } from "lucide-react";
 import React from "react";
+import { Link } from "@inertiajs/react";
 import { useGetWebsitesQuery } from "@/features/websites/websitesApi";
 
 function timeAgo(value) {
@@ -34,7 +35,19 @@ const STATUS_STYLES = {
 };
 
 export default function ProjectListSection() {
-    const { data: sites = [], isLoading } = useGetWebsitesQuery();
+    // 1. Initial fetch to get current state
+    const { data: initialSites = [], isLoading } = useGetWebsitesQuery();
+    
+    // 2. Check if any site is actively deploying
+    const isDeploying = initialSites.some(
+        (site) => site.status === "building" || site.status === "queued"
+    );
+
+    // 3. Enable polling every 3 seconds ONLY if a site is currently building
+    const { data: sites = [] } = useGetWebsitesQuery(undefined, {
+        pollingInterval: isDeploying ? 3000 : 0, 
+    });
+
     const liveCount = sites.filter((site) => site.status === "live").length;
 
     return (
@@ -44,7 +57,7 @@ export default function ProjectListSection() {
                 <h2 className="text-base font-bold text-slate-900">
                     Your sites
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="mt-0.5 text-xs text-slate-500">
                     {isLoading
                         ? "Loading…"
                         : `${liveCount} live · ${sites.length} total`}
@@ -80,36 +93,44 @@ export default function ProjectListSection() {
                     {sites.map((site) => (
                         <li
                             key={site.uuid}
-                            className="flex items-center justify-between py-4 cursor-pointer hover:bg-slate-50 -mx-2 px-2 rounded-lg transition-colors"
+                            className="group -mx-2 rounded-lg transition-colors hover:bg-slate-50"
                         >
-                            {/* Left: name + meta */}
-                            <div className="min-w-0">
-                                <p className="text-sm font-semibold text-slate-900 truncate">
-                                    {site.name}
-                                </p>
-                                <p className="text-xs text-slate-400 truncate mt-0.5">
-                                    {site.full_domain} ·{" "}
-                                    {site.repository_full_name} ·{" "}
-                                    {timeAgo(site.last_deployed_at ?? site.created_at)}
-                                </p>
-                            </div>
+                            {/* Open the live website in a new tab */}
+                            <a 
+                                href={`https://${site.full_domain}`} 
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex cursor-pointer items-center justify-between px-2 py-4"
+                            >
+                                {/* Left: name + meta */}
+                                <div className="min-w-0">
+                                    <p className="truncate text-sm font-semibold text-slate-900">
+                                        {site.name}
+                                    </p>
+                                    <p className="mt-0.5 truncate text-xs text-slate-400">
+                                        {site.full_domain} ·{" "}
+                                        {site.repository_full_name} ·{" "}
+                                        {timeAgo(site.last_deployed_at ?? site.created_at)}
+                                    </p>
+                                </div>
 
-                            {/* Right: status badge + chevron */}
-                            <div className="flex items-center gap-2 shrink-0 ml-4">
-                                <span
-                                    className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${STATUS_STYLES[site.status] ?? STATUS_STYLES.stopped}`}
-                                >
-                                    {(site.status === "building" ||
-                                        site.status === "queued") && (
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                    )}
-                                    {site.status === "failed" && (
-                                        <AlertCircle className="w-3 h-3" />
-                                    )}
-                                    {site.status}
-                                </span>
-                                <ChevronRight className="w-4 h-4 text-slate-400" />
-                            </div>
+                                {/* Right: status badge + chevron */}
+                                <div className="ml-4 flex shrink-0 items-center gap-2">
+                                    <span
+                                        className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${STATUS_STYLES[site.status] ?? STATUS_STYLES.stopped}`}
+                                    >
+                                        {(site.status === "building" ||
+                                            site.status === "queued") && (
+                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                        )}
+                                        {site.status === "failed" && (
+                                            <AlertCircle className="h-3 w-3" />
+                                        )}
+                                        {site.status}
+                                    </span>
+                                    <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600" />
+                                </div>
+                            </a>
                         </li>
                     ))}
                 </ul>

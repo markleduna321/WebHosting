@@ -6,8 +6,9 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import store from './store';
+import SupportWidget from '@/components/support/SupportWidget';
 
-const appName = import.meta.env.VITE_APP_NAME || 'AsuraHost';
+const appName = import.meta.env.VITE_APP_NAME || 'Caleho';
 
 createInertiaApp({
     title: (title) => `${title} ${appName}`,
@@ -21,7 +22,10 @@ createInertiaApp({
 
         root.render(
             <Provider store={store}>
-                <App {...props} />
+                <>
+                    <App {...props} />
+                    <SupportWidget />
+                </>
             </Provider>
         );
     },

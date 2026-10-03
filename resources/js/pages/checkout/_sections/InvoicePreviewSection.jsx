@@ -1,9 +1,30 @@
 import React, { useMemo, useState } from "react";
 import { usePage } from "@inertiajs/react";
-import { QrCode } from "lucide-react";
+import { CreditCard, QrCode, Wallet } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { formatCurrency } from "@/data/hostingPlans";
 import { useCreatePaymentMutation } from "@/features/checkout/checkoutApi";
+import PaymentMethodSection from "./PaymentMethodSection";
+
+const PAY_ICONS = {
+    qr: QrCode,
+    card: CreditCard,
+    ewallet: Wallet,
+};
+
+/** Only PayMongo's own HTTPS host may receive the redirect. */
+function safeCheckoutUrl(url) {
+    try {
+        const parsed = new URL(url);
+        return parsed.protocol === "https:" &&
+            (parsed.hostname === "paymongo.com" ||
+                parsed.hostname.endsWith(".paymongo.com"))
+            ? parsed.href
+            : null;
+    } catch {
+        return null;
+    }
+}
 
 const CYCLE_LABELS = {
     1: "Monthly",
@@ -25,12 +46,24 @@ export default function InvoicePreviewSection({
     cycle,
     addons = [],
     availableAddons = [],
+    paymentMethods = [],
     onCycleChange,
     onCreated,
 }) {
     const { auth } = usePage().props;
     const [createPayment, { isLoading }] = useCreatePaymentMutation();
     const [error, setError] = useState(null);
+    const [redirecting, setRedirecting] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState(
+        () => paymentMethods.find((m) => m.enabled)?.id ?? "qrph",
+    );
+
+    const selectedMethod = paymentMethods.find((m) => m.id === paymentMethod);
+    const PayIcon = PAY_ICONS[selectedMethod?.group] ?? QrCode;
+    const payLabel =
+        selectedMethod?.group === "card"
+            ? "Pay with card"
+            : `Pay with ${selectedMethod?.label ?? "QR Ph"}`;
 
     // Build available cycle options from the plan's prices JSON + always include monthly.
     const availableCycles = useMemo(() => {
@@ -70,8 +103,8 @@ export default function InvoicePreviewSection({
 
     const addonsTotal = useMemo(() => {
         return selectedAddOns.reduce((total, addOn) => {
-            const addOnPrice = months > 1 && addOn.period === "month" 
-                ? addOn.price * months 
+            const addOnPrice = months > 1 && addOn.period === "month"
+                ? addOn.price * months
                 : addOn.price;
             return total + addOnPrice;
         }, 0);
@@ -94,11 +127,26 @@ export default function InvoicePreviewSection({
                 plan_slug: plan.slug,
                 billing_cycle: cycle === "annual" ? "12" : (cycle === "monthly" ? "1" : String(cycle)),
                 addons: addons,
+                payment_method: paymentMethod,
             }).unwrap();
+
+            if (payment?.checkout_url) {
+                const target = safeCheckoutUrl(payment.checkout_url);
+
+                if (!target) {
+                    setError("We could not open the payment page. Please try again.");
+                    return;
+                }
+
+                setRedirecting(true);
+                window.location.assign(target);
+                return;
+            }
 
             onCreated(payment);
         } catch (err) {
             const fieldError =
+                err?.data?.errors?.payment_method?.[0] ??
                 err?.data?.errors?.plan_slug?.[0] ??
                 err?.data?.errors?.billing_cycle?.[0];
 
@@ -133,8 +181,8 @@ export default function InvoicePreviewSection({
                             disabled={isLoading}
                             aria-pressed={active}
                             className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-40 ${active
-                                    ? "bg-white text-slate-900 shadow-sm"
-                                    : "text-slate-500 hover:text-slate-700"
+                                ? "bg-white text-slate-900 shadow-sm"
+                                : "text-slate-500 hover:text-slate-700"
                                 }`}
                         >
                             {option.label}
@@ -189,6 +237,15 @@ export default function InvoicePreviewSection({
                 </div>
             </dl>
 
+            {paymentMethods.length > 0 && (
+                <PaymentMethodSection
+                    methods={paymentMethods}
+                    value={paymentMethod}
+                    onChange={setPaymentMethod}
+                    disabled={isLoading || redirecting}
+                />
+            )}
+
             {error && (
                 <p
                     role="alert"
@@ -202,12 +259,12 @@ export default function InvoicePreviewSection({
                 variant="primary"
                 size="md"
                 onClick={handlePay}
-                loading={isLoading}
-                disabled={isLoading}
+                loading={isLoading || redirecting}
+                disabled={isLoading || redirecting}
                 className="mt-5 w-full rounded-lg gap-2"
             >
-                <QrCode className="h-4 w-4" />
-                Pay with QR Ph
+                <PayIcon className="h-4 w-4" />
+                {redirecting ? "Opening secure payment page..." : payLabel}
             </Button>
 
             {auth?.user?.plan && (
@@ -216,9 +273,11 @@ export default function InvoicePreviewSection({
                 </p>
             )}
 
-            <p className="mt-2 text-center text-xs text-slate-400">
-                Scan the QR code with any bank or e-wallet app that supports QR Ph.
-            </p>
+            {paymentMethod === "qrph" && (
+                <p className="mt-2 text-center text-xs text-slate-400">
+                    Scan the QR code with any bank or e-wallet app that supports QR Ph.
+                </p>
+            )}
         </div>
     );
 }

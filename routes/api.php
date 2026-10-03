@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\PayMongoWebhookController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\StudentDatabaseController;
+use App\Http\Controllers\Api\SupportController;
+use App\Http\Controllers\Api\TwoFactorController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\WebsiteController;
 use App\Http\Controllers\Api\WebsiteFileController;
@@ -24,6 +26,24 @@ use App\Http\Controllers\Api\WebsiteFileController;
 // PayMongo authenticates itself with a request signature, so this route is deliberately public.
 Route::post('/webhooks/paymongo', [PayMongoWebhookController::class, 'handle'])
     ->name('api.webhooks.paymongo');
+
+// GitHub push event webhook listener
+Route::post('/webhooks/github', [\App\Http\Controllers\Api\GithubWebhookController::class, 'handle'])
+    ->name('api.webhooks.github');
+
+// The controller enforces user ownership or a guest capability cookie; login is optional.
+Route::post('/support/conversations', [SupportController::class, 'store'])
+    ->middleware('throttle:support')
+    ->name('api.support.conversations.store');
+Route::get('/support/conversations/{conversation}', [SupportController::class, 'show'])
+    ->middleware('throttle:support')
+    ->name('api.support.conversations.show');
+Route::post('/support/conversations/{conversation}/messages', [SupportController::class, 'message'])
+    ->middleware('throttle:support')
+    ->name('api.support.conversations.messages.store');
+Route::post('/support/conversations/{conversation}/handoff', [SupportController::class, 'handoff'])
+    ->middleware('throttle:support-handoff')
+    ->name('api.support.conversations.handoff');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [UserController::class, 'me']);
@@ -61,6 +81,9 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('throttle:10,1')
         ->name('api.websites.redeploy');
 
+    Route::patch('/websites/{website}/auto-pull', [WebsiteController::class, 'updateAutoPull'])
+        ->name('api.websites.auto-pull');
+
     Route::delete('/websites/{website}', [WebsiteController::class, 'destroy'])
         ->name('api.websites.destroy');
 
@@ -89,4 +112,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/checkout/{payment}', [CheckoutController::class, 'show'])
         ->middleware('throttle:120,1')
         ->name('api.checkout.show');
+
+    // Two-Factor Authentication
+    Route::post('/two-factor/enable', [TwoFactorController::class, 'enable'])
+        ->middleware('throttle:5,1')
+        ->name('api.two-factor.enable');
+    Route::post('/two-factor/verify', [TwoFactorController::class, 'verify'])
+        ->middleware('throttle:10,1')
+        ->name('api.two-factor.verify');
+    Route::post('/two-factor/disable', [TwoFactorController::class, 'disable'])
+        ->middleware('throttle:5,1')
+        ->name('api.two-factor.disable');
+    Route::post('/two-factor/resend', [TwoFactorController::class, 'resend'])
+        ->middleware('throttle:3,1')
+        ->name('api.two-factor.resend');
+
+    // Domains
+    Route::post('domains/{domain}/verify', [\App\Http\Controllers\Api\DomainController::class, 'verify'])->name('api.domains.verify');
+    Route::apiResource('domains', \App\Http\Controllers\Api\DomainController::class)->only(['index', 'store', 'destroy']);
 });

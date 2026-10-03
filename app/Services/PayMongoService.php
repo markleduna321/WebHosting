@@ -6,6 +6,7 @@ use App\Exceptions\PaymentException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /**
  * Thin client over the PayMongo v1 API.
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Log;
  */
 class PayMongoService
 {
-    public function createPaymentIntent(int $amountCentavos, string $description, array $metadata = []): array
+    public function createPaymentIntent(int $amountCentavos, string $description, array $metadata = [], string $statementDescriptor = 'Caleho Host'): array
     {
         return $this->post('/payment_intents', [
             'data' => [
@@ -25,6 +26,7 @@ class PayMongoService
                     'currency' => 'PHP',
                     'payment_method_allowed' => ['qrph'],
                     'description' => $description,
+                    'statement_descriptor' => Str::limit($statementDescriptor, 22, ''),
                     'metadata' => $metadata,
                 ],
             ],
@@ -60,6 +62,44 @@ class PayMongoService
         $response = $this->request()->get($this->url("/payment_intents/{$intentId}"));
 
         return $this->handle($response, "GET /payment_intents/{$intentId}");
+    }
+
+    /**
+     * Hosted checkout: the customer enters card or wallet details on PayMongo's page,
+     * so card data never reaches this application.
+     *
+     * @param  array<string, string>  $metadata  PayMongo accepts string values only.
+     */
+    public function createCheckoutSession(
+        int $amountCentavos,
+        string $itemName,
+        string $paymentMethodType,
+        string $successUrl,
+        string $cancelUrl,
+        string $referenceNumber,
+        array $metadata = [],
+        string $statementDescriptor = 'Caleho Host',
+    ): array {
+        return $this->post('/checkout_sessions', [
+            'data' => [
+                'attributes' => [
+                    'line_items' => [[
+                        'name' => Str::limit($itemName, 255, ''),
+                        'amount' => $amountCentavos,
+                        'currency' => 'PHP',
+                        'quantity' => 1,
+                    ]],
+                    'payment_method_types' => [$paymentMethodType],
+                    'description' => Str::limit($itemName, 255, ''),
+                    'success_url' => $successUrl,
+                    'cancel_url' => $cancelUrl,
+                    'reference_number' => $referenceNumber,
+                    'statement_descriptor' => Str::limit($statementDescriptor, 22, ''),
+                    'show_line_items' => true,
+                    'metadata' => $metadata,
+                ],
+            ],
+        ]);
     }
 
     /**

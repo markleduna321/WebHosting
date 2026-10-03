@@ -32,6 +32,7 @@ class Website extends Model
         'repository_full_name',
         'repository_default_branch',
         'repository_private',
+        'auto_pull_enabled',
         'status',
         'storage_path',
         'size_bytes',
@@ -44,6 +45,7 @@ class Website extends Model
     {
         return [
             'repository_private' => 'boolean',
+            'auto_pull_enabled' => 'boolean',
             'size_bytes' => 'integer',
             'file_count' => 'integer',
             'last_deployed_at' => 'datetime',
@@ -56,9 +58,17 @@ class Website extends Model
             $website->uuid ??= (string) Str::uuid();
         });
 
-        // Path is derived from the uuid only, never from user input.
         static::deleting(function (self $website) {
-            File::deleteDirectory(storage_path('app/websites/'.$website->uuid));
+            // Delete the actual deployed files in htdocs
+            if (!empty($website->storage_path) && File::exists($website->storage_path)) {
+                File::deleteDirectory($website->storage_path);
+            }
+            
+            // Fallback: Delete old UUID-based directory just in case
+            $legacyPath = storage_path('app/websites/'.$website->uuid);
+            if (File::exists($legacyPath)) {
+                File::deleteDirectory($legacyPath);
+            }
         });
     }
 
@@ -75,5 +85,10 @@ class Website extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function domains()
+    {
+        return $this->hasMany(Domain::class);
     }
 }

@@ -23,6 +23,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'two_factor_enabled',
+        'two_factor_code',
+        'two_factor_expires_at',
+        'two_factor_verified_at',
     ];
 
     /**
@@ -33,6 +37,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_code',
+        'two_factor_expires_at',
     ];
 
     /**
@@ -45,6 +51,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'two_factor_enabled' => 'boolean',
+            'two_factor_expires_at' => 'datetime',
+            'two_factor_verified_at' => 'datetime',
         ];
     }
 
@@ -85,5 +94,109 @@ class User extends Authenticatable implements MustVerifyEmail
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Send the email verification notification using Resend.
+     *
+     * @return void
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $url = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'verification.verify',
+            \Illuminate\Support\Carbon::now()->addMinutes(\Illuminate\Support\Facades\Config::get('auth.verification.expire', 60)),
+            [
+                'id' => $this->getKey(),
+                'hash' => sha1($this->getEmailForVerification()),
+            ]
+        );
+
+        try {
+            $apiKey = env('RESEND_API_KEY', '');
+            
+            if (empty($apiKey)) {
+                throw new \Exception('RESEND_API_KEY is not set in the environment variables.');
+            }
+
+            $resend = \Resend::client($apiKey);
+            
+            $resend->emails->send([
+                'from' => env('MAIL_FROM_ADDRESS', 'onboarding@resend.dev'),
+                'to' => [$this->email],
+                'subject' => 'Verify Your Email Address',
+                'html' => "
+                    <div style=\"font-family: sans-serif; max-width: 600px; margin: 0 auto;\">
+                        <h2 style=\"color: #1e293b;\">Welcome to our platform!</h2>
+                        <p style=\"color: #475569; font-size: 16px; line-height: 1.5;\">
+                            Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you?
+                        </p>
+                        <div style=\"margin: 30px 0;\">
+                            <a href=\"{$url}\" style=\"display: inline-block; padding: 12px 24px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold;\">
+                                Verify Email Address
+                            </a>
+                        </div>
+                        <p style=\"color: #64748b; font-size: 14px;\">
+                            If you did not create an account, no further action is required.
+                        </p>
+                    </div>
+                ",
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Resend Email Verification Failed: ' . $e->getMessage());
+            // Temporarily throw the error so it shows up in your browser's Network tab for debugging!
+            abort(500, 'Resend Error: ' . $e->getMessage());
+        }
+    }
+    /**
+     * Send the password reset notification using Resend.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $url = url(route('password.reset', [
+            'token' => $token,
+            'email' => $this->getEmailForPasswordReset(),
+        ], false));
+
+        try {
+            $apiKey = env('RESEND_API_KEY', '');
+            
+            if (empty($apiKey)) {
+                throw new \Exception('RESEND_API_KEY is not set in the environment variables.');
+            }
+
+            $resend = \Resend::client($apiKey);
+            
+            $resend->emails->send([
+                'from' => env('MAIL_FROM_ADDRESS', 'onboarding@resend.dev'),
+                'to' => [$this->email],
+                'subject' => 'Reset Your Password',
+                'html' => "
+                    <div style=\"font-family: sans-serif; max-width: 600px; margin: 0 auto;\">
+                        <h2 style=\"color: #1e293b;\">Password Reset Request</h2>
+                        <p style=\"color: #475569; font-size: 16px; line-height: 1.5;\">
+                            You are receiving this email because we received a password reset request for your account.
+                        </p>
+                        <div style=\"margin: 30px 0;\">
+                            <a href=\"{$url}\" style=\"display: inline-block; padding: 12px 24px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold;\">
+                                Reset Password
+                            </a>
+                        </div>
+                        <p style=\"color: #64748b; font-size: 14px; line-height: 1.5;\">
+                            This password reset link will expire in 60 minutes.
+                        </p>
+                        <p style=\"color: #64748b; font-size: 14px;\">
+                            If you did not request a password reset, no further action is required.
+                        </p>
+                    </div>
+                ",
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Resend Password Reset Failed: ' . $e->getMessage());
+            abort(500, 'Resend Error: ' . $e->getMessage());
+        }
     }
 }

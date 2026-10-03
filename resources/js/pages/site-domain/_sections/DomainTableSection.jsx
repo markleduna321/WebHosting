@@ -1,49 +1,13 @@
-import { CheckCircle, Loader2, AlertTriangle, Trash2, Star, RefreshCw, Globe } from "lucide-react";
+import { CheckCircle, Loader2, AlertTriangle, Trash2, Star, RefreshCw, Globe, Info, Copy, Check } from "lucide-react";
 import React, { useState } from "react";
 import Table from "@/components/ui/Table";
 import DropDown from "@/components/ui/Dropdown";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Modal from "@/components/ui/Modal";
 import { useGetWebsitesQuery } from "@/features/websites/websitesApi";
-
-const INITIAL_DOMAINS = [
-    {
-        id: 1,
-        domain: "mariaclara.dev",
-        primary: true,
-        site: "Portfolio 2026",
-        ssl: "SSL active",
-        renews: "Mar 4, 2027",
-        status: "verified",
-    },
-    {
-        id: 2,
-        domain: "thesis-traffic.ph",
-        primary: false,
-        site: "CS Thesis — Traffic Model",
-        ssl: "SSL active",
-        renews: "Jan 22, 2027",
-        status: "verified",
-    },
-    {
-        id: 3,
-        domain: "acmchapter.org",
-        primary: false,
-        site: "ACM Student Chapter",
-        ssl: "SSL issuing",
-        renews: "Aug 30, 2027",
-        status: "pending",
-    },
-    {
-        id: 4,
-        domain: "kadiwa.shop",
-        primary: false,
-        site: "Kadiwa Marketplace (demo)",
-        ssl: "No SSL",
-        renews: "Nov 12, 2026",
-        status: "failed",
-    },
-];
+import { useGetDomainsQuery, useAddDomainMutation, useDeleteDomainMutation, useVerifyDomainMutation } from "@/features/domains/domainsApi";
+import { message } from "antd";
 
 const BADGE_STYLES = {
     verified: "border-green-200 bg-green-50 text-green-600",
@@ -61,7 +25,7 @@ function StatusBadge({ status }) {
 
     return (
         <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium capitalize ${BADGE_STYLES[status]}`}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium capitalize ${BADGE_STYLES[status] || BADGE_STYLES.pending}`}
         >
             <Icon className={`w-3.5 h-3.5 ${status === "pending" ? "animate-spin" : ""}`} />
             {status}
@@ -87,17 +51,46 @@ function DomainCell({ row }) {
                     )}
                 </div>
                 <p className="text-xs text-slate-400 mt-0.5">
-                    {row.site} · {row.ssl} · renews {row.renews}
+                    {row.site || "No site linked"} · SSL: {row.ssl} · Added {new Date(row.created_at).toLocaleDateString()}
                 </p>
             </div>
         </div>
     );
 }
 
-function ActionsCell({ row }) {
+function ActionsCell({ row, onShowGuide }) {
+    const [deleteDomain, { isLoading: isDeleting }] = useDeleteDomainMutation();
+    const [verifyDomain, { isLoading: isVerifying }] = useVerifyDomainMutation();
+
+    const handleDelete = () => {
+        if (confirm("Are you sure you want to remove this domain?")) {
+            deleteDomain(row.id);
+        }
+    };
+
+    const handleVerify = async () => {
+        try {
+            await verifyDomain(row.id).unwrap();
+            message.success("Domain verified successfully!");
+        } catch (err) {
+            message.error(err?.data?.message || "Verification failed. DNS still propagating.");
+        }
+    };
+
     return (
         <div className="flex items-center justify-end gap-2">
             <StatusBadge status={row.status} />
+
+            {/* Info / Setup Guide — for pending domains */}
+            {row.status === "pending" && (
+                <button
+                    onClick={() => onShowGuide(row)}
+                    aria-label="Setup Guide"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-50 transition-colors"
+                >
+                    <Info className="w-4 h-4" />
+                </button>
+            )}
 
             {/* Star (favourite) — only for non-primary verified */}
             {!row.primary && row.status === "verified" && (
@@ -112,111 +105,237 @@ function ActionsCell({ row }) {
             {/* Refresh — for pending / failed */}
             {(row.status === "pending" || row.status === "failed") && (
                 <button
+                    onClick={handleVerify}
+                    disabled={isVerifying}
                     aria-label="Retry"
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-50 transition-colors"
+                    className={`p-1.5 rounded-lg transition-colors ${
+                        isVerifying ? "text-blue-500 bg-blue-50" : "text-slate-400 hover:text-blue-500 hover:bg-slate-50"
+                    }`}
                 >
-                    <RefreshCw className="w-4 h-4" />
+                    <RefreshCw className={`w-4 h-4 ${isVerifying ? "animate-spin" : ""}`} />
                 </button>
             )}
 
             {/* Delete */}
             <button
+                onClick={handleDelete}
+                disabled={isDeleting}
                 aria-label="Delete domain"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-slate-50 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-slate-50 transition-colors disabled:opacity-50"
             >
-                <Trash2 className="w-4 h-4" />
+                {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
             </button>
         </div>
     );
 }
 
-const COLUMNS = [
-    {
-        header: "",
-        accessor: "domain",
-        render: (row) => <DomainCell row={row} />,
-    },
-    {
-        header: "",
-        accessor: "actions",
-        render: (row) => <ActionsCell row={row} />,
-    },
-];
+function SetupGuideModal({ domain, onClose }) {
+    const [copied, setCopied] = useState(false);
+    const serverIP = "192.168.1.100"; // TODO: Fetch real server IP from backend
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(serverIP);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    return (
+        <Modal
+            open={!!domain}
+            onCancel={onClose}
+            title="Domain Setup Guide"
+            subtitle={`How to connect ${domain?.domain} to your website`}
+            width={600}
+            footer={
+                <div className="flex justify-end">
+                    <Button variant="primary" onClick={onClose}>
+                        Got it, I've updated my DNS
+                    </Button>
+                </div>
+            }
+        >
+            <div className="space-y-6">
+                <div className="rounded-lg bg-blue-50 p-4 border border-blue-100 flex items-start gap-3 text-sm text-blue-800">
+                    <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                    <p>
+                        Your domain is currently <strong>pending</strong>. To complete the connection, you must update the DNS settings at your domain registrar (e.g. Hostinger, GoDaddy, Namecheap).
+                    </p>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="flex gap-4">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600">
+                            1
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-semibold text-slate-900">Log in to your domain provider</h4>
+                            <p className="mt-1 text-sm text-slate-500">
+                                Sign in to the website where you bought your domain and locate the <strong>DNS Settings</strong> or <strong>Zone Editor</strong> for <span className="font-semibold text-slate-700">{domain?.domain}</span>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600">
+                            2
+                        </div>
+                        <div className="w-full">
+                            <h4 className="text-sm font-semibold text-slate-900">Add an A Record</h4>
+                            <p className="mt-1 text-sm text-slate-500 mb-3">
+                                Create a new A Record pointing to our server's IP address. Set the <strong>TTL to 300</strong> (5 minutes) if possible for faster propagation.
+                            </p>
+                            
+                            <div className="rounded-lg border border-slate-200 overflow-hidden text-sm">
+                                <div className="grid grid-cols-3 bg-slate-50 border-b border-slate-200 p-2 font-medium text-slate-600">
+                                    <div>Type</div>
+                                    <div>Name</div>
+                                    <div>Value / Points to</div>
+                                </div>
+                                <div className="grid grid-cols-3 p-3 items-center">
+                                    <div className="font-mono text-slate-800">A</div>
+                                    <div className="font-mono text-slate-800">@</div>
+                                    <div className="flex items-center gap-2 font-mono text-slate-800">
+                                        {serverIP}
+                                        <button 
+                                            onClick={handleCopy}
+                                            className="text-slate-400 hover:text-blue-500 focus:outline-none"
+                                            title="Copy IP Address"
+                                        >
+                                            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600">
+                            3
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-semibold text-slate-900">Wait for propagation</h4>
+                            <p className="mt-1 text-sm text-slate-500">
+                                Once updated, it can take anywhere from 5 minutes to 24 hours for DNS changes to propagate globally. We will continuously check your domain and issue a free SSL certificate automatically once it resolves.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Modal>
+    );
+}
 
 export default function DomainTableSection() {
     const { data: sites = [] } = useGetWebsitesQuery();
-    const [domains, setDomains] = useState(INITIAL_DOMAINS);
+    const { data: domains = [], isLoading: isLoadingDomains } = useGetDomainsQuery();
+    const [addDomain, { isLoading: isAdding }] = useAddDomainMutation();
     const [domainInput, setDomainInput] = useState("");
     const [selectedSite, setSelectedSite] = useState(null);
+    const [error, setError] = useState(null);
+    const [setupGuideDomain, setSetupGuideDomain] = useState(null);
 
     const siteItems = sites.map((site) => ({
         label: site.name,
         onClick: () => setSelectedSite(site),
     }));
 
-    const handleAddDomain = (e) => {
+    const handleAddDomain = async (e) => {
         e.preventDefault();
+        setError(null);
 
         const trimmed = domainInput.trim();
         if (!trimmed || !selectedSite) return;
 
-        setDomains((prev) => [
-            {
-                id: (prev.at(-1)?.id ?? 0) + 1,
-                domain: trimmed,
-                primary: false,
-                site: selectedSite.name,
-                ssl: "SSL issuing",
-                renews: "—",
-                status: "pending",
-            },
-            ...prev,
-        ]);
-        setDomainInput("");
+        try {
+            const result = await addDomain({ domain_name: trimmed, website_uuid: selectedSite.uuid }).unwrap();
+            setDomainInput("");
+            setSelectedSite(null);
+            // Automatically pop open the guide when they add a domain!
+            setSetupGuideDomain(result.data || result); 
+        } catch (err) {
+            setError(err?.data?.errors?.domain_name?.[0] || err?.data?.message || "Failed to add domain.");
+        }
     };
 
+    const columns = [
+        {
+            header: "",
+            accessor: "domain",
+            render: (row) => <DomainCell row={row} />,
+        },
+        {
+            header: "",
+            accessor: "actions",
+            render: (row) => <ActionsCell row={row} onShowGuide={setSetupGuideDomain} />,
+        },
+    ];
+
     return (
-        <div className="rounded-xl border border-gray-200 bg-white px-6 py-5">
-            {/* Header */}
-            <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
-                <div>
-                    <h2 className="text-sm font-bold text-slate-900">
-                        Connected domains
-                    </h2>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                        {domains.length} domain{domains.length === 1 ? "" : "s"} across
-                        your websites
-                    </p>
+        <>
+            <div className="rounded-xl border border-gray-200 bg-white px-6 py-5">
+                {/* Header */}
+                <div className="mb-4 flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
+                    <div>
+                        <h2 className="text-sm font-bold text-slate-900">
+                            Connected domains
+                        </h2>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                            {domains.length} domain{domains.length === 1 ? "" : "s"} across
+                            your websites
+                        </p>
+                    </div>
+
+                    <form
+                        onSubmit={handleAddDomain}
+                        className="flex flex-wrap items-center gap-3 w-full md:w-auto"
+                    >
+                        <div className="w-full md:w-48 relative">
+                            <Input
+                                name="new-domain"
+                                placeholder="myproject.dev"
+                                value={domainInput}
+                                onChange={(e) => setDomainInput(e.target.value)}
+                            />
+                            {error && (
+                                <div className="absolute -bottom-5 left-0 text-[10px] text-red-500">
+                                    {error}
+                                </div>
+                            )}
+                        </div>
+                        <DropDown
+                            buttonText={selectedSite?.name ?? "Select website"}
+                            items={siteItems}
+                            align="right"
+                        />
+                        <Button
+                            type="submit"
+                            disabled={!domainInput.trim() || !selectedSite || isAdding}
+                            className="rounded-full px-5"
+                        >
+                            {isAdding ? "Adding..." : "Add domain"}
+                        </Button>
+                    </form>
                 </div>
 
-                <form
-                    onSubmit={handleAddDomain}
-                    className="flex flex-wrap items-center gap-3"
-                >
-                    <div className="w-48">
-                        <Input
-                            name="new-domain"
-                            placeholder="myproject.dev"
-                            value={domainInput}
-                            onChange={(e) => setDomainInput(e.target.value)}
-                        />
+                {isLoadingDomains ? (
+                    <div className="py-12 flex justify-center text-slate-400">
+                        <Loader2 className="h-6 w-6 animate-spin" />
                     </div>
-                    <DropDown
-                        buttonText={selectedSite?.name ?? "Select website"}
-                        items={siteItems}
-                        align="right"
-                    />
-                    <Button
-                        type="submit"
-                        disabled={!domainInput.trim() || !selectedSite}
-                        className="rounded-full px-5"
-                    >
-                        Add domain
-                    </Button>
-                </form>
+                ) : domains.length > 0 ? (
+                    <Table columns={columns} data={domains} />
+                ) : (
+                    <div className="py-10 text-center border rounded-lg border-dashed mt-4 bg-slate-50 border-slate-200">
+                        <Globe className="h-8 w-8 mx-auto text-slate-300 mb-3" />
+                        <h3 className="text-sm font-medium text-slate-900">No domains connected</h3>
+                        <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                            You haven't connected any custom domains to your websites yet. Select a website and enter a domain above to get started.
+                        </p>
+                    </div>
+                )}
             </div>
-
-            <Table columns={COLUMNS} data={domains} />
-        </div>
+            
+            <SetupGuideModal domain={setupGuideDomain} onClose={() => setSetupGuideDomain(null)} />
+        </>
     );
 }

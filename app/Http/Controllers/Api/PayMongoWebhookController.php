@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\WebhookEvent;
 use App\Services\CheckoutService;
 use App\Services\PayMongoService;
+use App\Services\PaymentMethodRegistry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -18,7 +19,7 @@ use Throwable;
  */
 class PayMongoWebhookController extends Controller
 {
-    private const HANDLED = ['payment.paid', 'payment.failed'];
+    private const HANDLED = ['payment.paid', 'payment.failed', 'checkout_session.payment.paid'];
 
     public function __construct(
         private readonly PayMongoService $paymongo,
@@ -90,6 +91,24 @@ class PayMongoWebhookController extends Controller
         $data = $payload['data']['attributes']['data'] ?? [];
         $attributes = $data['attributes'] ?? [];
 
+        if ($type === 'checkout_session.payment.paid') {
+            $payment = $this->resolveCheckoutSession($data);
+
+            if ($payment === null) {
+                Log::warning('PayMongo webhook had no matching local payment.', ['type' => $type]);
+
+                return;
+            }
+
+            $this->checkout->markPaid(
+                $payment,
+                $attributes['payments'][0]['id'] ?? null,
+                $attributes['payments'][0]['attributes'] ?? []
+            );
+
+            return;
+        }
+
         $payment = $this->resolvePayment($attributes);
 
         if ($payment === null) {
@@ -99,8 +118,13 @@ class PayMongoWebhookController extends Controller
         }
 
         if ($type === 'payment.paid') {
-            $this->checkout->markPaid($payment, $data['id'] ?? null);
+            $this->checkout->markPaid($payment, $data['id'] ?? null, $attributes);
 
+            return;
+        }
+
+        // Hosted checkout lets the customer retry on PayMongo's page, so one decline is not final.
+        if ($payment->payment_method !== PaymentMethodRegistry::QRPH) {
             return;
         }
 
@@ -108,6 +132,29 @@ class PayMongoWebhookController extends Controller
             $payment,
             $attributes['last_payment_error'] ?? 'The payment did not go through.'
         );
+    }
+
+    /**
+     * @param  array<string, mixed>  $session
+     */
+    private function resolveCheckoutSession(array $session): ?Payment
+    {
+        $attributes = $session['attributes'] ?? [];
+        $uuid = $attributes['metadata']['payment_uuid'] ?? $attributes['reference_number'] ?? null;
+
+        if (is_string($uuid)) {
+            $payment = Payment::where('uuid', $uuid)->first();
+
+            if ($payment !== null) {
+                return $payment;
+            }
+        }
+
+        $sessionId = $session['id'] ?? null;
+
+        return is_string($sessionId)
+            ? Payment::where('paymongo_checkout_session_id', $sessionId)->first()
+            : null;
     }
 
     /**

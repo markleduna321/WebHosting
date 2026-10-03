@@ -48,15 +48,27 @@ class Payment extends Model
         'billing_cycle',
         'amount',
         'currency',
+        'payment_method',
         'status',
         'paymongo_payment_intent_id',
         'paymongo_payment_id',
+        'paymongo_checkout_session_id',
+        'checkout_url',
         'qr_image_url',
         'paymongo_test_url',
         'expires_at',
         'paid_at',
         'failure_reason',
         'addons',
+        'invoice_number',
+        'invoice_issued_at',
+        'invoice_emailed_at',
+        'line_items',
+        'paymongo_fee',
+        'paymongo_foreign_fee',
+        'paymongo_tax_amount',
+        'paymongo_net_amount',
+        'paymongo_taxes',
     ];
 
     protected function casts(): array
@@ -65,7 +77,11 @@ class Payment extends Model
             'amount' => 'decimal:2',
             'expires_at' => 'datetime',
             'paid_at' => 'datetime',
+            'invoice_issued_at' => 'datetime',
+            'invoice_emailed_at' => 'datetime',
             'addons' => 'array',
+            'line_items' => 'array',
+            'paymongo_taxes' => 'array',
         ];
     }
 

@@ -7,39 +7,45 @@ export const GUIDES = [
         title: "How to connect your project to GitHub",
         description: (
             <>
-                Link a <span className="text-blue-500">GitHub repository</span>{" "}
-                to a <span className="text-blue-500">website</span> so every
-                push to your{" "}
-                <span className="text-blue-500">main branch</span> deploys
-                automatically.
+                Connect your <span className="text-blue-500">GitHub account</span>{" "}
+                and deploy a website straight from one of your{" "}
+                <span className="text-blue-500">repositories</span>.
             </>
         ),
         subtitle: (
             <>
-                Connecting GitHub turns your repository into the{" "}
-                <span className="text-blue-500">source</span> of truth for a
-                website. AsuraTech Host clones the{" "}
-                <span className="text-blue-500">branch</span> you pick, runs
-                your build <span className="text-blue-500">command</span>, and
-                publishes the{" "}
-                <span className="text-blue-500">output</span> — no manual
-                uploads.
+                Deploying from GitHub clones the{" "}
+                <span className="text-blue-500">branch</span> you pick into
+                your website's storage and serves it right away — no manual
+                file uploads needed.
             </>
         ),
         category: "Git & deployments",
-        read: "6 min read",
+        read: "4 min read",
         updated: "Aug 14, 2026",
         steps: [
             {
-                title: "Open the website you want to connect",
+                title: "Make sure you have an active plan",
                 description: (
                     <>
-                        Go to <span className="text-blue-500">Website</span>,
-                        open the site, then choose{" "}
+                        You need an active hosting plan before you can deploy.
+                        If you haven't chosen one yet, the{" "}
+                        <span className="text-blue-500">Deploy New Site</span>{" "}
+                        button will ask you to choose a plan first.
+                    </>
+                ),
+            },
+            {
+                title: "Click Deploy New Site",
+                description: (
+                    <>
+                        From your dashboard, click{" "}
+                        <span className="text-blue-500">Deploy New Site</span>.
+                        If your GitHub account isn't linked yet, you'll see the{" "}
                         <span className="text-blue-500">
-                            Deployments → Connect repository
-                        </span>
-                        . You can connect one repository per website.
+                            Connect your GitHub account
+                        </span>{" "}
+                        prompt first.
                     </>
                 ),
             },
@@ -47,45 +53,56 @@ export const GUIDES = [
                 title: "Authorize AsuraTech Host on GitHub",
                 description: (
                     <>
-                        Sign in with GitHub and grant read access to the
-                        repositories you want to deploy. Student accounts can
-                        pick{" "}
-                        <span className="text-blue-500">individual repos</span>{" "}
-                        instead of the whole account.
+                        You'll be redirected to GitHub to sign in and grant
+                        read-only access (public repositories and your profile
+                        only). After authorizing, you're brought back to the
+                        dashboard and the deploy window opens automatically.
                     </>
                 ),
             },
             {
-                title: "Choose the repository and branch",
-                description:
-                    "Select your repo and the branch to track — usually main. Pushes to other branches create preview deployments instead of replacing your live site.",
-            },
-            {
-                title: "Set your build command and output folder",
-                description:
-                    "Static HTML sites need no build step. For Vite, React, or Astro projects use the settings below, then save.",
-                code: `Install command:   npm install
-Build command:     npm run build
-Output directory:  dist`,
-            },
-            {
-                title: "Push a commit to deploy",
+                title: "Pick a repository and branch",
                 description: (
                     <>
-                        Commit and push to your{" "}
-                        <span className="text-blue-500">tracked branch</span>.
-                        The Deployments page shows live{" "}
-                        <span className="text-blue-500">build logs</span>, and
-                        the site goes live once the build succeeds.
+                        In the deploy window, choose a{" "}
+                        <span className="text-blue-500">Repository</span> from
+                        the dropdown, then pick the{" "}
+                        <span className="text-blue-500">Branch</span> you want
+                        to deploy.
                     </>
                 ),
-                code: `git add .
-git commit -m "connect to AsuraTech Host"
-git push origin main`,
+            },
+            {
+                title: "Add optional build settings",
+                description: (
+                    <>
+                        You can fill in a{" "}
+                        <span className="text-blue-500">Build command</span>{" "}
+                        and{" "}
+                        <span className="text-blue-500">
+                            Output directory
+                        </span>{" "}
+                        for reference — these are saved with your site. Plain
+                        static files and Laravel projects work without filling
+                        them in.
+                    </>
+                ),
+            },
+            {
+                title: "Create the site",
+                description: (
+                    <>
+                        Confirm to start the deployment. The site's status
+                        shows{" "}
+                        <span className="text-blue-500">Deploying</span> while
+                        the repository is cloned, then switches to{" "}
+                        <span className="text-blue-500">Live</span> once your
+                        files are in place.
+                    </>
+                ),
                 tips: [
-                    "Keep secrets out of Git — add them under Website → Environment variables instead.",
-                    "A failed build never takes your live site down; the previous deployment stays online.",
-                    "Use Deployments → Redeploy to rebuild without pushing a new commit.",
+                    "Only public repositories and repos you have read access to will appear in the list.",
+                    "Detected Laravel projects automatically get a matching database and .env credentials.",
                 ],
             },
         ],
@@ -95,71 +112,62 @@ git push origin main`,
         title: "Why my deployment failed and how to fix it",
         description: (
             <>
-                Read build logs, spot the{" "}
-                <span className="text-blue-500">failing step</span>, and recover
-                from the three most common errors.
+                What a <span className="text-blue-500">Failed</span> site
+                status usually means, and how to get your site deploying
+                again.
             </>
         ),
         subtitle: (
             <>
-                Every deployment keeps its{" "}
-                <span className="text-blue-500">full</span> log. Reading the
-                last 20 lines almost{" "}
-                <span className="text-blue-500">always identifies</span> the
-                problem.
+                Deployments clone your repository as-is — there's no build
+                step yet, so most failures come from access or repository
+                structure issues rather than code errors.
             </>
         ),
         category: "Git & deployments",
-        read: "5 min read",
+        read: "3 min read",
         updated: "Aug 9, 2026",
         steps: [
             {
-                title: "Open the failed deployment",
+                title: "Check the site status",
                 description: (
                     <>
-                        Deployments → select the red entry. The log stops at the{" "}
-                        <span className="text-blue-500">step that failed</span>.
+                        Open the website from your dashboard. A{" "}
+                        <span className="text-blue-500">Failed</span> badge
+                        means the clone job couldn't finish.
                     </>
                 ),
             },
             {
-                title: "Missing dependency",
+                title: "Repository access issue",
                 description: (
                     <>
-                        If the log says a module cannot be found, the package is
-                        probably{" "}
-                        <span className="text-blue-500">only installed locally</span>.
-                        Commit your{" "}
-                        <span className="text-blue-500">package.json</span> and{" "}
-                        <span className="text-blue-500">lockfile</span>.
+                        If your GitHub token expired or access was revoked, the
+                        deploy window will prompt you to{" "}
+                        <span className="text-blue-500">Reconnect GitHub</span>{" "}
+                        before trying again.
                     </>
                 ),
-                code: `npm install <package> --save
-git add package.json package-lock.json`,
             },
             {
-                title: "TypeScript or build error",
+                title: "Private or missing repository",
                 description: (
                     <>
-                        Run the same{" "}
-                        <span className="text-blue-500">build locally</span> to
-                        reproduce it, fix the file named in the log, then push
-                        again.
+                        Only repositories your connected GitHub account can
+                        read will show up. Double-check the repo still exists
+                        and that you selected the correct branch.
                     </>
                 ),
-                code: `npm run build`,
             },
             {
-                title: "Wrong output directory",
+                title: "Try deploying again",
                 description: (
                     <>
-                        If the build{" "}
-                        <span className="text-blue-500">succeeds</span> but the
-                        site is <span className="text-blue-500">blank</span>,
-                        the output folder is wrong. Vite uses{" "}
-                        <span className="text-blue-500">dist</span>. Create
-                        React App uses{" "}
-                        <span className="text-blue-500">build</span>.
+                        Start a new deployment from{" "}
+                        <span className="text-blue-500">Deploy New Site</span>{" "}
+                        with the same repository once the issue is resolved. A
+                        failed attempt never affects any other site you
+                        already have live.
                     </>
                 ),
             },
@@ -169,179 +177,74 @@ git add package.json package-lock.json`,
     // ─── Getting started ─────────────────────────────────────────────────
     {
         id: 3,
-        title: "Launch your first website in 10 minutes",
+        title: "From signup to your first live website",
         description: (
             <>
-                From an empty dashboard to a{" "}
-                <span className="text-blue-500">live URL</span> with SSL, using
-                either an upload or a Git repo.
+                The full path from choosing a{" "}
+                <span className="text-blue-500">plan</span> to deploying your{" "}
+                <span className="text-blue-500">first website</span>.
             </>
         ),
         subtitle:
-            "Every plan includes a free asuratechhost.app subdomain and an automatic SSL certificate.",
+            "An active, paid subscription is required before you can deploy a website.",
         category: "Getting started",
+        searchTerms: ["signup", "register", "password", "QR Ph", "plan", "deploy"],
         read: "4 min read",
-        updated: "Aug 2, 2026",
+        updated: "Oct 3, 2026",
         steps: [
             {
-                title: "Create the website",
+                title: "Choose a plan",
                 description: (
                     <>
-                        Press{" "}
-                        <span className="text-blue-500">
-                            Create New Website
-                        </span>
-                        , name it, and pick your free{" "}
-                        <span className="text-blue-500">subdomain</span>.
-                        Provisioning takes about a minute.
+                        Pick a plan from the pricing section and click{" "}
+                        <span className="text-blue-500">Choose Plan</span>.
+                        This takes you to registration with your plan already
+                        selected.
                     </>
                 ),
             },
             {
-                title: "Add your files",
+                title: "Create your account",
                 description: (
                     <>
-                        <span className="text-blue-500">Upload</span> a folder
-                        from the Files section, or connect a{" "}
-                        <span className="text-blue-500">
-                            GitHub repository
-                        </span>{" "}
-                        if your project has a build step.
+                        Fill in your name, email, and password to create your
+                        account. Your password needs at least 8 characters,
+                        including uppercase and lowercase letters, a number,
+                        and a special character. You'll be signed in and taken
+                        straight to checkout.
                     </>
                 ),
             },
             {
-                title: "Check that it is live",
+                title: "Pay with QR Ph",
                 description: (
                     <>
-                        Open the domain from the{" "}
-                        <span className="text-blue-500">Website</span> section.
-                        A green{" "}
-                        <span className="text-blue-500">Live</span> badge means
-                        the certificate is issued and traffic is being served.
-                    </>
-                ),
-            },
-        ],
-    },
-
-    // ─── Domains & SSL ───────────────────────────────────────────────────
-    {
-        id: 4,
-        title: "Point a custom domain to your website",
-        description: (
-            <>
-                Add a domain you already own, update{" "}
-                <span className="text-blue-500">DNS records</span>, and wait out
-                verification.
-            </>
-        ),
-        subtitle: (
-            <>
-                You can keep your domain at any registrar. AsuraTech Host only
-                needs two DNS records to serve and{" "}
-                <span className="text-blue-500">secure it</span>.
-            </>
-        ),
-        category: "Domains & SSL",
-        read: "5 min read",
-        updated: "Jul 29, 2026",
-        steps: [
-            {
-                title: "Add the domain",
-                description: (
-                    <>
-                        Domains →{" "}
-                        <span className="text-blue-500">Add domain</span>, type
-                        the domain, and choose which website it should serve.
+                        On the checkout page, review your plan and any
+                        add-ons, choose a billing period, then click{" "}
+                        <span className="text-blue-500">Pay with QR Ph</span>.
+                        Scan the QR code with your banking or e-wallet app to
+                        complete payment.
                     </>
                 ),
             },
             {
-                title: "Update DNS at your registrar",
+                title: "Wait for confirmation",
                 description: (
                     <>
-                        Create these records, then save.{" "}
-                        <span className="text-blue-500">Propagation</span>{" "}
-                        usually{" "}
-                        <span className="text-blue-500">finishes</span> in under
-                        an hour.
-                    </>
-                ),
-                code: `A      @    103.84.22.10\nCNAME  www  proxy.asuratechhost.app`,
-                tips: [
-                    "Never keep an old A record from a previous host — duplicate records break verification.",
-                ],
-            },
-            {
-                title: "Wait for verification and SSL",
-                description: (
-                    <>
-                        Status moves from{" "}
-                        <span className="text-blue-500">Pending</span> to{" "}
-                        <span className="text-blue-500">Verified</span>, then
-                        the certificate is issued automatically.{" "}
-                        <span className="text-blue-500">Failed</span> status
-                        means a record still points elsewhere.
-                    </>
-                ),
-            },
-        ],
-    },
-    {
-        id: 5,
-        title: "Fix an SSL certificate that will not issue",
-        description: (
-            <>
-                What to check when a domain is{" "}
-                <span className="text-blue-500">verified</span> but HTTPS still
-                shows a warning.
-            </>
-        ),
-        subtitle: (
-            <>
-                Certificates are issued and renewed for{" "}
-                <span className="text-blue-500">you</span>, but a few DNS setups{" "}
-                <span className="text-blue-500">block the challenge</span>.
-            </>
-        ),
-        category: "Domains & SSL",
-        read: "3 min read",
-        updated: "Jul 21, 2026",
-        steps: [
-            {
-                title: "Confirm the domain is verified",
-                description: (
-                    <>
-                        SSL only starts after{" "}
-                        <span className="text-blue-500">verification</span>{" "}
-                        succeeds. Re-run verification from the{" "}
-                        <span className="text-blue-500">domain row</span> if
-                        needed.
+                        Once payment is confirmed, your subscription becomes{" "}
+                        <span className="text-blue-500">Active</span> and you
+                        can head to your dashboard.
                     </>
                 ),
             },
             {
-                title: "Remove conflicting CAA records",
+                title: "Deploy your first site",
                 description: (
                     <>
-                        A CAA record that only allows another authority will{" "}
-                        <span className="text-blue-500">block</span> issuance.
-                        Delete it or add ours.
-                    </>
-                ),
-                code: `CAA  @  0 issue "letsencrypt.org"`,
-            },
-            {
-                title: "Turn off registrar proxying",
-                description: (
-                    <>
-                        If your{" "}
-                        <span className="text-blue-500">registrar</span> proxies
-                        traffic, set the record to{" "}
-                        <span className="text-blue-500">DNS-only</span> while
-                        the certificate is{" "}
-                        <span className="text-blue-500">issued</span>.
+                        From the dashboard, click{" "}
+                        <span className="text-blue-500">Deploy New Site</span>,
+                        connect GitHub, and pick the repository you want to go
+                        live.
                     </>
                 ),
             },
@@ -350,81 +253,108 @@ git add package.json package-lock.json`,
 
     // ─── Databases ───────────────────────────────────────────────────────
     {
-        id: 6,
-        title: "Connect your app to a MySQL or PostgreSQL database",
+        id: 5,
+        title: "Create a MySQL database for your project",
         description: (
             <>
-                Create a database, grab the{" "}
-                <span className="text-blue-500">credentials</span>, and store
-                them as environment variables.
+                Create a real{" "}
+                <span className="text-blue-500">MySQL database</span>, get its
+                credentials, and connect it from phpMyAdmin.
             </>
         ),
         subtitle: (
             <>
-                Each database gets a private host, a dedicated user, and a size
-                limit based on your{" "}
-                <span className="text-blue-500">plan</span>.
+                Every database you create is provisioned instantly with its
+                own name, user, and password, scoped to your account.
             </>
         ),
         category: "Databases",
-        read: "5 min read",
+        read: "4 min read",
         updated: "Aug 11, 2026",
         steps: [
             {
-                title: "Create the database",
+                title: "Open Create database",
                 description: (
                     <>
-                        Databases →{" "}
-                        <span className="text-blue-500">Create database</span>,
-                        choose the{" "}
-                        <span className="text-blue-500">engine</span>, and{" "}
-                        <span className="text-blue-500">attach</span> it to a
-                        website.
+                        Go to{" "}
+                        <span className="text-blue-500">
+                            Files & Database → Databases
+                        </span>{" "}
+                        and click{" "}
+                        <span className="text-blue-500">Create database</span>.
                     </>
                 ),
             },
             {
-                title: "Copy the connection string",
+                title: "Name your database",
                 description: (
                     <>
-                        Use the credentials shown on the database card. Never
-                        commit them to Git.
+                        Enter a name using lowercase letters, numbers, and
+                        underscores (3–32 characters). It's stored as{" "}
+                        <span className="text-blue-500">
+                            stu_&#123;your_id&#125;_&#123;name&#125;
+                        </span>{" "}
+                        behind the scenes.
                     </>
                 ),
-                code: `DATABASE_URL=mysql://user:password@mysql-01.asuratechhost.app:3306/portfolio_prod`,
             },
             {
-                title: "Add it as an environment variable",
+                title: "Set a password",
                 description: (
                     <>
-                        Website → Environment variables →{" "}
-                        <span className="text-blue-500">Add</span>, then
-                        redeploy so the new value is picked up.
+                        Enter a password between 8–64 characters with an
+                        uppercase letter, lowercase letter, digit, and symbol —
+                        or click{" "}
+                        <span className="text-blue-500">Generate</span> for a
+                        strong one automatically. Confirm it, then submit.
                     </>
                 ),
                 tips: [
-                    "Import an existing .sql dump from the database card to migrate a local project.",
+                    "Avoid quotes, backticks, and backslashes in your password — they aren't accepted.",
+                    "You'll see a \"Database is ready\" confirmation once it's created.",
                 ],
+            },
+            {
+                title: "Get your credentials",
+                description: (
+                    <>
+                        On the database card, click{" "}
+                        <span className="text-blue-500">Show credentials</span>{" "}
+                        to reveal the host, port, database name, username, and
+                        password, or copy the full connection string in one
+                        click.
+                    </>
+                ),
+            },
+            {
+                title: "Manage it in phpMyAdmin",
+                description: (
+                    <>
+                        Click{" "}
+                        <span className="text-blue-500">Open phpMyAdmin</span>{" "}
+                        on an active database to manage tables and run queries
+                        directly.
+                    </>
+                ),
             },
         ],
     },
 
     // ─── Files & storage ─────────────────────────────────────────────────
     {
-        id: 7,
-        title: "Upload, replace, and organize your site files",
+        id: 6,
+        title: "Browsing and editing your website files",
         description: (
             <>
-                How the file manager maps to what visitors see, and which{" "}
-                <span className="text-blue-500">folder is served</span>.
+                Use the{" "}
+                <span className="text-blue-500">file manager</span> to
+                navigate, create, and edit the files behind a live website.
             </>
         ),
         subtitle: (
             <>
-                The Files section{" "}
-                <span className="text-blue-500">is</span> a live view of your
-                website root. Changes are{" "}
-                <span className="text-blue-500">served</span> immediately.
+                The file manager reads and writes directly to your website's
+                storage, so changes take effect immediately.
             </>
         ),
         category: "Files & storage",
@@ -432,89 +362,192 @@ git add package.json package-lock.json`,
         updated: "Jul 18, 2026",
         steps: [
             {
-                title: "Know which folder is public",
+                title: "Select your website",
                 description: (
                     <>
-                        Uploaded sites serve from the root, and built sites
-                        serve from your configured{" "}
-                        <span className="text-blue-500">output folder</span>.
+                        Go to{" "}
+                        <span className="text-blue-500">
+                            Files & Database → File manager
+                        </span>{" "}
+                        and choose a website from the dropdown. Only sites
+                        with a{" "}
+                        <span className="text-blue-500">Live</span> status can
+                        be browsed.
                     </>
                 ),
             },
             {
-                title: "Upload or replace files",
+                title: "Navigate folders",
                 description: (
                     <>
-                        Drag <span className="text-blue-500">files</span> into
-                        the <span className="text-blue-500">file list</span>.
-                        Uploading a{" "}
-                        <span className="text-blue-500">file</span> with an
-                        existing name replaces it.
+                        Click a folder to open it. The breadcrumb at the top
+                        shows your current path so you can jump back to any
+                        parent folder.
                     </>
                 ),
             },
             {
-                title: "Keep an index.html",
+                title: "Create a file",
                 description: (
                     <>
-                        A missing index.html is the usual{" "}
-                        <span className="text-blue-500">cause</span> of a 404
-                        on a freshly uploaded site.
+                        Click{" "}
+                        <span className="text-blue-500">Create File</span>,
+                        enter a file name, then either type content directly
+                        or upload a file (choosing one clears the other).
+                        Files are capped at 10 MB.
                     </>
                 ),
+            },
+            {
+                title: "Edit an existing file",
+                description: (
+                    <>
+                        Click the pencil icon next to a file to open it in the
+                        editor, make your changes, and save. Binary or overly
+                        large files can't be opened this way.
+                    </>
+                ),
+                tips: [
+                    "There's currently no download or delete option from the file manager — plan file changes accordingly.",
+                ],
             },
         ],
     },
 
     // ─── Billing ─────────────────────────────────────────────────────────
     {
-        id: 8,
-        title: "Upgrade your plan and understand what changes",
+        id: 7,
+        title: "How checkout and payment works",
         description: (
             <>
-                What happens to your websites, storage, and next{" "}
-                <span className="text-blue-500">invoice</span> when you switch
-                plans.
+                What happens after you pick a plan, and how{" "}
+                <span className="text-blue-500">QR Ph</span> payment activates
+                your subscription.
             </>
         ),
         subtitle:
-            "Upgrades take effect immediately and you are charged a prorated amount on your next invoice.",
+            "QR Ph is currently the available payment method. Cards and e-wallets remain unavailable until enabled for the PayMongo account.",
         category: "Billing",
-        read: "2 min read",
-        updated: "Aug 5, 2026",
+        searchTerms: ["payment", "checkout", "QR Ph", "card", "GCash", "Maya", "GrabPay", "invoice", "PDF"],
+        read: "3 min read",
+        updated: "Oct 3, 2026",
         steps: [
             {
-                title: "Go to your subscription",
+                title: "Review your plan on checkout",
                 description: (
                     <>
-                        Open{" "}
-                        <span className="text-blue-500">Account & Billing</span>{" "}
-                        →{" "}
-                        <span className="text-blue-500">Subscription</span> and
-                        click{" "}
-                        <span className="text-blue-500">Change plan</span>.
+                        The checkout page shows your chosen plan's features,
+                        plus any add-ons you can include.
                     </>
                 ),
             },
             {
-                title: "Select the new plan",
+                title: "Pick a billing period",
                 description: (
                     <>
-                        Review the storage, site slots, and price, then click{" "}
-                        <span className="text-blue-500">Confirm upgrade</span>.
-                        The change is instant.
+                        Choose one of the billing periods available for that
+                        plan, such as monthly or a multi-year period. The total
+                        updates as you choose add-ons.
                     </>
                 ),
             },
             {
-                title: "Check your next invoice",
+                title: "Pay with QR Ph",
                 description: (
                     <>
-                        A prorated charge appears in{" "}
-                        <span className="text-blue-500">Invoice history</span>{" "}
-                        on your next billing date.
+                        QR Ph is currently available. Debit/credit cards,
+                        GCash, Maya, and GrabPay appear as temporarily
+                        unavailable until enabled on the PayMongo account.
+                        Choose QR Ph to generate a code, then scan it with
+                        your banking or e-wallet app. The page checks payment
+                        status and shows when the code expires.
                     </>
                 ),
+            },
+            {
+                title: "Subscription activation",
+                description: (
+                    <>
+                        Once payment is confirmed, your subscription is marked{" "}
+                        <span className="text-blue-500">Active</span> and you
+                        can head to your dashboard. A paid invoice is also
+                        emailed to you, and you can download it from Account
+                        & Billing → Subscription & invoices.
+                    </>
+                ),
+            },
+            {
+                title: "Changing plans later",
+                description: (
+                    <>
+                        From{" "}
+                        <span className="text-blue-500">
+                            Account & Billing
+                        </span>
+                        , click{" "}
+                        <span className="text-blue-500">Change plan</span> to
+                        go back to the plans page and check out a different
+                        plan.
+                    </>
+                ),
+                tips: [
+                    "Keep an eye on your renewal date in Account & Billing — reach out to support if you have questions about your subscription.",
+                ],
+            },
+        ],
+    },
+    {
+        id: 8,
+        title: "Enable email two-factor authentication",
+        description: (
+            <>
+                Add an emailed verification code to sign-in after your
+                password, and learn how to complete the challenge.
+            </>
+        ),
+        subtitle:
+            "Two-factor authentication (2FA) sends a one-time code to your account email when you sign in.",
+        category: "Account security",
+        searchTerms: ["2FA", "two-factor", "email code", "OTP", "login", "security"],
+        read: "3 min read",
+        updated: "Oct 3, 2026",
+        steps: [
+            {
+                title: "Open your security settings",
+                description: (
+                    <>
+                        Go to Account & Billing → Profile and find the{" "}
+                        <span className="text-blue-500">Security</span>{" "}
+                        section.
+                    </>
+                ),
+            },
+            {
+                title: "Enable and verify 2FA",
+                description: (
+                    <>
+                        Choose <span className="text-blue-500">Enable 2FA</span>.
+                        Enter the six-digit code sent to your account email to
+                        confirm setup. 2FA is enabled after the code verifies.
+                    </>
+                ),
+            },
+            {
+                title: "Complete the next sign-in",
+                description: (
+                    <>
+                        After your password is accepted, enter the new six-digit
+                        code from your email on the verification page. Codes
+                        expire after 10 minutes. Use{" "}
+                        <span className="text-blue-500">Resend code</span> if
+                        needed; repeated incorrect codes will return you to
+                        login.
+                    </>
+                ),
+                tips: [
+                    "If you no longer have access to the account email, contact support before signing out.",
+                    "You can disable 2FA from the same Security section while signed in.",
+                ],
             },
         ],
     },
