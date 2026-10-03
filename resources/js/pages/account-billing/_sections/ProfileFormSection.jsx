@@ -11,11 +11,9 @@ export default function ProfileFormSection() {
 
     const handleChange = (field) => (e) =>
         setForm((prev) => ({ ...prev, [field]: e.target.value }));
-
     const handleSubmit = (e) => {
         e.preventDefault();
     };
-
     return (
         <div className="rounded-xl border border-gray-200 bg-white px-6 py-5">
             <h2 className="text-sm font-bold text-slate-900">Profile</h2>
