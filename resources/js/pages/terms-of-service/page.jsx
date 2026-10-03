@@ -1,6 +1,7 @@
 import React from "react";
 import { Head } from "@inertiajs/react";
 import NavBarSection from "../home-page/_sections/NavBarSection";
+import Button from "@/components/Button";
 
 export default function Page() {
     return (
@@ -93,23 +94,33 @@ export default function Page() {
                             <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">
                                 6. Contact Us
                             </h2>
-                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-                                Questions about these Terms can be sent to:
-                            </p>
-                            <div className="bg-slate-100 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-sm space-y-1">
-                                <p className="text-slate-900 dark:text-white font-medium">
-                                    Caleho Cloud Support
-                                </p>
-                                <p className="text-slate-500 dark:text-slate-400">
-                                    Email:{" "}
-                                    <a
-                                        href="mailto:support@caleho.cloud"
-                                        className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 hover:underline"
-                                    >
-                                        support@caleho.cloud
-                                    </a>
-                                </p>
+                          
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm">
+                                <div>
+                                    <p className="font-semibold text-slate-900 dark:text-white">
+                                        Caleho Cloud Support
+                                    </p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        Need assistance? Our support team is
+                                        here to help.
+                                    </p>
+                                </div>
+
+                                <Button
+                                    onClick={() =>
+                                        window.dispatchEvent(
+                                            new CustomEvent(
+                                                "caleho:support:open",
+                                            ),
+                                        )
+                                    }
+                                    className="min-h-11 w-full mr-5 sm:w-auto bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-medium rounded-xl shadow-lg shadow-blue-600/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-blue-400 transition-colors"
+                                >
+                                    Contact Us
+                                </Button>
                             </div>
+
+                            
                         </section>
                     </main>
                 </div>
