@@ -111,7 +111,7 @@ export default function HeroSection() {
 
                     {/* Feature bullets */}
                     <div className="pt-2 flex items-center justify-between gap-2 text-[11px] xs:text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 w-full max-w-sm">
-                        {["Free SSL", "Free domain", "99.9% uptime"].map(
+                        {["Free SSL", "Free subdomain", "99.9% uptime"].map(
                             (feat) => (
                                 <div
                                     key={feat}
