@@ -1,6 +1,7 @@
+
 import React from "react";
-import { Mail } from "lucide-react";
 import { Link } from "@inertiajs/react";
+
 const FacebookIcon = (props) => (
     <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
         <path d="M13.5 21v-7.6h2.55l.38-2.96h-2.93v-1.9c0-.86.24-1.44 1.47-1.44h1.57V4.14c-.27-.04-1.2-.12-2.28-.12-2.26 0-3.8 1.38-3.8 3.9v2.18H8v2.96h2.46V21h3.04z" />
@@ -17,7 +18,13 @@ const InstagramIcon = (props) => (
     >
         <rect x="3" y="3" width="18" height="18" rx="5" />
         <circle cx="12" cy="12" r="4" />
-        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+        <circle
+            cx="17.5"
+            cy="6.5"
+            r="1"
+            fill="currentColor"
+            stroke="none"
+        />
     </svg>
 );
 
@@ -37,29 +44,54 @@ const LINK_COLUMNS = [
     {
         title: "Platform",
         links: [
-            { label: "Home", href: "#home" },
-            { label: "Hosting Plans", href: "#hosting-plans" },
-            { label: "Features", href: "#features" },
-            { label: "Partners", href: "#partners" },
-            { label: "About Us", href: "#about-us" },
+            {
+                label: "Home",
+                href: "#home",
+            },
+            {
+                label: "Hosting Plans",
+                href: "#hosting-plans",
+            },
+            {
+                label: "Features",
+                href: "#features",
+            },
+           
         ],
     },
     {
         title: "Resources",
         links: [
-            // { label: "Documentation", href: "#documentation" },
-            // { label: "Help Center", href: "#help-center" },
-            // { label: "Tutorials", href: "#tutorials" },
-            { label: "FAQs", href: "#faqs" }, 
+            {
+                label: "FAQs",
+                href: "#faqs",
+            },
+            {
+                label: "Contact Us",
+                href: "#support",
+                action: "open-support",
+            },
         ],
     },
     {
         title: "Account",
         links: [
-            { label: "Log In", href: "/login" },
-            { label: "Sign Up", href: "/register" },
-            { label: "My Hosting", href: "/login" },
-            { label: "Billing", href: "/login" },
+            {
+                label: "Log In",
+                href: "/login",
+            },
+            {
+                label: "Sign Up",
+                href: "/register",
+            },
+            {
+                label: "My Hosting",
+                href: "/login",
+            },
+            {
+                label: "Billing",
+                href: "/login",
+            },
         ],
     },
 ];
@@ -90,79 +122,97 @@ const SOCIAL_LINKS = [
 export default function FooterSection() {
     const year = new Date().getFullYear();
 
-    const handleFaqsClick = (e) => {
-        e.preventDefault();
-        document.getElementById("faqs")?.scrollIntoView({ behavior: "smooth" });
+    const handleSectionClick = (e, link) => {
+        if (link.action === "open-support") {
+            e.preventDefault();
+            window.dispatchEvent(new CustomEvent("caleho:support:open"));
+            return;
+        }
+
+        if (!link.href?.startsWith("#")) {
+            return;
+        }
+
+        const targetId = link.href.substring(1);
+        const target = document.getElementById(targetId);
+
+        if (target) {
+            e.preventDefault();
+
+            target.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        }
     };
 
     return (
-        <footer className="bg-slate-900 text-slate-300 px-4 sm:px-6 lg:px-8 pt-16 pb-8">
+        <footer className="bg-slate-900 px-4 pb-8 pt-16 text-slate-300 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-7xl">
+                {/* Main Footer */}
                 <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
-                    {/* Brand, description, socials & contact */}
+                    {/* Brand, Description & Socials */}
                     <div className="lg:col-span-4">
-                        <a href="/" className="flex items-center gap-2.5">
+                        <a
+                            href="/"
+                            aria-label="CALEHO Host Home"
+                            className="flex items-center gap-2.5"
+                        >
                             <img
                                 src="/images/logo 3.png"
                                 alt="CALEHO Host Logo"
-                                className="w-12 h-12 object-contain"
+                                className="h-12 w-12 object-contain"
                             />
-                            <span className="bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-400 bg-clip-text text-transparent font-bold">
-                                CALEHO
-                                <span className="text-blue-500"> HOST</span>
+
+                            <span className="bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-400 bg-clip-text font-bold text-transparent">
+                                CALEHO{" "}
+                                <span className="text-blue-500">
+                                    HOST
+                                </span>
                             </span>
                         </a>
+
                         <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-400">
                             Affordable and reliable web hosting built to help
                             students learn, create, and launch online.
                         </p>
 
+                        {/* Social Links */}
                         <div className="mt-5 flex items-center gap-3">
-                            {" "}
-                            {SOCIAL_LINKS.map(({ icon: Icon, href, label }) => (
-                                <a
-                                    key={label}
-                                    href={href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    aria-label={`Visit our ${label}`}
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 text-slate-400 transition-colors hover:border-slate-500 hover:text-white"
-                                >
-                                    {" "}
-                                    <Icon className="w-4 h-4" />{" "}
-                                </a>
-                            ))}{" "}
-                        </div>
-
-                        <div className="mt-10">
-                            <h4 className="text-sm font-bold text-white">
-                                Contact
-                            </h4>
-                            <a
-                                href="mailto:support@calehohost.com"
-                                className="mt-3 flex items-center gap-2 text-sm text-slate-300 transition-colors hover:text-white"
-                            >
-                                <Mail className="w-4 h-4 shrink-0" />
-                                support@calehohost.com
-                            </a>
+                            {SOCIAL_LINKS.map(
+                                ({ icon: Icon, href, label }) => (
+                                    <a
+                                        key={label}
+                                        href={href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        aria-label={`Visit our ${label}`}
+                                        className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 text-slate-400 transition-colors hover:border-slate-500 hover:text-white"
+                                    >
+                                        <Icon className="h-4 w-4" />
+                                    </a>
+                                )
+                            )}
                         </div>
                     </div>
 
-                    {/* Link columns */}
+                    {/* Footer Link Columns */}
                     {LINK_COLUMNS.map((column) => (
-                        <div key={column.title} className="lg:col-span-2">
+                        <div
+                            key={column.title}
+                            className="lg:col-span-2"
+                        >
                             <h4 className="text-sm font-bold text-white">
                                 {column.title}
                             </h4>
+
                             <ul className="mt-4 space-y-3">
                                 {column.links.map((link) => (
                                     <li key={link.label}>
                                         <a
                                             href={link.href}
-                                            onClick={
-                                                link.href === "#faqs"
-                                                    ? handleFaqsClick
-                                                    : undefined
+                                            onClick={(e) =>
+                                                handleSectionClick(e, link)
                                             }
                                             className="text-sm text-slate-300 transition-colors hover:text-white"
                                         >
@@ -175,9 +225,12 @@ export default function FooterSection() {
                     ))}
                 </div>
 
-                {/* Bottom bar */}
+                {/* Bottom Bar */}
                 <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-6 text-sm text-slate-500 sm:flex-row">
-                    <p>© {year} CALEHO Host. All rights reserved.</p>
+                    <p>
+                        © {year} CALEHO Host. All rights reserved.
+                    </p>
+
                     <div className="flex gap-6">
                         <Link
                             href="/privacy-policy"
@@ -185,6 +238,7 @@ export default function FooterSection() {
                         >
                             Privacy Policy
                         </Link>
+
                         <Link
                             href="/terms-of-service"
                             className="transition-colors hover:text-white"

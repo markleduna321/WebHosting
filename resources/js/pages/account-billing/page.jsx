@@ -13,6 +13,7 @@ import ReferralTableSection from "./_sections/ReferralTableSection";
 import ProfileFormSection from "./_sections/ProfileFormSection";
 import ProfileStudentVerificationSection from "./_sections/ProfileStudentVerificationSection";
 import ProfileSecuritySection from "./_sections/ProfileSecuritySection";
+import DeleteAccountSection from "./_sections/DeleteAccountSection";
 
 const TABS = [
     { id: "subscription", label: "Subscription & invoices", icon: <Receipt size={16} /> },
@@ -74,6 +75,7 @@ export default function Page() {
                     <div className="lg:col-span-1 flex flex-col gap-6">
                         <ProfileStudentVerificationSection />
                         <ProfileSecuritySection />
+                        <DeleteAccountSection />
                     </div>
                 </div>
             </TabPanel>

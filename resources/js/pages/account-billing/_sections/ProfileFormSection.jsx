@@ -12,11 +12,6 @@ export default function ProfileFormSection() {
         email: profile?.email ?? auth?.user?.email ?? "",
     });
 
-<<<<<<< HEAD
-    const handleChange = (field) => (e) =>
-        setForm((prev) => ({ ...prev, [field]: e.target.value }));
-    const handleSubmit = (e) => {
-=======
     const [updateUser, { isLoading }] = useUpdateUserMutation();
     const [success, setSuccess] = useState(false);
     const [errors, setErrors] = useState({});
@@ -28,7 +23,6 @@ export default function ProfileFormSection() {
     };
 
     const handleSubmit = async (e) => {
->>>>>>> 59807391c63355423d5bd730edda0374a35f92cc
         e.preventDefault();
         setErrors({});
         setSuccess(false);

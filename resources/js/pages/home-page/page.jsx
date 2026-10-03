@@ -19,7 +19,7 @@ export default function HomePage({ plans }) {
                 <HostPlanSection plans={plans} />
                 <FeatureSection />
                 <UseCasesSection />
-                <TestimonialSection />
+                {/* <TestimonialSection /> */}
                 <FaqsSection/>
                 <AboutUsSection />
             </main>

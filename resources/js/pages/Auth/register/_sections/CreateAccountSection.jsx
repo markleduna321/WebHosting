@@ -34,7 +34,8 @@ function validateForm(data) {
     }
 
     if (data.school.trim().length > 255) {
-        nextErrors.school = "School name may not be longer than 255 characters.";
+        nextErrors.school =
+            "School name may not be longer than 255 characters.";
     }
 
     if (!data.agree_terms) {
@@ -60,15 +61,20 @@ function inputClass(hasError, isValid = false) {
     return `${inputBaseClass} border-slate-200 focus:border-blue-500 focus:ring-blue-500`;
 }
 
-export default function CreateAccountSection({ plan, period, selectedAddOnIds = [] }) {
-    const { data, setData, post, processing, errors, clearErrors, transform } = useForm({
-        name: "",
-        email: "",
-        password: "",
-        password_confirmation: "",
-        school: "",
-        agree_terms: false,
-    });
+export default function CreateAccountSection({
+    plan,
+    period,
+    selectedAddOnIds = [],
+}) {
+    const { data, setData, post, processing, errors, clearErrors, transform } =
+        useForm({
+            name: "",
+            email: "",
+            password: "",
+            password_confirmation: "",
+            school: "",
+            agree_terms: false,
+        });
 
     const [touched, setTouched] = useState({});
     const [passwordFocused, setPasswordFocused] = useState(false);
@@ -419,19 +425,20 @@ export default function CreateAccountSection({ plan, period, selectedAddOnIds = 
                             className="ml-2.5 block text-sm text-slate-600 select-none"
                         >
                             I agree to the{" "}
-                            <a
-                                href="#"
-                                className="font-medium text-blue-600 hover:text-blue-500"
-                            >
-                                Terms of Service
-                            </a>{" "}
-                            and{" "}
-                            <a
-                                href="#"
-                                className="font-medium text-blue-600 hover:text-blue-500"
+                         
+                            <Link
+                                href="/privacy-policy"
+                                className="transition-colors text-blue-600  hover:underline"
                             >
                                 Privacy Policy
-                            </a>
+                            </Link>{" "}
+                            and{" "}
+                            <Link
+                                href="/terms-of-service"
+                                className="transition-colors  text-blue-600hover:underline"
+                            >
+                                Terms of Service
+                            </Link>
                             .
                         </label>
                     </div>
