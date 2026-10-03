@@ -435,7 +435,7 @@ export default function CreateAccountSection({
                             and{" "}
                             <Link
                                 href="/terms-of-service"
-                                className="transition-colors  text-blue-600hover:underline"
+                                className="transition-colors  text-blue-600 hover:underline"
                             >
                                 Terms of Service
                             </Link>
