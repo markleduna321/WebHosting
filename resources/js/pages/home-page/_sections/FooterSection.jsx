@@ -96,28 +96,28 @@ const LINK_COLUMNS = [
     },
 ];
 
-const SOCIAL_LINKS = [
-    {
-        icon: FacebookIcon,
-        href: "https://www.facebook.com/share/1BrH2TSyqz/",
-        label: "Facebook",
-    },
-    {
-        icon: InstagramIcon,
-        href: "https://www.instagram.com/asuratech_admin",
-        label: "Instagram",
-    },
-    {
-        icon: LinkedinIcon,
-        href: "https://www.linkedin.com/company/asuratech-solutions",
-        label: "LinkedIn",
-    },
-    {
-        icon: GithubIcon,
-        href: "https://github.com/calehohost",
-        label: "GitHub",
-    },
-];
+// const SOCIAL_LINKS = [
+//     {
+//         icon: FacebookIcon,
+//         href: "https://www.facebook.com/share/1BrH2TSyqz/",
+//         label: "Facebook",
+//     },
+//     {
+//         icon: InstagramIcon,
+//         href: "https://www.instagram.com/asuratech_admin",
+//         label: "Instagram",
+//     },
+//     {
+//         icon: LinkedinIcon,
+//         href: "https://www.linkedin.com/company/asuratech-solutions",
+//         label: "LinkedIn",
+//     },
+//     {
+//         icon: GithubIcon,
+//         href: "https://github.com/calehohost",
+//         label: "GitHub",
+//     },
+// ];
 
 export default function FooterSection() {
     const year = new Date().getFullYear();
@@ -178,7 +178,7 @@ export default function FooterSection() {
                         </p>
 
                         {/* Social Links */}
-                        <div className="mt-5 flex items-center gap-3">
+                        {/* <div className="mt-5 flex items-center gap-3">
                             {SOCIAL_LINKS.map(
                                 ({ icon: Icon, href, label }) => (
                                     <a
@@ -193,7 +193,7 @@ export default function FooterSection() {
                                     </a>
                                 )
                             )}
-                        </div>
+                        </div> */}
                     </div>
 
                     {/* Footer Link Columns */}
