@@ -65,6 +65,44 @@ class PayMongoService
     }
 
     /**
+     * Hosted checkout: the customer enters card or wallet details on PayMongo's page,
+     * so card data never reaches this application.
+     *
+     * @param  array<string, string>  $metadata  PayMongo accepts string values only.
+     */
+    public function createCheckoutSession(
+        int $amountCentavos,
+        string $itemName,
+        string $paymentMethodType,
+        string $successUrl,
+        string $cancelUrl,
+        string $referenceNumber,
+        array $metadata = [],
+        string $statementDescriptor = 'Caleho Host',
+    ): array {
+        return $this->post('/checkout_sessions', [
+            'data' => [
+                'attributes' => [
+                    'line_items' => [[
+                        'name' => Str::limit($itemName, 255, ''),
+                        'amount' => $amountCentavos,
+                        'currency' => 'PHP',
+                        'quantity' => 1,
+                    ]],
+                    'payment_method_types' => [$paymentMethodType],
+                    'description' => Str::limit($itemName, 255, ''),
+                    'success_url' => $successUrl,
+                    'cancel_url' => $cancelUrl,
+                    'reference_number' => $referenceNumber,
+                    'statement_descriptor' => Str::limit($statementDescriptor, 22, ''),
+                    'show_line_items' => true,
+                    'metadata' => $metadata,
+                ],
+            ],
+        ]);
+    }
+
+    /**
      * Verifies the Paymongo-Signature header against the raw request body.
      *
      * The body must not have been parsed first: re-encoding changes the bytes

@@ -37,6 +37,10 @@ return [
         'redirect' => env('GITHUB_REDIRECT_URI', '/auth/github/callback'),
     ],
 
+    'resend' => [
+        'key' => env('RESEND_API_KEY'),
+    ],
+
     'paymongo' => [
         'secret_key' => env('PAYMONGO_SECRET_KEY'),
         // Shown once when the endpoint is created in the dashboard. NOT the secret API key.
@@ -46,6 +50,13 @@ return [
         // QR Ph accepts 60-9000; PayMongo defaults to 1800.
         'qr_expiry_seconds' => (int) env('PAYMONGO_QR_EXPIRY_SECONDS', 1800),
         'signature_tolerance' => (int) env('PAYMONGO_SIGNATURE_TOLERANCE', 300),
+        // Flip on only after PayMongo activates the method on the account. QR Ph is always on.
+        'methods' => [
+            'card' => filter_var(env('PAYMONGO_METHOD_CARD', false), FILTER_VALIDATE_BOOLEAN),
+            'gcash' => filter_var(env('PAYMONGO_METHOD_GCASH', false), FILTER_VALIDATE_BOOLEAN),
+            'maya' => filter_var(env('PAYMONGO_METHOD_MAYA', false), FILTER_VALIDATE_BOOLEAN),
+            'grabpay' => filter_var(env('PAYMONGO_METHOD_GRABPAY', false), FILTER_VALIDATE_BOOLEAN),
+        ],
     ],
 
 ];

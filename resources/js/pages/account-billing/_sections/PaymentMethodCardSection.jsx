@@ -20,9 +20,11 @@ export default function PaymentMethodCardSection() {
                 Processed by PayMongo
             </p>
             <p className="mt-2 text-xs text-slate-500 leading-relaxed">
-                GCash, Maya, GrabPay, and Visa/Mastercard payments are handled
-                by PayMongo. Card details never touch AsuraTech Host servers,
-                and every charge is receipted to your student email.
+                Payments are processed securely by PayMongo using QR Ph, which
+                works with any bank or e-wallet app. Visa/Mastercard, GCash,
+                Maya, and GrabPay are coming soon. Card details will never
+                touch AsuraTech Host servers, and every charge is receipted to
+                your student email.
             </p>
 
             {/* Divider */}

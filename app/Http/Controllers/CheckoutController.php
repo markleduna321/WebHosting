@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\PlanResource;
 use App\Models\Payment;
 use App\Models\Plan;
+use App\Services\PaymentMethodRegistry;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -45,6 +46,7 @@ class CheckoutController extends Controller
             'cycle' => $cycle,
             'initialAddons' => $addons,
             'availableAddons' => \App\Http\Resources\AddonResource::collection($availableAddons)->resolve(),
+            'paymentMethods' => app(PaymentMethodRegistry::class)->all(),
         ]);
     }
 }

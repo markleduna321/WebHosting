@@ -33,7 +33,8 @@ class CheckoutController extends Controller
                 $request->user(),
                 $plan,
                 $request->validated('billing_cycle'),
-                $addons
+                $addons,
+                $request->paymentMethod()
             );
         } catch (PaymentException $e) {
             return response()->json([

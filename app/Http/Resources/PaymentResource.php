@@ -18,6 +18,11 @@ class PaymentResource extends JsonResource
             'amount' => (float) $this->amount,
             'currency' => $this->currency,
             'billing_cycle' => $this->billing_cycle,
+            'payment_method' => $this->payment_method,
+            'checkout_url' => $this->when(
+                $this->status === \App\Models\Payment::STATUS_AWAITING_PAYMENT,
+                fn () => $this->checkout_url
+            ),
             'qr_image_url' => $this->qr_image_url,
             // Withheld in live mode so a stale test row can never expose a bypass.
             'test_url' => $this->when(

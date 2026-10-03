@@ -12,15 +12,25 @@ use Illuminate\Validation\ValidationException;
 
 class CheckoutService
 {
-    public function __construct(private readonly PayMongoService $paymongo) {}
+    public function __construct(
+        private readonly PayMongoService $paymongo,
+        private readonly PaymentMethodRegistry $methods,
+    ) {}
 
     /**
-     * Starts a QR Ph payment for a plan and optional add-ons.
+     * Starts a payment for a plan and optional add-ons: QR Ph inline, everything else via hosted checkout.
      *
      * @throws ValidationException|PaymentException
      */
-    public function start(User $user, Plan $plan, string $cycle, array $addonIds = []): Payment
+    public function start(User $user, Plan $plan, string $cycle, array $addonIds = [], string $method = PaymentMethodRegistry::QRPH): Payment
     {
+        // Re-checked here so a flag flipped between validation and charge cannot slip through.
+        if (! $this->methods->isEnabled($method)) {
+            throw ValidationException::withMessages([
+                'payment_method' => 'This payment method is temporarily unavailable. Please use QR Ph.',
+            ]);
+        }
+
         $amount = $this->priceFor($plan, $cycle, $addonIds);
 
         $payment = $user->payments()->create([
@@ -28,20 +38,79 @@ class CheckoutService
             'billing_cycle' => $cycle,
             'amount' => $amount,
             'currency' => $plan->currency ?? 'PHP',
+            'payment_method' => $method,
             'status' => Payment::STATUS_PENDING,
             'addons' => $addonIds,
         ]);
 
+        $metadata = [
+            'payment_uuid' => $payment->uuid,
+            'user_id' => (string) $user->id,
+            'plan_slug' => $plan->slug,
+            'addons' => implode(',', $addonIds),
+        ];
+
+        return $method === PaymentMethodRegistry::QRPH
+            ? $this->startQr($payment, $plan, $cycle, $amount, $metadata)
+            : $this->startHostedCheckout($payment, $plan, $cycle, $amount, $method, $metadata);
+    }
+
+    /**
+     * @param  array<string, string>  $metadata
+     *
+     * @throws PaymentException
+     */
+    private function startHostedCheckout(Payment $payment, Plan $plan, string $cycle, string $amount, string $method, array $metadata): Payment
+    {
+        try {
+            $session = $this->paymongo->createCheckoutSession(
+                $this->toCentavos($amount),
+                "{$plan->name} plan ({$cycle})",
+                $method,
+                route('checkout.return', ['payment' => $payment->uuid, 'status' => 'success']),
+                route('checkout.return', ['payment' => $payment->uuid, 'status' => 'cancel']),
+                $payment->uuid,
+                $metadata,
+                'CALEHO HOST'
+            );
+        } catch (PaymentException $e) {
+            $this->markFailed($payment, $e->getMessage());
+
+            throw $e;
+        }
+
+        $attributes = $session['data']['attributes'] ?? [];
+        $checkoutUrl = $attributes['checkout_url'] ?? null;
+
+        if (! is_string($checkoutUrl) || ! str_starts_with($checkoutUrl, 'https://')) {
+            $this->markFailed($payment, 'PayMongo did not return a checkout page.');
+
+            throw new PaymentException('We could not open the payment page. Please try again.');
+        }
+
+        $payment->update([
+            'paymongo_checkout_session_id' => $session['data']['id'] ?? null,
+            // Lets the payment.paid event for the underlying intent resolve to this row too.
+            'paymongo_payment_intent_id' => $attributes['payment_intent']['id'] ?? null,
+            'checkout_url' => $checkoutUrl,
+            'status' => Payment::STATUS_AWAITING_PAYMENT,
+        ]);
+
+        return $payment->fresh();
+    }
+
+    /**
+     * @param  array<string, string>  $metadata
+     *
+     * @throws PaymentException
+     */
+    private function startQr(Payment $payment, Plan $plan, string $cycle, string $amount, array $metadata): Payment
+    {
         try {
             $intent = $this->paymongo->createPaymentIntent(
                 $this->toCentavos($amount),
                 "{$plan->name} plan ({$cycle})",
-                [
-                    'payment_uuid' => $payment->uuid,
-                    'user_id' => (string) $user->id,
-                    'plan_slug' => $plan->slug,
-                    'addons' => implode(',', $addonIds),
-                ],
+                $metadata,
                 'CALEHO HOST'
             );
 

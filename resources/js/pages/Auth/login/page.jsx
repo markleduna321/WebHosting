@@ -2,7 +2,7 @@ import { Head, Link, useForm } from "@inertiajs/react";
 import { ArrowLeft, CheckCircle, Eye, EyeOff } from "lucide-react";
 import React, { useState } from "react";
 
-export default function Page() {
+export default function Page({ status }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         email: "",
         password: "",
@@ -109,6 +109,15 @@ export default function Page() {
                             Manage your websites, domains, and deployments.
                         </p>
                     </div>
+
+                    {status && (
+                        <div
+                            role="status"
+                            className="mb-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800"
+                        >
+                            {status}
+                        </div>
+                    )}
 
                     {/* Form Fields */}
                     <form className="space-y-8" onSubmit={submit}>
