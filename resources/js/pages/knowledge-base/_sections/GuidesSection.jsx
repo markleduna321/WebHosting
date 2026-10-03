@@ -7,14 +7,22 @@ const CATEGORY_COUNTS = GUIDES.reduce((acc, g) => {
     return acc;
 }, {});
 
+const CATEGORY_ORDER = [
+    "Getting started",
+    "Git & deployments",
+    "Domains & SSL",
+    "Databases",
+    "Files & storage",
+    "Billing",
+    "Account security",
+];
+
 const CATEGORIES = [
-    { label: "All",               count: GUIDES.length },
-    { label: "Getting started",   count: CATEGORY_COUNTS["Getting started"]   || 0 },
-    { label: "Git & deployments", count: CATEGORY_COUNTS["Git & deployments"] || 0 },
-    { label: "Domains & SSL",     count: CATEGORY_COUNTS["Domains & SSL"]     || 0 },
-    { label: "Databases",         count: CATEGORY_COUNTS["Databases"]         || 0 },
-    { label: "Files & storage",   count: CATEGORY_COUNTS["Files & storage"]   || 0 },
-    { label: "Billing",           count: CATEGORY_COUNTS["Billing"]           || 0 },
+    { label: "All", count: GUIDES.length },
+    ...CATEGORY_ORDER.filter((label) => CATEGORY_COUNTS[label]).map((label) => ({
+        label,
+        count: CATEGORY_COUNTS[label],
+    })),
 ];
 
 export default function GuidesSection({ searchQuery = "", onSelectGuide }) {
@@ -26,7 +34,10 @@ export default function GuidesSection({ searchQuery = "", onSelectGuide }) {
         const matchesSearch =
             !searchQuery ||
             g.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            g.category.toLowerCase().includes(searchQuery.toLowerCase());
+            g.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            g.searchTerms?.some((term) =>
+                term.toLowerCase().includes(searchQuery.toLowerCase()),
+            );
         return matchesCategory && matchesSearch;
     });
 

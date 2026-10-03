@@ -39,6 +39,8 @@ Route::get('/terms-of-service', function () {
     return Inertia::render('terms-of-service/page');
 })->name('terms-of-service');
 
+Route::get('/support', fn () => Inertia::render('support/page'))->name('support');
+
 Route::get('/dashboard', function () {
     return Inertia::render('dashboard/page');
 })->middleware('auth')->name('dashboard');
@@ -64,7 +66,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/deployments', fn () => Inertia::render('deployments/page'))->name('deployments');
     Route::get('/billing', fn () => Inertia::render('billing/page'))->name('billing');
     Route::get('/knowledge-base', fn () => Inertia::render('knowledge-base/page'))->name('knowledge-base');
-    Route::get('/support', fn () => Inertia::render('support/page'))->name('support');
     Route::get('/account/settings', fn () => Inertia::render('account/settings/page'))->name('account.settings');
 });
 

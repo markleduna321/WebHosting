@@ -15,8 +15,8 @@ export default function HeroSection({ onSearch }) {
                 How can we help?
             </h1>
             <p className="mt-1.5 text-sm text-slate-500 max-w-sm leading-relaxed">
-                Step-by-step guides for hosting, Git, domains, and databases —
-                written for student projects.
+                Step-by-step help for hosting, deployments, billing, databases,
+                and account security.
             </p>
 
             {/* Search bar */}
@@ -26,7 +26,7 @@ export default function HeroSection({ onSearch }) {
                     type="text"
                     value={query}
                     onChange={handleChange}
-                    placeholder="Search guides — e.g. GitHub, SSL, database"
+                    placeholder="Search guides — e.g. GitHub, 2FA, QR Ph"
                     className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-700 placeholder-slate-300 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition"
                 />
             </div>

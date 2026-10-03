@@ -2,7 +2,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import React from "react";
 import { GUIDES } from "../data/guides-data.jsx";
 
-const FEATURED = GUIDES.find((g) => g.id === 1);
+const FEATURED = GUIDES.find((g) => g.id === 3);
 
 export default function FeaturedGuideSection({ onSelectGuide }) {
     return (
@@ -10,7 +10,7 @@ export default function FeaturedGuideSection({ onSelectGuide }) {
             {/* Badge */}
             <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-500 uppercase tracking-wider mb-3">
                 <Sparkles className="w-3.5 h-3.5" />
-                Most read guide
+                Start here
             </div>
 
             <h2 className="text-xl font-bold text-slate-900">

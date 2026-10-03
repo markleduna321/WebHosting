@@ -37,6 +37,16 @@ return [
         'redirect' => env('GITHUB_REDIRECT_URI', '/auth/github/callback'),
     ],
 
+    'openai' => [
+        'key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+        'scope_model' => env('OPENAI_SCOPE_MODEL', env('OPENAI_MODEL', 'gpt-4o-mini')),
+    ],
+
+    'support' => [
+        'team_email' => env('SUPPORT_TEAM_EMAIL'),
+    ],
+
     'resend' => [
         'key' => env('RESEND_API_KEY'),
         // Must be an address on a domain verified in Resend.

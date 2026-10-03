@@ -188,8 +188,9 @@ export const GUIDES = [
         subtitle:
             "An active, paid subscription is required before you can deploy a website.",
         category: "Getting started",
+        searchTerms: ["signup", "register", "password", "QR Ph", "plan", "deploy"],
         read: "4 min read",
-        updated: "Aug 2, 2026",
+        updated: "Oct 3, 2026",
         steps: [
             {
                 title: "Choose a plan",
@@ -207,8 +208,10 @@ export const GUIDES = [
                 description: (
                     <>
                         Fill in your name, email, and password to create your
-                        account. You'll be signed in and taken straight to
-                        checkout.
+                        account. Your password needs at least 8 characters,
+                        including uppercase and lowercase letters, a number,
+                        and a special character. You'll be signed in and taken
+                        straight to checkout.
                     </>
                 ),
             },
@@ -244,68 +247,6 @@ export const GUIDES = [
                         live.
                     </>
                 ),
-            },
-        ],
-    },
-
-    // ─── Domains ─────────────────────────────────────────────────────────
-    {
-        id: 4,
-        title: "Adding a domain to your website (preview)",
-        description: (
-            <>
-                Domains is currently a{" "}
-                <span className="text-blue-500">preview feature</span> — here's
-                what you can do with it today.
-            </>
-        ),
-        subtitle: (
-            <>
-                The Domains page lets you keep a list of domains against a
-                website. DNS setup, verification, and SSL issuance are not
-                automated yet — treat this page as a planning tool for now.
-            </>
-        ),
-        category: "Domains & SSL",
-        read: "2 min read",
-        updated: "Jul 29, 2026",
-        steps: [
-            {
-                title: "Open the Domains page",
-                description: (
-                    <>
-                        Go to{" "}
-                        <span className="text-blue-500">Site & Domain</span>{" "}
-                        from the sidebar.
-                    </>
-                ),
-            },
-            {
-                title: "Add a domain",
-                description: (
-                    <>
-                        Enter the domain name and choose which website it
-                        should point to, then click{" "}
-                        <span className="text-blue-500">Add domain</span>. It
-                        appears in your list with a{" "}
-                        <span className="text-blue-500">Pending</span> status.
-                    </>
-                ),
-            },
-            {
-                title: "Know the current limits",
-                description: (
-                    <>
-                        Adding a domain here does not yet configure DNS,
-                        request a certificate, or make the domain reachable.
-                        Point your domain's DNS at your registrar manually if
-                        you need it live today, and contact support for help.
-                    </>
-                ),
-                tips: [
-                    "Use this page to track which domains belong to which site while full automation is being built.",
-                    "Favorite, retry, and delete actions update this list but don't trigger any DNS or SSL changes yet.",
-                ],
             },
         ],
     },
@@ -485,10 +426,11 @@ export const GUIDES = [
             </>
         ),
         subtitle:
-            "Every plan is paid for through a QR Ph payment before your subscription becomes active.",
+            "QR Ph is currently the available payment method. Cards and e-wallets remain unavailable until enabled for the PayMongo account.",
         category: "Billing",
+        searchTerms: ["payment", "checkout", "QR Ph", "card", "GCash", "Maya", "GrabPay", "invoice", "PDF"],
         read: "3 min read",
-        updated: "Aug 5, 2026",
+        updated: "Oct 3, 2026",
         steps: [
             {
                 title: "Review your plan on checkout",
@@ -503,11 +445,9 @@ export const GUIDES = [
                 title: "Pick a billing period",
                 description: (
                     <>
-                        Toggle between{" "}
-                        <span className="text-blue-500">Monthly</span>,{" "}
-                        <span className="text-blue-500">Annual</span>, or a
-                        custom number of months. The total updates
-                        automatically as you choose add-ons.
+                        Choose one of the billing periods available for that
+                        plan, such as monthly or a multi-year period. The total
+                        updates as you choose add-ons.
                     </>
                 ),
             },
@@ -515,12 +455,12 @@ export const GUIDES = [
                 title: "Pay with QR Ph",
                 description: (
                     <>
-                        Click{" "}
-                        <span className="text-blue-500">Pay with QR Ph</span>{" "}
-                        to generate a QR code, then scan it with your banking
-                        or e-wallet app. The page checks payment status
-                        automatically and shows a countdown until the QR code
-                        expires.
+                        QR Ph is currently available. Debit/credit cards,
+                        GCash, Maya, and GrabPay appear as temporarily
+                        unavailable until enabled on the PayMongo account.
+                        Choose QR Ph to generate a code, then scan it with
+                        your banking or e-wallet app. The page checks payment
+                        status and shows when the code expires.
                     </>
                 ),
             },
@@ -530,7 +470,9 @@ export const GUIDES = [
                     <>
                         Once payment is confirmed, your subscription is marked{" "}
                         <span className="text-blue-500">Active</span> and you
-                        can head to your dashboard.
+                        can head to your dashboard. A paid invoice is also
+                        emailed to you, and you can download it from Account
+                        & Billing → Subscription & invoices.
                     </>
                 ),
             },
@@ -550,6 +492,61 @@ export const GUIDES = [
                 ),
                 tips: [
                     "Keep an eye on your renewal date in Account & Billing — reach out to support if you have questions about your subscription.",
+                ],
+            },
+        ],
+    },
+    {
+        id: 8,
+        title: "Enable email two-factor authentication",
+        description: (
+            <>
+                Add an emailed verification code to sign-in after your
+                password, and learn how to complete the challenge.
+            </>
+        ),
+        subtitle:
+            "Two-factor authentication (2FA) sends a one-time code to your account email when you sign in.",
+        category: "Account security",
+        searchTerms: ["2FA", "two-factor", "email code", "OTP", "login", "security"],
+        read: "3 min read",
+        updated: "Oct 3, 2026",
+        steps: [
+            {
+                title: "Open your security settings",
+                description: (
+                    <>
+                        Go to Account & Billing → Profile and find the{" "}
+                        <span className="text-blue-500">Security</span>{" "}
+                        section.
+                    </>
+                ),
+            },
+            {
+                title: "Enable and verify 2FA",
+                description: (
+                    <>
+                        Choose <span className="text-blue-500">Enable 2FA</span>.
+                        Enter the six-digit code sent to your account email to
+                        confirm setup. 2FA is enabled after the code verifies.
+                    </>
+                ),
+            },
+            {
+                title: "Complete the next sign-in",
+                description: (
+                    <>
+                        After your password is accepted, enter the new six-digit
+                        code from your email on the verification page. Codes
+                        expire after 10 minutes. Use{" "}
+                        <span className="text-blue-500">Resend code</span> if
+                        needed; repeated incorrect codes will return you to
+                        login.
+                    </>
+                ),
+                tips: [
+                    "If you no longer have access to the account email, contact support before signing out.",
+                    "You can disable 2FA from the same Security section while signed in.",
                 ],
             },
         ],

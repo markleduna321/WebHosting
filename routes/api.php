@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\PayMongoWebhookController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\StudentDatabaseController;
+use App\Http\Controllers\Api\SupportController;
 use App\Http\Controllers\Api\TwoFactorController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\WebsiteController;
@@ -29,6 +30,20 @@ Route::post('/webhooks/paymongo', [PayMongoWebhookController::class, 'handle'])
 // GitHub push event webhook listener
 Route::post('/webhooks/github', [\App\Http\Controllers\Api\GithubWebhookController::class, 'handle'])
     ->name('api.webhooks.github');
+
+// The controller enforces user ownership or a guest capability cookie; login is optional.
+Route::post('/support/conversations', [SupportController::class, 'store'])
+    ->middleware('throttle:support')
+    ->name('api.support.conversations.store');
+Route::get('/support/conversations/{conversation}', [SupportController::class, 'show'])
+    ->middleware('throttle:support')
+    ->name('api.support.conversations.show');
+Route::post('/support/conversations/{conversation}/messages', [SupportController::class, 'message'])
+    ->middleware('throttle:support')
+    ->name('api.support.conversations.messages.store');
+Route::post('/support/conversations/{conversation}/handoff', [SupportController::class, 'handoff'])
+    ->middleware('throttle:support-handoff')
+    ->name('api.support.conversations.handoff');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [UserController::class, 'me']);
