@@ -12,8 +12,22 @@ class PaymentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $isInvoiced = $this->status === \App\Models\Payment::STATUS_PAID && $this->invoice_number !== null;
+        // PayMongo's fee columns are merchant-only records and deliberately never serialised here.
+        $invoice = $isInvoiced ? app(\App\Services\InvoiceService::class)->build($this->resource) : null;
+
         return [
             'uuid' => $this->uuid,
+            'invoice_number' => $this->invoice_number,
+            'invoice' => $this->when($isInvoiced, fn () => [
+                'items' => $invoice['items'],
+                'subtotal' => $invoice['subtotal'],
+                'tax' => $invoice['tax'],
+                'total' => $invoice['total'],
+                'payment_method' => $invoice['payment_method'],
+                'issued_at' => $invoice['issued_at']?->toIso8601String(),
+                'download_url' => route('invoices.download', $this->uuid),
+            ]),
             'status' => $this->status,
             'amount' => (float) $this->amount,
             'currency' => $this->currency,

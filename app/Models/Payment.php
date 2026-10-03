@@ -60,6 +60,15 @@ class Payment extends Model
         'paid_at',
         'failure_reason',
         'addons',
+        'invoice_number',
+        'invoice_issued_at',
+        'invoice_emailed_at',
+        'line_items',
+        'paymongo_fee',
+        'paymongo_foreign_fee',
+        'paymongo_tax_amount',
+        'paymongo_net_amount',
+        'paymongo_taxes',
     ];
 
     protected function casts(): array
@@ -68,7 +77,11 @@ class Payment extends Model
             'amount' => 'decimal:2',
             'expires_at' => 'datetime',
             'paid_at' => 'datetime',
+            'invoice_issued_at' => 'datetime',
+            'invoice_emailed_at' => 'datetime',
             'addons' => 'array',
+            'line_items' => 'array',
+            'paymongo_taxes' => 'array',
         ];
     }
 

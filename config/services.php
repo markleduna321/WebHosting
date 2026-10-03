@@ -39,6 +39,8 @@ return [
 
     'resend' => [
         'key' => env('RESEND_API_KEY'),
+        // Must be an address on a domain verified in Resend.
+        'from' => env('RESEND_FROM_ADDRESS', env('MAIL_FROM_ADDRESS')),
     ],
 
     'paymongo' => [

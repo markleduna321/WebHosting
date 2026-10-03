@@ -76,6 +76,11 @@ class PaymentMethodRegistry
         return array_keys(self::METHODS);
     }
 
+    public function label(string $id): string
+    {
+        return self::METHODS[$id]['label'] ?? $id;
+    }
+
     /**
      * @return array<int, string>
      */

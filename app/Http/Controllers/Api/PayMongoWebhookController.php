@@ -100,7 +100,11 @@ class PayMongoWebhookController extends Controller
                 return;
             }
 
-            $this->checkout->markPaid($payment, $attributes['payments'][0]['id'] ?? null);
+            $this->checkout->markPaid(
+                $payment,
+                $attributes['payments'][0]['id'] ?? null,
+                $attributes['payments'][0]['attributes'] ?? []
+            );
 
             return;
         }
@@ -114,7 +118,7 @@ class PayMongoWebhookController extends Controller
         }
 
         if ($type === 'payment.paid') {
-            $this->checkout->markPaid($payment, $data['id'] ?? null);
+            $this->checkout->markPaid($payment, $data['id'] ?? null, $attributes);
 
             return;
         }

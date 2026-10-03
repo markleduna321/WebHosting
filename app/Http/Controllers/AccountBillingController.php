@@ -22,7 +22,9 @@ class AccountBillingController extends Controller
             ->whereIn('status', [Payment::STATUS_PAID, Payment::STATUS_FAILED])
             ->with('plan')
             ->orderByDesc('created_at')
-            ->get();
+            ->get()
+            // Every row belongs to this user; reuse the model instead of querying it per invoice.
+            ->each->setRelation('user', $user);
 
         return Inertia::render('account-billing/page', [
             'tab' => $request->query('tab'),

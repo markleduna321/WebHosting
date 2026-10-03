@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountBillingController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CheckoutReturnController;
+use App\Http\Controllers\InvoiceDownloadController;
 use App\Http\Controllers\HostingPlanController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -56,6 +57,10 @@ Route::middleware('auth')->group(function () {
         'tab' => $request->query('tab'),
     ]))->name('files-database');
     Route::get('/account-billing', [AccountBillingController::class, 'index'])->name('account-billing');
+    // Streams a PDF file, so it cannot be an Inertia render; it lives here to share the session guard.
+    Route::get('/account-billing/invoices/{payment:uuid}/download', [InvoiceDownloadController::class, 'show'])
+        ->middleware('throttle:30,1')
+        ->name('invoices.download');
     Route::get('/deployments', fn () => Inertia::render('deployments/page'))->name('deployments');
     Route::get('/billing', fn () => Inertia::render('billing/page'))->name('billing');
     Route::get('/knowledge-base', fn () => Inertia::render('knowledge-base/page'))->name('knowledge-base');

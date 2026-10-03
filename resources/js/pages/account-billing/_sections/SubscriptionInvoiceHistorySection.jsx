@@ -43,7 +43,7 @@ const COLUMNS = [
         accessor: "uuid",
         render: (row) => (
             <span className="text-sm font-semibold text-slate-800">
-                {row.uuid?.substring(0, 8).toUpperCase()}
+                {row.invoice_number ?? row.uuid?.substring(0, 8).toUpperCase()}
             </span>
         ),
     },
@@ -127,6 +127,24 @@ const COLUMNS = [
                 </span>
             );
         },
+    },
+    {
+        header: "",
+        accessor: "download",
+        render: (row) =>
+            row.invoice?.download_url ? (
+                <a
+                    href={row.invoice.download_url}
+                    download
+                    // The row itself opens the invoice; don't trigger that as well.
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label={`Download invoice ${row.invoice_number} as PDF`}
+                    title="Download PDF"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                >
+                    <Download className="h-4 w-4" />
+                </a>
+            ) : null,
     },
 ];
 
