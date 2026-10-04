@@ -77,7 +77,7 @@ export default function QrPaymentSection({ payment: initialPayment, onRestart })
                     Payment received
                 </p>
                 <p className="mt-1 text-xs text-slate-600">
-                    {formatCurrency(payment.amount)} paid. Your plan is active —
+                    {formatCurrency(payment.amount, payment.currency)} paid. Your plan is active —
                     taking you to your dashboard.
                 </p>
             </div>
@@ -150,7 +150,7 @@ export default function QrPaymentSection({ payment: initialPayment, onRestart })
             <div className="mt-4 flex items-center justify-between text-sm">
                 <span className="text-slate-600">Amount due</span>
                 <span className="font-bold text-slate-900">
-                    {formatCurrency(payment.amount)}
+                    {formatCurrency(payment.amount, payment.currency)}
                 </span>
             </div>
 

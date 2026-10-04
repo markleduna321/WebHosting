@@ -49,9 +49,42 @@ class Plan extends Model
         return 'slug';
     }
 
-    public function priceForPeriod(int $months): ?float
+    /**
+     * @return array<int, int>
+     */
+    public function billingPeriods(): array
     {
         if ($this->monthly_price === null) {
+            return [];
+        }
+
+        $periods = [1];
+        foreach (array_merge(
+            array_keys($this->prices ?? []),
+            array_keys($this->period_discounts ?? [])
+        ) as $period) {
+            if (filter_var($period, FILTER_VALIDATE_INT, ['options' => ['min_range' => 2]]) !== false) {
+                $periods[] = (int) $period;
+            }
+        }
+
+        $periods = array_values(array_unique($periods));
+        sort($periods);
+
+        return array_values(array_filter(
+            $periods,
+            fn (int $months): bool => ($this->priceForPeriod($months) ?? 0) > 0
+        ));
+    }
+
+    public function supportsBillingPeriod(int $months): bool
+    {
+        return in_array($months, $this->billingPeriods(), true);
+    }
+
+    public function priceForPeriod(int $months): ?float
+    {
+        if ($months < 1 || $this->monthly_price === null) {
             return null;
         }
 
@@ -74,10 +107,10 @@ class Plan extends Model
 
         $prices = $this->prices ?? [];
         if (array_key_exists($months, $prices)) {
-            return $prices[$months] !== null ? (float) $prices[$months] : null;
+            return is_numeric($prices[$months]) ? (float) $prices[$months] : null;
         }
 
-        return round((float) $this->monthly_price * $months, 2);
+        return null;
     }
 
     public function subscriptions(): HasMany

@@ -1,25 +1,15 @@
 // Shared utilities for pricing formatting
 
-export const BILLING_PERIODS = [1, 3, 6, 12, 24, 48];
+export function formatBillingPeriod(months) {
+    if (months === 1) {
+        return "Monthly";
+    }
 
-export const PERIOD_LABELS = {
-    1: "",
-    12: "",
-    24: "",
-    48: "Best Value",
-};
+    if (months === 12) {
+        return "Yearly";
+    }
 
-export const BILLING_PERIOD_LABELS = {
-    1: "Monthly",
-    3: "3 Months",
-    6: "6 Months",
-    12: "1 Year",
-    24: "2 Years",
-    48: "4 Years",
-};
-
-export function getPeriodLabel(period) {
-    return PERIOD_LABELS[period] ?? "";
+    return `${months} Months`;
 }
 
 export function getPlanPeriodPrice(plan, months) {
@@ -28,9 +18,17 @@ export function getPlanPeriodPrice(plan, months) {
     }
 
     const monthlyPrice = Number(plan.monthlyPrice);
+    if (months === 1) {
+        return monthlyPrice;
+    }
+
     const discount = plan.periodDiscounts?.[months];
 
     if (discount != null) {
+        if (!Number.isFinite(Number(discount)) || discount < 0 || discount > 100) {
+            return null;
+        }
+
         return Math.round(
             monthlyPrice * months * (100 - Number(discount)),
         ) / 100;
@@ -41,7 +39,7 @@ export function getPlanPeriodPrice(plan, months) {
         return Number(configuredPrice);
     }
 
-    return Math.round(monthlyPrice * months * 100) / 100;
+    return null;
 }
 
 export function getPlanPeriodDiscountPercent(plan, months) {
@@ -51,33 +49,44 @@ export function getPlanPeriodDiscountPercent(plan, months) {
 
     const configuredDiscount = plan.periodDiscounts?.[months];
     if (configuredDiscount != null) {
-        return Number(configuredDiscount);
+        const discountPercent = Number(configuredDiscount);
+
+        return Number.isFinite(discountPercent) &&
+            discountPercent >= 0 &&
+            discountPercent <= 100
+            ? discountPercent
+            : 0;
     }
 
     const regularPrice = Number(plan.monthlyPrice) * months;
     const periodPrice = getPlanPeriodPrice(plan, months);
 
-    return periodPrice < regularPrice
+    return periodPrice != null && periodPrice < regularPrice
         ? Math.round(((regularPrice - periodPrice) / regularPrice) * 100)
         : 0;
 }
 
 export function getPlanBillingPeriods(plan) {
     if (plan?.monthlyPrice == null) {
-        return [1];
+        return [];
     }
 
     const configuredPeriods = [
-        ...Object.keys(plan?.prices ?? {}),
-        ...Object.keys(plan?.periodDiscounts ?? {}),
+        1,
+        ...Object.keys(plan?.prices ?? {}).map(Number),
+        ...Object.keys(plan?.periodDiscounts ?? {}).map(Number),
     ]
-        .map(Number)
-        .filter((months) => BILLING_PERIODS.includes(months));
+        .filter((months) => Number.isSafeInteger(months) && months > 0)
+        .filter((months) => getPlanPeriodPrice(plan, months) > 0);
 
-    return [...new Set([...BILLING_PERIODS, ...configuredPeriods])]
-        .sort((a, b) => a - b);
+    return [...new Set(configuredPeriods)].sort((a, b) => a - b);
 }
 
-export function formatCurrency(amount) {
-    return `₱${amount.toLocaleString()}`;
+export function formatCurrency(amount, currency = "PHP") {
+    return new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    }).format(amount);
 }

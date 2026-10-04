@@ -18,6 +18,7 @@ export default function PaymentMethodSection({
     value,
     onChange,
     disabled = false,
+    errorId,
 }) {
     const optionRefs = useRef({});
     const enabledIds = methods.filter((m) => m.enabled).map((m) => m.id);
@@ -43,8 +44,12 @@ export default function PaymentMethodSection({
     };
 
     return (
-        <fieldset className="mt-5" disabled={disabled}>
-            <legend className="text-sm font-bold text-slate-900">
+        <fieldset
+            className="mt-5"
+            disabled={disabled}
+            aria-describedby={errorId}
+        >
+            <legend id="payment-method-heading" className="text-sm font-bold text-slate-900">
                 Payment method
             </legend>
 

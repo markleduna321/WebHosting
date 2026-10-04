@@ -2,7 +2,7 @@ import React from "react";
 import { router, usePage } from "@inertiajs/react";
 import Button from "@/components/ui/Button";
 import {
-    BILLING_PERIOD_LABELS,
+    formatBillingPeriod,
     getPlanPeriodPrice,
 } from "@/data/hostingPlans";
 
@@ -45,7 +45,7 @@ export default function SubscriptionHeaderSection() {
         : subscription.billing_cycle === "monthly"
             ? 1
             : Number(subscription.billing_cycle) || 1;
-    const billingCycle = BILLING_PERIOD_LABELS[months] ?? `${months} Months`;
+    const billingCycle = formatBillingPeriod(months);
     const renewDate = subscription.ends_at
         ? new Date(subscription.ends_at).toLocaleDateString("en-US", {
               month: "short",

@@ -4,11 +4,14 @@ namespace App\Services;
 
 use App\Exceptions\PaymentException;
 use App\Jobs\SendInvoiceEmailJob;
+use App\Models\Addon;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class CheckoutService
@@ -161,13 +164,13 @@ class CheckoutService
      *
      * @param  array<string, mixed>  $code
      */
-    private function expiryFor(array $code): \Illuminate\Support\Carbon
+    private function expiryFor(array $code): Carbon
     {
         $expiresAt = $code['expires_at'] ?? null;
 
         if (is_string($expiresAt)) {
             try {
-                return \Illuminate\Support\Carbon::parse($expiresAt);
+                return Carbon::parse($expiresAt);
             } catch (\Throwable) {
                 // Fall through to the configured window.
             }
@@ -200,7 +203,7 @@ class CheckoutService
             $months = Payment::cycleToMonths($payment->billing_cycle);
             $ends = $starts->copy()->addMonths($months);
 
-            // A new paid plan supersedes the pending_payment it originated from, 
+            // A new paid plan supersedes the pending_payment it originated from,
             // as well as any older active subscriptions the user might be upgrading from.
             $payment->user->subscriptions()
                 ->whereIn('status', [
@@ -245,7 +248,7 @@ class CheckoutService
         try {
             SendInvoiceEmailJob::dispatch($payment->id);
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Could not queue the invoice email.', [
+            Log::error('Could not queue the invoice email.', [
                 'payment_id' => $payment->id,
                 'error' => $e->getMessage(),
             ]);
@@ -307,6 +310,12 @@ class CheckoutService
         $basePrice = $plan->priceForPeriod($months);
 
         if ($basePrice === null) {
+            if ($plan->monthly_price !== null) {
+                throw ValidationException::withMessages([
+                    'billing_cycle' => 'That billing period is not available for this plan.',
+                ]);
+            }
+
             throw ValidationException::withMessages([
                 'plan_slug' => 'That plan is quote-only. Please contact sales.',
             ]);
@@ -329,17 +338,17 @@ class CheckoutService
             'amount' => $planCentavos,
         ]];
 
-        if (!empty($addonIds)) {
-            $addons = \App\Models\Addon::whereIn('slug', $addonIds)
+        if (! empty($addonIds)) {
+            $addons = Addon::whereIn('slug', $addonIds)
                 ->where('is_active', true)
                 ->get();
-                
+
             if ($addons->count() !== count($addonIds)) {
                 throw ValidationException::withMessages([
                     'addons' => 'One or more selected add-ons are invalid or no longer available.',
                 ]);
             }
-            
+
             foreach ($addons as $addon) {
                 // Addon price is already stored in centavos!
                 $quantity = $months > 1 && $addon->billing_period === 'month' ? $months : 1;

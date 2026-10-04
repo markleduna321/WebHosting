@@ -13,9 +13,10 @@ import {
 } from "lucide-react";
 import React from "react";
 import {
-  BILLING_PERIOD_LABELS,
+  formatBillingPeriod,
   formatCurrency,
   getPlanBillingPeriods,
+  getPlanPeriodDiscountPercent,
   getPlanPeriodPrice,
 } from "../../../../data/hostingPlans";
 
@@ -39,22 +40,24 @@ export default function PlanDetailsSection({
   const hasFixedPrice = plan?.monthlyPrice != null;
 
   const periods = getPlanBillingPeriods(plan);
-  const isBestValue = period === 48;
+  const currency = plan?.currency ?? "PHP";
 
   const fullTotalPrice = hasFixedPrice ? plan.monthlyPrice * period : null;
   const totalPrice = hasFixedPrice ? getPlanPeriodPrice(plan, period) : null;
 
-  const perMonthPrice = hasFixedPrice && period > 1
-    ? Math.round((totalPrice / period) * 100) / 100
-    : plan?.monthlyPrice;
+  const perMonthPrice = !hasFixedPrice
+    ? null
+    : totalPrice == null
+      ? null
+      : period > 1
+        ? Math.round((totalPrice / period) * 100) / 100
+        : plan.monthlyPrice;
 
   const savings = hasFixedPrice && period > 1
-    ? Math.round((fullTotalPrice - totalPrice) * 100) / 100
+    ? Math.max(0, Math.round((fullTotalPrice - (totalPrice ?? fullTotalPrice)) * 100) / 100)
     : 0;
 
-  const discountPercent = fullTotalPrice > 0 && savings > 0
-    ? Math.round((savings / fullTotalPrice) * 100)
-    : 0;
+  const discountPercent = getPlanPeriodDiscountPercent(plan, period);
 
   return (
     <div className="space-y-6">
@@ -93,15 +96,10 @@ export default function PlanDetailsSection({
               className="appearance-none rounded-lg border border-gray-200 bg-white px-4 py-2.5 pr-9 text-sm font-medium text-slate-700 shadow-sm cursor-pointer focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m4%206%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px] bg-[right_12px_center] bg-no-repeat"
             >
               {periods.map((months) => {
-                const price = getPlanPeriodPrice(plan, months);
-                const pFull = (plan?.monthlyPrice ?? 0) * months;
-                const pTotal = price ?? pFull;
-                const pPercent = pFull > 0 && pFull > pTotal 
-                  ? Math.round(((pFull - pTotal) / pFull) * 100) 
-                  : 0;
+                const pPercent = getPlanPeriodDiscountPercent(plan, months);
                 return (
                   <option key={months} value={months}>
-                    {BILLING_PERIOD_LABELS[months] ?? `${months} Months`}
+                    {formatBillingPeriod(months)}
                     {pPercent > 0 ? ` — Save ${pPercent}%` : ""}
                   </option>
                 );
@@ -109,26 +107,20 @@ export default function PlanDetailsSection({
             </select>
           </div>
           <div className="text-right">
-            <div className="flex items-center justify-end gap-2">
-              {isBestValue && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-0.5 text-[11px] font-bold text-white shadow-sm">
-                  <Sparkles className="h-3 w-3" />
-                  Best Value
-                </span>
-              )}
-            </div>
             <span className="text-2xl font-black tracking-tight text-slate-900">
-              {hasFixedPrice ? formatCurrency(perMonthPrice) : plan?.price ?? "₱129"}
+              {perMonthPrice != null
+                ? formatCurrency(perMonthPrice, currency)
+                : plan?.price ?? "Custom"}
             </span>
             <span className="text-sm font-medium text-slate-400">/mo</span>
             {hasFixedPrice && period > 1 && (
               <p className="mt-0.5 text-xs text-slate-400 line-through">
-                {formatCurrency(plan.monthlyPrice)}/mo
+                {formatCurrency(plan.monthlyPrice, currency)}/mo
               </p>
             )}
             {hasFixedPrice && savings > 0 && (
               <p className="mt-0.5 text-xs font-semibold text-emerald-600">
-                You save {formatCurrency(savings)} ({discountPercent}%)
+                You save {formatCurrency(savings, currency)} ({discountPercent}%)
               </p>
             )}
           </div>
@@ -137,7 +129,7 @@ export default function PlanDetailsSection({
         {/* Renewal note */}
         <p className="mt-3 text-xs text-slate-400">
           {hasFixedPrice
-            ? `Renews after ${period} month${period > 1 ? "s" : ""} at ${formatCurrency(plan.monthlyPrice)}/mo. Cancel anytime.`
+            ? `Renews after ${formatBillingPeriod(period).toLowerCase()} at ${formatCurrency(plan.monthlyPrice, currency)}/mo. Cancel anytime.`
             : "Custom pricing — our team will confirm details."}
         </p>
 
@@ -219,7 +211,7 @@ export default function PlanDetailsSection({
 
               {/* Price */}
               <span className="shrink-0 text-sm font-bold text-slate-900">
-                +{formatCurrency(addOn.price)}
+                +{formatCurrency(addOn.price, currency)}
                 <span className="text-xs font-medium text-slate-400">/{addOn.period}</span>
               </span>
             </button>

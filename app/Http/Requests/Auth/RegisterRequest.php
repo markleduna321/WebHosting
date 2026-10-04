@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\Payment;
+use App\Models\Plan;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
@@ -29,7 +31,27 @@ class RegisterRequest extends FormRequest
             'school' => ['nullable', 'string', 'max:255'],
             'agree_terms' => ['accepted'],
             'plan_slug' => ['nullable', 'string', 'exists:plans,slug'],
-            'billing_cycle' => ['nullable', 'string', 'in:monthly,annual,1,3,6,12,24,48'],
+            'billing_cycle' => [
+                'nullable',
+                'string',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (! is_string($value) || ! Payment::isValidCycle($value)) {
+                        $fail('Select a valid billing period.');
+
+                        return;
+                    }
+
+                    $planSlug = $this->input('plan_slug');
+                    if (! is_string($planSlug) || $planSlug === '') {
+                        return;
+                    }
+
+                    $plan = Plan::query()->where('slug', $planSlug)->first();
+                    if (! $plan?->supportsBillingPeriod(Payment::cycleToMonths($value))) {
+                        $fail('The selected billing period is not available for this plan.');
+                    }
+                },
+            ],
             'addons' => ['nullable', 'array'],
             'addons.*' => ['string'],
         ];

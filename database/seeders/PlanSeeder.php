@@ -30,7 +30,6 @@ class PlanSeeder extends Seeder
                     '1 Free Subdomain',
                     '50MB NVMe Storage',
                     '1 MySQL Database (50MB)',
-                    'Automated Git Push Sync',
                     'Free SSL',
                 ],
                 'max_websites' => 1,

@@ -26,7 +26,15 @@ class StoreCheckoutRequest extends FormRequest
 
         return [
             'plan_slug' => ['required', 'string', Rule::exists('plans', 'slug')->where('is_active', true)],
-            'billing_cycle' => ['required', Rule::in(Payment::VALID_CYCLES)],
+            'billing_cycle' => [
+                'required',
+                'string',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (! is_string($value) || ! Payment::isValidCycle($value)) {
+                        $fail('Select a valid billing period.');
+                    }
+                },
+            ],
             'addons' => ['nullable', 'array'],
             'addons.*' => ['string'],
             'payment_method' => [

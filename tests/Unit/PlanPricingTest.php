@@ -19,7 +19,7 @@ class PlanPricingTest extends TestCase
         $this->assertEquals(4334.40, $plan->priceForPeriod(48));
     }
 
-    public function test_period_price_uses_configured_total_before_monthly_fallback(): void
+    public function test_unconfigured_period_is_unavailable(): void
     {
         $plan = new Plan([
             'monthly_price' => 129,
@@ -27,7 +27,21 @@ class PlanPricingTest extends TestCase
         ]);
 
         $this->assertEquals(1000, $plan->priceForPeriod(12));
-        $this->assertEquals(387, $plan->priceForPeriod(3));
+        $this->assertNull($plan->priceForPeriod(3));
+        $this->assertSame([1, 12], $plan->billingPeriods());
+    }
+
+    public function test_configured_discount_period_is_available_without_a_saved_total(): void
+    {
+        $plan = new Plan([
+            'monthly_price' => 129,
+            'prices' => [],
+            'period_discounts' => [48 => 30],
+        ]);
+
+        $this->assertSame([1, 48], $plan->billingPeriods());
+        $this->assertTrue($plan->supportsBillingPeriod(48));
+        $this->assertFalse($plan->supportsBillingPeriod(24));
     }
 
     public function test_monthly_price_is_used_without_a_period_discount(): void
@@ -37,11 +51,12 @@ class PlanPricingTest extends TestCase
         $this->assertEquals(129, $plan->priceForPeriod(1));
     }
 
-    public function test_three_and_six_month_cycles_are_supported(): void
+    public function test_numeric_billing_cycles_are_supported_dynamically(): void
     {
-        $this->assertContains('3', Payment::VALID_CYCLES);
-        $this->assertContains('6', Payment::VALID_CYCLES);
         $this->assertSame(3, Payment::cycleToMonths('3'));
         $this->assertSame(6, Payment::cycleToMonths('6'));
+        $this->assertSame(9, Payment::cycleToMonths('9'));
+        $this->assertTrue(Payment::isValidCycle('9'));
+        $this->assertFalse(Payment::isValidCycle('0'));
     }
 }

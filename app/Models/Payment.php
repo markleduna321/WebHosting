@@ -6,40 +6,52 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class Payment extends Model
 {
     use HasFactory;
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_AWAITING_PAYMENT = 'awaiting_payment';
+
     public const STATUS_PAID = 'paid';
+
     public const STATUS_FAILED = 'failed';
+
     public const STATUS_EXPIRED = 'expired';
 
     public const CYCLE_MONTHLY = 'monthly';
+
     public const CYCLE_ANNUAL = 'annual';
 
-    /**
-     * All valid billing cycle values (in months).
-     * Legacy string values are also accepted for backward compatibility.
-     */
-    public const VALID_CYCLES = ['monthly', 'annual', '1', '3', '6', '12', '24', '48'];
+    public static function isValidCycle(string $cycle): bool
+    {
+        return in_array($cycle, [self::CYCLE_MONTHLY, self::CYCLE_ANNUAL], true)
+            || filter_var($cycle, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false;
+    }
 
     /**
      * Converts a billing cycle value to the number of months.
      */
     public static function cycleToMonths(string $cycle): int
     {
-        return match ($cycle) {
-            'monthly', '1' => 1,
-            '3' => 3,
-            '6' => 6,
-            'annual', '12' => 12,
-            '24' => 24,
-            '48' => 48,
-            default => 1,
-        };
+        if ($cycle === self::CYCLE_MONTHLY) {
+            return 1;
+        }
+
+        if ($cycle === self::CYCLE_ANNUAL) {
+            return 12;
+        }
+
+        $months = filter_var($cycle, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+
+        if ($months === false) {
+            throw new InvalidArgumentException('Billing cycle must be a positive number of months.');
+        }
+
+        return $months;
     }
 
     protected $fillable = [

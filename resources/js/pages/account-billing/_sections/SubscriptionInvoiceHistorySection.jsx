@@ -3,6 +3,7 @@ import React from "react";
 import { usePage } from "@inertiajs/react";
 import Button from "@/components/ui/Button";
 import Table from "@/components/ui/Table";
+import { formatBillingPeriod } from "@/data/hostingPlans";
 
 /**
  * Format a date string for display.
@@ -21,24 +22,15 @@ function formatDate(dateStr) {
  * Format the billing cycle label for display.
  */
 function formatCycleLabel(cycle) {
-    switch (cycle) {
-        case "monthly":
-        case "1":
-            return "Monthly";
-        case "annual":
-        case "12":
-            return "Annual";
-        case "3":
-            return "3-Month";
-        case "6":
-            return "6-Month";
-        case "24":
-            return "2-Year";
-        case "48":
-            return "4-Year";
-        default:
-            return cycle;
-    }
+    const months = cycle === "monthly"
+        ? 1
+        : cycle === "annual"
+            ? 12
+            : Number(cycle);
+
+    return Number.isSafeInteger(months) && months > 0
+        ? formatBillingPeriod(months)
+        : cycle;
 }
 
 const COLUMNS = [

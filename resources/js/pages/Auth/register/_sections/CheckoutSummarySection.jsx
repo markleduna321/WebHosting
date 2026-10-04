@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import {
-    BILLING_PERIOD_LABELS,
+    formatBillingPeriod,
     formatCurrency,
     getPlanPeriodDiscountPercent,
     getPlanPeriodPrice,
@@ -43,15 +43,18 @@ export default function CheckoutSummarySection({
     const hasFixedPrice = plan?.monthlyPrice != null;
     const planTotal = hasFixedPrice ? getPlanPeriodPrice(plan, period) : null;
     const discountPercent = getPlanPeriodDiscountPercent(plan, period);
-    const periodLabel = `${BILLING_PERIOD_LABELS[period] ?? `${period} Months`}${
+    const currency = plan?.currency ?? "PHP";
+    const periodLabel = `${formatBillingPeriod(period)}${
         discountPercent > 0 ? ` · ${discountPercent}% off` : ""
     }`;
-    const subtotalDisplay = hasFixedPrice
-        ? formatCurrency(planTotal)
-        : plan?.price;
-    const totalDisplay = hasFixedPrice
-        ? formatCurrency(planTotal + addOnsTotal)
-        : plan?.price;
+    const subtotalDisplay = hasFixedPrice && planTotal != null
+        ? formatCurrency(planTotal, currency)
+        : hasFixedPrice
+            ? "Price unavailable"
+            : plan?.price ?? "Custom";
+    const totalDisplay = hasFixedPrice && planTotal != null
+        ? formatCurrency(planTotal + addOnsTotal, currency)
+        : subtotalDisplay;
 
     return (
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -65,7 +68,7 @@ export default function CheckoutSummarySection({
                 {/* Plan */}
                 <div>
                     <p className="text-sm font-semibold text-slate-900">
-                        {plan?.name ?? "Student"} plan
+                        {plan?.name ?? "Plan"}
                     </p>
                     <div className="mt-1.5 flex items-center justify-between text-sm">
                         <span className="text-slate-500">{periodLabel}</span>
@@ -77,24 +80,33 @@ export default function CheckoutSummarySection({
 
                 {/* Selected add-ons */}
                 <AnimatePresence initial={false}>
-                    {selectedAddOns.map((addOn) => (
-                        <motion.div
-                            key={addOn.id}
-                            layout
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.15 }}
-                            className="overflow-hidden"
-                        >
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-slate-500">{addOn.label}</span>
-                                <span className="font-medium text-slate-900">
-                                    {formatCurrency(addOn.price)}/{addOn.period}
-                                </span>
-                            </div>
-                        </motion.div>
-                    ))}
+                    {selectedAddOns.map((addOn) => {
+                        const addOnTotal = period > 1 && addOn.period === "month"
+                            ? addOn.price * period
+                            : addOn.price;
+
+                        return (
+                            <motion.div
+                                key={addOn.id}
+                                layout
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.15 }}
+                                className="overflow-hidden"
+                            >
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-slate-500">{addOn.label}</span>
+                                    <span className="font-medium text-slate-900">
+                                        {formatCurrency(addOnTotal, currency)}
+                                        {period > 1 && addOn.period === "month"
+                                            ? ` (${formatCurrency(addOn.price, currency)} × ${period} months)`
+                                            : `/${addOn.period}`}
+                                    </span>
+                                </div>
+                            </motion.div>
+                        );
+                    })}
                 </AnimatePresence>
 
                 {/* Divider */}

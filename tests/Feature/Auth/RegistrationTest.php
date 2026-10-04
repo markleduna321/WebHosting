@@ -37,7 +37,7 @@ class RegistrationTest extends TestCase
             'slug' => 'student',
             'name' => 'Student',
             'monthly_price' => 129,
-            'prices' => [],
+            'prices' => [3 => 350],
             'period_discounts' => [],
         ]);
 
@@ -55,6 +55,33 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseHas('subscriptions', [
             'plan_id' => $plan->id,
             'billing_cycle' => '3',
+        ]);
+    }
+
+    public function test_registration_rejects_a_billing_period_not_configured_for_the_plan(): void
+    {
+        $plan = Plan::create([
+            'slug' => 'student',
+            'name' => 'Student',
+            'monthly_price' => 129,
+            'prices' => [3 => 350],
+            'period_discounts' => [],
+        ]);
+
+        $response = $this->from('/register')->post('/register', [
+            'name' => 'Test User',
+            'email' => 'unsupported-cycle@example.com',
+            'password' => 'StrongPass1!',
+            'password_confirmation' => 'StrongPass1!',
+            'agree_terms' => true,
+            'plan_slug' => $plan->slug,
+            'billing_cycle' => '6',
+        ]);
+
+        $response->assertRedirect('/register');
+        $response->assertSessionHasErrors('billing_cycle');
+        $this->assertDatabaseMissing('users', [
+            'email' => 'unsupported-cycle@example.com',
         ]);
     }
 }
