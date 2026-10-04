@@ -24,6 +24,7 @@ class PlanSeeder extends Seeder
                     24 => 1800,
                     48 => 3000,
                 ],
+                'period_discounts' => [],
                 'features' => [
                     '1 Site',
                     '1 Free Subdomain',
@@ -50,6 +51,7 @@ class PlanSeeder extends Seeder
                     24 => 4000,
                     48 => 7000,
                 ],
+                'period_discounts' => [],
                 'features' => [
                     '3 Sites',
                     '1 Free Subdomain',
@@ -72,6 +74,7 @@ class PlanSeeder extends Seeder
                 'subtitle' => 'For organizations and capstone teams',
                 'monthly_price' => null,
                 'prices' => [],
+                'period_discounts' => [],
                 'features' => [
                     'Free Domain (1 Year)',
                     'Automated Git + Priority Sync',
@@ -93,6 +96,7 @@ class PlanSeeder extends Seeder
                     'subtitle' => $plan['subtitle'],
                     'monthly_price' => $plan['monthly_price'],
                     'prices' => $plan['prices'],
+                    'period_discounts' => $plan['period_discounts'],
                     'currency' => 'PHP',
                     'features' => $plan['features'],
                     'max_websites' => $plan['max_websites'],

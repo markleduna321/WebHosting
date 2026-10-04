@@ -24,7 +24,7 @@ class Payment extends Model
      * All valid billing cycle values (in months).
      * Legacy string values are also accepted for backward compatibility.
      */
-    public const VALID_CYCLES = ['monthly', 'annual', '1', '12', '24', '48'];
+    public const VALID_CYCLES = ['monthly', 'annual', '1', '3', '6', '12', '24', '48'];
 
     /**
      * Converts a billing cycle value to the number of months.
@@ -33,6 +33,8 @@ class Payment extends Model
     {
         return match ($cycle) {
             'monthly', '1' => 1,
+            '3' => 3,
+            '6' => 6,
             'annual', '12' => 12,
             '24' => 24,
             '48' => 48,

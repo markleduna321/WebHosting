@@ -40,6 +40,7 @@ class AccountBillingController extends Controller
                     'monthly_price' => (float) $subscription->plan->monthly_price,
                     'currency' => $subscription->plan->currency ?? 'PHP',
                     'prices' => $subscription->plan->prices,
+                    'period_discounts' => $subscription->plan->period_discounts,
                 ] : null,
             ] : null,
             'invoices' => PaymentResource::collection($payments)->resolve(),

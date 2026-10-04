@@ -4,7 +4,12 @@ import {
     Shield,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
-import { formatCurrency } from "../../../../data/hostingPlans";
+import {
+    BILLING_PERIOD_LABELS,
+    formatCurrency,
+    getPlanPeriodDiscountPercent,
+    getPlanPeriodPrice,
+} from "../../../../data/hostingPlans";
 
 export default function CheckoutSummarySection({
     plan,
@@ -24,13 +29,23 @@ export default function CheckoutSummarySection({
     );
 
     const addOnsTotal = useMemo(
-        () => selectedAddOns.reduce((sum, addOn) => sum + addOn.price, 0),
-        [selectedAddOns],
+        () => selectedAddOns.reduce(
+            (sum, addOn) => sum + (
+                period > 1 && addOn.period === "month"
+                    ? addOn.price * period
+                    : addOn.price
+            ),
+            0,
+        ),
+        [selectedAddOns, period],
     );
 
     const hasFixedPrice = plan?.monthlyPrice != null;
-    const planTotal = hasFixedPrice ? plan.monthlyPrice * period : null;
-    const periodLabel = period === 1 ? "Monthly" : `${period}-month period`;
+    const planTotal = hasFixedPrice ? getPlanPeriodPrice(plan, period) : null;
+    const discountPercent = getPlanPeriodDiscountPercent(plan, period);
+    const periodLabel = `${BILLING_PERIOD_LABELS[period] ?? `${period} Months`}${
+        discountPercent > 0 ? ` · ${discountPercent}% off` : ""
+    }`;
     const subtotalDisplay = hasFixedPrice
         ? formatCurrency(planTotal)
         : plan?.price;

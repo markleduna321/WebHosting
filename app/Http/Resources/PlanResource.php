@@ -19,6 +19,7 @@ class PlanResource extends JsonResource
             // Map these to exactly what the frontend React components expect
             'monthlyPrice' => $this->monthly_price !== null ? (float) $this->monthly_price : null,
             'prices' => $this->prices ?? [],
+            'periodDiscounts' => $this->period_discounts ?? [],
             'price' => $this->monthly_price !== null ? '₱' . number_format($this->monthly_price, 0) : 'Custom',
             'currency' => $this->currency,
             'features' => $this->features ?? [],

@@ -304,15 +304,7 @@ class CheckoutService
     private function priceFor(Plan $plan, string $cycle, array $addonIds = []): array
     {
         $months = Payment::cycleToMonths($cycle);
-        $prices = $plan->prices ?? [];
-
-        // For monthly (1 month), use the monthly_price column as the canonical source.
-        // For longer cycles, look up the total in the prices JSON map.
-        if ($months === 1) {
-            $basePrice = $plan->monthly_price;
-        } else {
-            $basePrice = $prices[$months] ?? null;
-        }
+        $basePrice = $plan->priceForPeriod($months);
 
         if ($basePrice === null) {
             throw ValidationException::withMessages([

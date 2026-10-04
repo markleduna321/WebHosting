@@ -1,6 +1,10 @@
 import React from "react";
 import { router, usePage } from "@inertiajs/react";
 import Button from "@/components/ui/Button";
+import {
+    BILLING_PERIOD_LABELS,
+    getPlanPeriodPrice,
+} from "@/data/hostingPlans";
 
 export default function SubscriptionHeaderSection() {
     const { subscription } = usePage().props;
@@ -36,7 +40,12 @@ export default function SubscriptionHeaderSection() {
     }
 
     const plan = subscription.plan;
-    const billingCycle = subscription.billing_cycle === "annual" ? "year" : "month";
+    const months = subscription.billing_cycle === "annual"
+        ? 12
+        : subscription.billing_cycle === "monthly"
+            ? 1
+            : Number(subscription.billing_cycle) || 1;
+    const billingCycle = BILLING_PERIOD_LABELS[months] ?? `${months} Months`;
     const renewDate = subscription.ends_at
         ? new Date(subscription.ends_at).toLocaleDateString("en-US", {
               month: "short",
@@ -45,11 +54,14 @@ export default function SubscriptionHeaderSection() {
           })
         : null;
 
-    // Determine price from plan prices or monthly_price
-    let displayPrice = plan?.monthly_price ?? 0;
-    if (plan?.prices && subscription.billing_cycle && plan.prices[subscription.billing_cycle]) {
-        displayPrice = plan.prices[subscription.billing_cycle];
-    }
+    const displayPrice = getPlanPeriodPrice(
+        {
+            monthlyPrice: plan?.monthly_price,
+            prices: plan?.prices,
+            periodDiscounts: plan?.period_discounts,
+        },
+        months,
+    ) ?? 0;
 
     const currencySymbol = plan?.currency === "PHP" ? "₱" : "$";
 
@@ -100,7 +112,7 @@ export default function SubscriptionHeaderSection() {
                         {Number(displayPrice).toLocaleString("en-US", {
                             minimumFractionDigits: 2,
                         })}{" "}
-                        / {billingCycle}
+                        / {billingCycle.toLowerCase()}
                     </p>
                 </div>
 

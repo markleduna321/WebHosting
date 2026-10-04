@@ -2,7 +2,13 @@ import React, { useMemo, useState } from "react";
 import { usePage } from "@inertiajs/react";
 import { CreditCard, QrCode, Wallet } from "lucide-react";
 import Button from "@/components/ui/Button";
-import { formatCurrency } from "@/data/hostingPlans";
+import {
+    BILLING_PERIOD_LABELS,
+    getPlanBillingPeriods,
+    getPlanPeriodDiscountPercent,
+    getPlanPeriodPrice,
+    formatCurrency,
+} from "@/data/hostingPlans";
 import { useCreatePaymentMutation } from "@/features/checkout/checkoutApi";
 import PaymentMethodSection from "./PaymentMethodSection";
 
@@ -25,13 +31,6 @@ function safeCheckoutUrl(url) {
         return null;
     }
 }
-
-const CYCLE_LABELS = {
-    1: "Monthly",
-    12: "1 Year",
-    24: "2 Years",
-    48: "4 Years",
-};
 
 function formatDate(date) {
     return date.toLocaleDateString(undefined, {
@@ -65,25 +64,14 @@ export default function InvoicePreviewSection({
             ? "Pay with card"
             : `Pay with ${selectedMethod?.label ?? "QR Ph"}`;
 
-    // Build available cycle options from the plan's prices JSON + always include monthly.
+    // Always offer supported periods; plan-specific prices and discounts refine the total.
     const availableCycles = useMemo(() => {
-        const prices = plan.prices ?? {};
-        const cycles = [{ id: "1", label: "Monthly", months: 1 }];
-
-        Object.keys(prices)
-            .map(Number)
-            .filter((m) => m > 1)
-            .sort((a, b) => a - b)
-            .forEach((m) => {
-                cycles.push({
-                    id: String(m),
-                    label: CYCLE_LABELS[m] ?? `${m} Months`,
-                    months: m,
-                });
-            });
-
-        return cycles;
-    }, [plan.prices]);
+        return getPlanBillingPeriods(plan).map((months) => ({
+            id: String(months),
+            label: BILLING_PERIOD_LABELS[months] ?? `${months} Months`,
+            months,
+        }));
+    }, [plan]);
 
     // Use Number() to convert the string cycle back to an integer, default to 1 (monthly).
     // The previous implementation used "monthly" and "annual" strings. We map "annual" to 12.
@@ -93,8 +81,8 @@ export default function InvoicePreviewSection({
         return Number(cycle) || 1;
     }, [cycle]);
 
-    const prices = plan.prices ?? {};
-    const basePrice = months === 1 ? plan.monthlyPrice : prices[months];
+    const basePrice = getPlanPeriodPrice(plan, months);
+    const discountPercent = getPlanPeriodDiscountPercent(plan, months);
 
     const selectedAddOns = useMemo(
         () => addons.map(id => availableAddons.find(a => a.id === id)).filter(Boolean),
@@ -125,7 +113,7 @@ export default function InvoicePreviewSection({
         try {
             const payment = await createPayment({
                 plan_slug: plan.slug,
-                billing_cycle: cycle === "annual" ? "12" : (cycle === "monthly" ? "1" : String(cycle)),
+                billing_cycle: String(months),
                 addons: addons,
                 payment_method: paymentMethod,
             }).unwrap();
@@ -194,10 +182,15 @@ export default function InvoicePreviewSection({
             <dl className="mt-5 space-y-3 text-sm">
                 <div className="flex items-start justify-between gap-3">
                     <dt className="text-slate-600">
-                        {plan.name} · {CYCLE_LABELS[months] ?? `${months} Months`}
+                        {plan.name} · {BILLING_PERIOD_LABELS[months] ?? `${months} Months`}
                         <span className="mt-0.5 block text-xs text-slate-400">
                             {period}
                         </span>
+                        {discountPercent > 0 && (
+                            <span className="mt-0.5 block text-xs font-medium text-emerald-600">
+                                {discountPercent}% off this billing period
+                            </span>
+                        )}
                     </dt>
                     <dd className="font-medium text-slate-900">
                         {basePrice != null ? formatCurrency(basePrice) : "—"}

@@ -121,7 +121,7 @@ export default function CreateAccountSection({
         transform((data) => ({
             ...data,
             plan_slug: plan?.slug,
-            billing_cycle: period > 1 ? "annual" : "monthly",
+            billing_cycle: String(period),
             addons: selectedAddOnIds,
         }));
 

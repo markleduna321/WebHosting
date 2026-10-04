@@ -17,6 +17,7 @@ class Plan extends Model
         'monthly_price',
         'currency',
         'prices',
+        'period_discounts',
         'features',
         'is_popular',
         'is_active',
@@ -32,6 +33,7 @@ class Plan extends Model
         return [
             'features' => 'array',
             'prices' => 'array',
+            'period_discounts' => 'array',
             'monthly_price' => 'decimal:2',
             'is_popular' => 'boolean',
             'is_active' => 'boolean',
@@ -45,6 +47,37 @@ class Plan extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    public function priceForPeriod(int $months): ?float
+    {
+        if ($this->monthly_price === null) {
+            return null;
+        }
+
+        if ($months === 1) {
+            return (float) $this->monthly_price;
+        }
+
+        $discounts = $this->period_discounts ?? [];
+        if (array_key_exists($months, $discounts)) {
+            $discount = $discounts[$months];
+            if (! is_numeric($discount) || $discount < 0 || $discount > 100) {
+                return null;
+            }
+
+            return round(
+                (float) $this->monthly_price * $months * (100 - (float) $discount) / 100,
+                2
+            );
+        }
+
+        $prices = $this->prices ?? [];
+        if (array_key_exists($months, $prices)) {
+            return $prices[$months] !== null ? (float) $prices[$months] : null;
+        }
+
+        return round((float) $this->monthly_price * $months, 2);
     }
 
     public function subscriptions(): HasMany

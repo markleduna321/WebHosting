@@ -18,9 +18,17 @@ class CheckoutController extends Controller
             return redirect()->route('hosting');
         }
 
-        $cycle = $request->query('cycle') === Payment::CYCLE_ANNUAL
-            ? Payment::CYCLE_ANNUAL
+        $requestedCycle = $request->query('cycle', Payment::CYCLE_MONTHLY);
+        $requestedCycle = is_string($requestedCycle)
+            ? $requestedCycle
             : Payment::CYCLE_MONTHLY;
+        $cycle = match ($requestedCycle) {
+            Payment::CYCLE_ANNUAL => '12',
+            Payment::CYCLE_MONTHLY => '1',
+            default => in_array($requestedCycle, Payment::VALID_CYCLES, true)
+                ? $requestedCycle
+                : '1',
+        };
 
         // Pull addons from pending subscription if it exists for this plan
         $pendingSub = $request->user()?->subscriptions()
@@ -31,12 +39,22 @@ class CheckoutController extends Controller
         if ($pendingSub && is_array($pendingSub->addons)) {
             $addons = $pendingSub->addons;
             // Also override cycle if it was set during registration
-            $cycle = $pendingSub->billing_cycle;
+            $cycle = match ($pendingSub->billing_cycle) {
+                Payment::CYCLE_ANNUAL => '12',
+                Payment::CYCLE_MONTHLY => '1',
+                default => in_array($pendingSub->billing_cycle, Payment::VALID_CYCLES, true)
+                    ? $pendingSub->billing_cycle
+                    : '1',
+            };
         } else {
             $addons = $request->query('addons', []);
             if (!is_array($addons)) {
                 $addons = [];
             }
+        }
+
+        if ($plan->priceForPeriod(Payment::cycleToMonths($cycle)) === null) {
+            $cycle = '1';
         }
 
         $availableAddons = \App\Models\Addon::where('is_active', true)->get();

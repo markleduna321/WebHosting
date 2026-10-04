@@ -28,6 +28,10 @@ function formatCycleLabel(cycle) {
         case "annual":
         case "12":
             return "Annual";
+        case "3":
+            return "3-Month";
+        case "6":
+            return "6-Month";
         case "24":
             return "2-Year";
         case "48":

@@ -1,0 +1,29 @@
+### Phase 1: Configurable billing periods and discounts
+
+- **Timestamp:** 2026-10-04 (Asia/Manila)
+- **Mode:** Agent
+- **Persona(s) Active:** 🏗️ Tech Lead, ⚙️ Backend, 🖥️ Frontend, 🧪 QA
+- **Files Modified/Created:**
+  - `database/migrations/2026_10_04_000000_add_period_discounts_to_plans.php` — Add a nullable JSON plan discount map with a reversible `down()` method.
+  - `database/seeders/PlanSeeder.php` — Initialize the per-period discount map for seeded plans.
+  - `app/Models/Plan.php` — Cast discount data and resolve final plan prices per billing period.
+  - `app/Models/Payment.php` — Recognize 3- and 6-month cycles.
+  - `app/Http/Resources/PlanResource.php` — Expose period discounts to the frontend.
+  - `app/Http/Requests/Auth/RegisterRequest.php` — Accept supported numeric billing periods during registration.
+  - `app/Http/Controllers/CheckoutController.php` — Preserve valid selected periods when rendering checkout.
+  - `app/Http/Controllers/AccountBillingController.php` — Include discounts in the current subscription plan data.
+  - `app/Services/CheckoutService.php` — Use server-calculated period prices when starting payments.
+  - `resources/js/data/hostingPlans.js` — Share billing period labels and price/discount calculations.
+  - `resources/js/pages/Auth/register/_sections/PlanDetailsSection.jsx` — Show supported periods and their savings.
+  - `resources/js/pages/Auth/register/_sections/CheckoutSummarySection.jsx` — Show the discounted period total and charge monthly add-ons for the selected term.
+  - `resources/js/pages/Auth/register/_sections/CreateAccountSection.jsx` — Submit the selected numeric billing period.
+  - `resources/js/pages/checkout/_sections/InvoicePreviewSection.jsx` — Display matching term options, totals, and discount information.
+  - `resources/js/pages/account-billing/_sections/SubscriptionHeaderSection.jsx` — Show the saved term and matching current plan price.
+  - `resources/js/pages/account-billing/_sections/SubscriptionInvoiceHistorySection.jsx` — Label 3- and 6-month billing cycles.
+  - `tests/Unit/PlanPricingTest.php` — Cover discount precedence, explicit period totals, fallbacks, and cycle conversion.
+  - `tests/Feature/Auth/RegistrationTest.php` — Cover registration with a 3-month billing cycle and provide valid data to the existing registration test.
+- **Issues Encountered:** Existing successful-registration test data did not satisfy current password and terms validation.
+- **Resolution:** Updated the test fixture to use a valid password and accepted terms; production validation was not weakened.
+- **QA Checklist Result:** ✅ Targeted PHPUnit tests passed (7 tests, 14 assertions) with SQLite in-memory; Pint formatting check passed; editor diagnostics reported no errors. Browser-dependent accessibility and responsive behavior remain code-level checks requiring browser verification.
+- **Configuration:** To set a plan-specific discount in `PlanSeeder`, use a month-keyed percentage such as `'period_discounts' => [48 => 30]`; checkout recomputes the charge server-side from monthly price and this percentage. Existing explicit `prices` totals remain the fallback where no period discount is configured.
+- **Next Steps:** No additional phase planned.

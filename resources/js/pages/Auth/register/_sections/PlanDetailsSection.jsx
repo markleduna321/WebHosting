@@ -12,7 +12,12 @@ import {
   Wrench,
 } from "lucide-react";
 import React from "react";
-import { formatCurrency, getPeriodLabel } from "../../../../data/hostingPlans";
+import {
+  BILLING_PERIOD_LABELS,
+  formatCurrency,
+  getPlanBillingPeriods,
+  getPlanPeriodPrice,
+} from "../../../../data/hostingPlans";
 
 const ADD_ON_ICONS = {
   "professional-email": Mail,
@@ -33,20 +38,11 @@ export default function PlanDetailsSection({
 }) {
   const hasFixedPrice = plan?.monthlyPrice != null;
 
-  const PERIODS = [
-    { value: 1, label: "1 month" },
-    { value: 12, label: "12 months" },
-    { value: 24, label: "24 months" },
-    { value: 48, label: "48 months" },
-  ];
-
-  const discountLabel = getPeriodLabel(period);
+  const periods = getPlanBillingPeriods(plan);
   const isBestValue = period === 48;
 
   const fullTotalPrice = hasFixedPrice ? plan.monthlyPrice * period : null;
-  const totalPrice = hasFixedPrice && plan.prices && plan.prices[period]
-    ? plan.prices[period]
-    : fullTotalPrice;
+  const totalPrice = hasFixedPrice ? getPlanPeriodPrice(plan, period) : null;
 
   const perMonthPrice = hasFixedPrice && period > 1
     ? Math.round((totalPrice / period) * 100) / 100
@@ -96,15 +92,16 @@ export default function PlanDetailsSection({
               onChange={(e) => onPeriodChange?.(Number(e.target.value))}
               className="appearance-none rounded-lg border border-gray-200 bg-white px-4 py-2.5 pr-9 text-sm font-medium text-slate-700 shadow-sm cursor-pointer focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m4%206%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px] bg-[right_12px_center] bg-no-repeat"
             >
-              {PERIODS.map((p) => {
-                const pFull = (plan?.monthlyPrice ?? 0) * p.value;
-                const pTotal = plan?.prices?.[p.value] ?? pFull;
+              {periods.map((months) => {
+                const price = getPlanPeriodPrice(plan, months);
+                const pFull = (plan?.monthlyPrice ?? 0) * months;
+                const pTotal = price ?? pFull;
                 const pPercent = pFull > 0 && pFull > pTotal 
                   ? Math.round(((pFull - pTotal) / pFull) * 100) 
                   : 0;
                 return (
-                  <option key={p.value} value={p.value}>
-                    {p.label}
+                  <option key={months} value={months}>
+                    {BILLING_PERIOD_LABELS[months] ?? `${months} Months`}
                     {pPercent > 0 ? ` — Save ${pPercent}%` : ""}
                   </option>
                 );
