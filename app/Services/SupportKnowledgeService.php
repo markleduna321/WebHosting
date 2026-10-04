@@ -14,15 +14,16 @@ class SupportKnowledgeService
         $plans = Plan::query()
             ->where('is_active', true)
             ->orderBy('sort_order')
-            ->get(['name', 'monthly_price', 'prices', 'features']);
+            ->get(['name', 'slug', 'monthly_price', 'prices', 'period_discounts', 'features']);
 
         $planFacts = $plans->map(function (Plan $plan) {
             $price = $plan->monthly_price === null
                 ? 'Contact support for pricing'
                 : 'PHP '.number_format((float) $plan->monthly_price, 2).' per month';
-            $cyclePrices = collect($plan->prices ?? [])->map(
-                fn ($amount, $months) => "{$months} months: PHP ".number_format((float) $amount, 2),
-            )->implode('; ');
+            $cyclePrices = collect($plan->billingPeriods())
+                ->reject(fn (int $months) => $months === 1)
+                ->map(fn (int $months) => "{$months} months: PHP ".number_format((float) $plan->priceForPeriod($months), 2))
+                ->implode('; ');
             $limits = "up to {$plan->max_websites} websites, {$plan->max_databases} databases, {$plan->disk_space_mb} MB storage";
 
             return '- '.$plan->name.': '.$price

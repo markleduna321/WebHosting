@@ -2,12 +2,65 @@
 
 namespace Tests\Unit;
 
+use App\Http\Resources\PlanResource;
 use App\Models\Payment;
 use App\Models\Plan;
-use PHPUnit\Framework\TestCase;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Tests\TestCase;
 
 class PlanPricingTest extends TestCase
 {
+    public function test_month_keyed_prices_offer_exactly_the_saved_periods_and_totals(): void
+    {
+        $plan = new Plan([
+            'slug' => 'pro',
+            'monthly_price' => 249,
+            'prices' => [1 => 249, 12 => 2200, 24 => 4000, 48 => 7000],
+            'period_discounts' => [],
+        ]);
+
+        $this->assertSame([1, 12, 24, 48], $plan->billingPeriods());
+        $this->assertEquals(2200, $plan->priceForPeriod(12));
+        $this->assertEquals(4000, $plan->priceForPeriod(24));
+        $this->assertEquals(7000, $plan->priceForPeriod(48));
+        $this->assertNull($plan->priceForPeriod(3));
+    }
+
+    public function test_list_shaped_prices_are_ignored_instead_of_read_as_months(): void
+    {
+        Log::spy();
+
+        $plan = new Plan([
+            'slug' => 'pro',
+            'monthly_price' => 249,
+            'prices' => [249, 2200, 4000, 7000],
+            'period_discounts' => [],
+        ]);
+
+        $this->assertSame([1], $plan->billingPeriods());
+        $this->assertNull($plan->priceForPeriod(2));
+        $this->assertNull($plan->priceForPeriod(3));
+        $this->assertFalse($plan->supportsBillingPeriod(3));
+
+        Log::shouldHaveReceived('warning')->once();
+    }
+
+    public function test_resource_serializes_period_maps_as_objects(): void
+    {
+        $plan = new Plan([
+            'slug' => 'pro',
+            'monthly_price' => 249,
+            'prices' => [1 => 249, 12 => 2200],
+            'period_discounts' => [],
+        ]);
+
+        $json = json_encode((new PlanResource($plan))->toArray(Request::create('/')));
+
+        $this->assertStringContainsString('"prices":{"1":249,"12":2200}', $json);
+        $this->assertStringContainsString('"periodDiscounts":{}', $json);
+    }
+
     public function test_configured_percentage_discount_overrides_the_period_price(): void
     {
         $plan = new Plan([

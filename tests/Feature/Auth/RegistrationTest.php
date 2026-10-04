@@ -84,4 +84,48 @@ class RegistrationTest extends TestCase
             'email' => 'unsupported-cycle@example.com',
         ]);
     }
+
+    public function test_registration_rejects_periods_derived_from_list_shaped_prices(): void
+    {
+        $plan = Plan::create([
+            'slug' => 'pro',
+            'name' => 'Pro',
+            'monthly_price' => 249,
+            'prices' => [249, 2200, 4000, 7000],
+            'period_discounts' => [],
+        ]);
+
+        $response = $this->from('/register')->post('/register', [
+            'name' => 'Test User',
+            'email' => 'list-prices@example.com',
+            'password' => 'StrongPass1!',
+            'password_confirmation' => 'StrongPass1!',
+            'agree_terms' => true,
+            'plan_slug' => $plan->slug,
+            'billing_cycle' => '3',
+        ]);
+
+        $response->assertSessionHasErrors('billing_cycle');
+        $this->assertDatabaseMissing('users', ['email' => 'list-prices@example.com']);
+    }
+
+    public function test_registration_page_sends_month_keyed_prices(): void
+    {
+        Plan::create([
+            'slug' => 'pro',
+            'name' => 'Pro',
+            'monthly_price' => 249,
+            'prices' => [1 => 249, 12 => 2200, 24 => 4000, 48 => 7000],
+            'period_discounts' => [],
+            'is_active' => true,
+        ]);
+
+        $response = $this->get('/register?plan=Pro');
+
+        $response->assertOk();
+        $this->assertStringContainsString(
+            '"prices":{"1":249,"12":2200,"24":4000,"48":7000}',
+            html_entity_decode($response->getContent()),
+        );
+    }
 }

@@ -107,12 +107,24 @@ export default function InvoicePreviewSection({
     const planTotalCents = basePrice == null ? null : Math.round(basePrice * 100);
     const totalCents = planTotalCents == null ? null : planTotalCents + addonsTotal;
     const total = totalCents == null ? null : totalCents / 100;
-    const regularPlanCents = months == null || plan?.monthlyPrice == null
+    const monthlyCents = plan?.monthlyPrice == null
         ? null
-        : Math.round(Number(plan.monthlyPrice) * months * 100);
+        : Math.round(Number(plan.monthlyPrice) * 100);
+    const regularPlanCents = months == null || monthlyCents == null
+        ? null
+        : monthlyCents * months;
     const savingsCents = regularPlanCents == null || planTotalCents == null
         ? 0
         : Math.max(0, regularPlanCents - planTotalCents);
+    // Itemize as regular price minus discount so every line adds up to the total.
+    const planLineCents = savingsCents > 0 ? regularPlanCents : planTotalCents;
+    const planLineDetail = months == null
+        ? "Period unavailable"
+        : savingsCents > 0
+            ? `${months} × ${formatCurrency(monthlyCents / 100, currency)}`
+            : months === 1
+                ? "Billed monthly"
+                : `${months} months`;
     const cycleIsAvailable = months != null &&
         availableCycles.some((option) => option.months === months);
     const canPay = cycleIsAvailable &&
@@ -182,46 +194,45 @@ export default function InvoicePreviewSection({
     };
 
     return (
-        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.12)]">
-            <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 px-6 py-6 text-white sm:px-7">
-                <div className="pointer-events-none absolute -right-10 -top-16 h-48 w-48 rounded-full bg-blue-500/20 blur-3xl" />
-                <div className="relative flex items-start justify-between gap-4">
+        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <div className="border-b border-gray-100 px-6 py-5">
+                <div className="flex items-start justify-between gap-4">
                     <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">
-                            Secure checkout
-                        </p>
-                        <h2 className="mt-2 text-xl font-bold tracking-tight sm:text-2xl">
+                        <h2 className="text-base font-bold text-slate-900">
                             Review and pay
                         </h2>
-                        <p className="mt-1 text-sm text-slate-300">
+                        <p className="mt-0.5 text-sm text-slate-500">
                             Your plan starts after payment is confirmed.
                         </p>
                     </div>
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.07] text-blue-200 shadow-inner">
-                        <ShieldCheck className="h-5 w-5" />
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-blue-600">
+                        <ShieldCheck className="h-5 w-5" aria-hidden="true" />
                     </span>
                 </div>
-                <div className="relative mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-slate-300">
-                    <span className="inline-flex items-center gap-1.5">
-                        <Check className="h-3.5 w-3.5 text-emerald-400" />
+                <ol
+                    aria-label="Checkout progress"
+                    className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-medium text-slate-500"
+                >
+                    <li className="inline-flex items-center gap-1.5">
+                        <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
                         Plan selected
-                    </span>
-                    <span className="h-px w-6 bg-white/20" />
-                    <span className="inline-flex items-center gap-1.5">
-                        <Check className="h-3.5 w-3.5 text-emerald-400" />
+                    </li>
+                    <li aria-hidden="true" className="h-px w-5 bg-gray-200" />
+                    <li className="inline-flex items-center gap-1.5">
+                        <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
                         Account created
-                    </span>
-                    <span className="h-px w-6 bg-white/20" />
-                    <span className="inline-flex items-center gap-1.5 text-white">
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white">
+                    </li>
+                    <li aria-hidden="true" className="h-px w-5 bg-gray-200" />
+                    <li aria-current="step" className="inline-flex items-center gap-1.5 text-slate-900">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
                             3
                         </span>
                         Payment
-                    </span>
-                </div>
+                    </li>
+                </ol>
             </div>
 
-            <div className="space-y-6 px-5 py-6 sm:px-7">
+            <div className="space-y-6 px-6 py-6">
                 <section aria-labelledby="billing-period-heading">
                     <div className="flex items-center justify-between gap-3">
                         <div>
@@ -303,34 +314,28 @@ export default function InvoicePreviewSection({
                             {months != null ? formatBillingPeriod(months) : "Period unavailable"}
                         </span>
                     </div>
-                    <dl className="mt-3 space-y-3 rounded-2xl border border-slate-100 bg-slate-50/80 p-4 text-sm">
+                    <dl className="mt-3 space-y-3 rounded-xl border border-gray-100 bg-slate-50 p-4 text-sm">
                         <div className="flex items-start justify-between gap-4">
                             <dt className="min-w-0 text-slate-600">
                                 <span className="block font-medium text-slate-800">
-                                    {plan?.name ?? "Hosting plan"}
+                                    {plan?.name ?? "Hosting"} plan
                                 </span>
                                 <span className="mt-0.5 block text-xs text-slate-500">
-                                    Starts after payment confirmation
+                                    {planLineDetail}
                                 </span>
-                                {savingsCents > 0 && (
-                                    <span className="mt-1 block text-xs text-slate-500">
-                                        <span className="line-through">
-                                            {formatCurrency(regularPlanCents / 100, currency)}
-                                        </span>
-                                    </span>
-                                )}
                             </dt>
                             <dd className="shrink-0 text-right font-semibold text-slate-900">
-                                {basePrice != null ? formatCurrency(basePrice, currency) : "—"}
+                                {planLineCents != null ? formatCurrency(planLineCents / 100, currency) : "—"}
                             </dd>
                         </div>
 
-                        {discountPercent > 0 && (
-                            <div className="flex items-center justify-between gap-4 text-xs">
+                        {savingsCents > 0 && (
+                            <div className="flex items-center justify-between gap-4">
                                 <dt className="text-emerald-700">
-                                    Period discount ({discountPercent}%)
+                                    {formatBillingPeriod(months)} discount
+                                    {discountPercent > 0 ? ` (${discountPercent}%)` : ""}
                                 </dt>
-                                <dd className="font-semibold text-emerald-700">
+                                <dd className="shrink-0 font-semibold text-emerald-700">
                                     −{formatCurrency(savingsCents / 100, currency)}
                                 </dd>
                             </div>
@@ -359,11 +364,9 @@ export default function InvoicePreviewSection({
                             );
                         })}
 
-                        <div className="border-t border-dashed border-slate-200 pt-3">
-                            <div className="flex items-center justify-between text-base font-bold text-slate-950">
-                                <dt>Total due today</dt>
-                                <dd>{total != null ? formatCurrency(total, currency) : "—"}</dd>
-                            </div>
+                        <div className="flex items-center justify-between border-t border-dashed border-gray-200 pt-3 text-base font-bold text-slate-900">
+                            <dt>Total due today</dt>
+                            <dd>{total != null ? formatCurrency(total, currency) : "—"}</dd>
                         </div>
                     </dl>
                 </section>
@@ -424,7 +427,7 @@ export default function InvoicePreviewSection({
                         onClick={handlePay}
                         loading={isLoading || redirecting}
                         disabled={!canPay || isLoading || redirecting}
-                        className="min-h-12 w-full gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-sm font-bold shadow-[0_10px_25px_rgba(37,99,235,0.25)] transition-[box-shadow,transform] hover:shadow-[0_14px_30px_rgba(37,99,235,0.35)] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                        className="min-h-12 w-full gap-2 rounded-xl bg-blue-600 text-sm font-semibold shadow-sm transition-colors hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                     >
                         <PayIcon className="h-4 w-4" />
                         {redirecting ? "Opening secure payment page..." : payLabel}

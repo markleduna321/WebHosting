@@ -1,5 +1,12 @@
 // Shared utilities for pricing formatting
 
+/** Month-keyed maps only; a list would turn its indexes into billing periods. */
+function periodMap(value) {
+    return value && typeof value === "object" && !Array.isArray(value)
+        ? value
+        : {};
+}
+
 export function formatBillingPeriod(months) {
     if (months === 1) {
         return "Monthly";
@@ -22,7 +29,7 @@ export function getPlanPeriodPrice(plan, months) {
         return monthlyPrice;
     }
 
-    const discount = plan.periodDiscounts?.[months];
+    const discount = periodMap(plan.periodDiscounts)[months];
 
     if (discount != null) {
         if (!Number.isFinite(Number(discount)) || discount < 0 || discount > 100) {
@@ -34,7 +41,7 @@ export function getPlanPeriodPrice(plan, months) {
         ) / 100;
     }
 
-    const configuredPrice = plan.prices?.[months];
+    const configuredPrice = periodMap(plan.prices)[months];
     if (configuredPrice != null) {
         return Number(configuredPrice);
     }
@@ -47,7 +54,7 @@ export function getPlanPeriodDiscountPercent(plan, months) {
         return 0;
     }
 
-    const configuredDiscount = plan.periodDiscounts?.[months];
+    const configuredDiscount = periodMap(plan.periodDiscounts)[months];
     if (configuredDiscount != null) {
         const discountPercent = Number(configuredDiscount);
 
@@ -73,8 +80,8 @@ export function getPlanBillingPeriods(plan) {
 
     const configuredPeriods = [
         1,
-        ...Object.keys(plan?.prices ?? {}).map(Number),
-        ...Object.keys(plan?.periodDiscounts ?? {}).map(Number),
+        ...Object.keys(periodMap(plan.prices)).map(Number),
+        ...Object.keys(periodMap(plan.periodDiscounts)).map(Number),
     ]
         .filter((months) => Number.isSafeInteger(months) && months > 0)
         .filter((months) => getPlanPeriodPrice(plan, months) > 0);

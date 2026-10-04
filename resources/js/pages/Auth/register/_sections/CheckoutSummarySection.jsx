@@ -28,32 +28,40 @@ export default function CheckoutSummarySection({
         [selectedAddOnIds, availableAddons],
     );
 
-    const addOnsTotal = useMemo(
-        () => selectedAddOns.reduce(
-            (sum, addOn) => sum + (
-                period > 1 && addOn.period === "month"
-                    ? addOn.price * period
-                    : addOn.price
-            ),
-            0,
-        ),
+    // Centavo math mirrors CheckoutService: monthly add-ons are charged for every month of the term.
+    const addOnLines = useMemo(
+        () => selectedAddOns.map((addOn) => {
+            const quantity = period > 1 && addOn.period === "month" ? period : 1;
+
+            return {
+                addOn,
+                quantity,
+                totalCents: Math.round(Number(addOn.price) * 100) * quantity,
+            };
+        }),
         [selectedAddOns, period],
     );
+    const addOnsCents = addOnLines.reduce((sum, line) => sum + line.totalCents, 0);
 
     const hasFixedPrice = plan?.monthlyPrice != null;
     const planTotal = hasFixedPrice ? getPlanPeriodPrice(plan, period) : null;
+    const planCents = planTotal == null ? null : Math.round(planTotal * 100);
+    const regularCents = hasFixedPrice && period > 1
+        ? Math.round(Number(plan.monthlyPrice) * 100) * period
+        : null;
+    const savingsCents = regularCents != null && planCents != null
+        ? Math.max(0, regularCents - planCents)
+        : 0;
     const discountPercent = getPlanPeriodDiscountPercent(plan, period);
     const currency = plan?.currency ?? "PHP";
-    const periodLabel = `${formatBillingPeriod(period)}${
-        discountPercent > 0 ? ` · ${discountPercent}% off` : ""
-    }`;
-    const subtotalDisplay = hasFixedPrice && planTotal != null
-        ? formatCurrency(planTotal, currency)
+    const periodLabel = formatBillingPeriod(period);
+    const subtotalDisplay = planCents != null
+        ? formatCurrency(planCents / 100, currency)
         : hasFixedPrice
             ? "Price unavailable"
             : plan?.price ?? "Custom";
-    const totalDisplay = hasFixedPrice && planTotal != null
-        ? formatCurrency(planTotal + addOnsTotal, currency)
+    const totalDisplay = planCents != null
+        ? formatCurrency((planCents + addOnsCents) / 100, currency)
         : subtotalDisplay;
 
     return (
@@ -72,19 +80,32 @@ export default function CheckoutSummarySection({
                     </p>
                     <div className="mt-1.5 flex items-center justify-between text-sm">
                         <span className="text-slate-500">{periodLabel}</span>
-                        <span className="font-medium text-slate-900">
-                            {subtotalDisplay}
+                        <span className="text-right">
+                            {savingsCents > 0 && (
+                                <span className="mr-1.5 text-xs text-slate-400 line-through">
+                                    {formatCurrency(regularCents / 100, currency)}
+                                </span>
+                            )}
+                            <span className="font-medium text-slate-900">
+                                {subtotalDisplay}
+                            </span>
                         </span>
                     </div>
+                    {savingsCents > 0 && (
+                        <div className="mt-1 flex items-center justify-between text-xs font-medium text-emerald-600">
+                            <span>
+                                You save{discountPercent > 0 ? ` (${discountPercent}%)` : ""}
+                            </span>
+                            <span>
+                                −{formatCurrency(savingsCents / 100, currency)}
+                            </span>
+                        </div>
+                    )}
                 </div>
 
                 {/* Selected add-ons */}
                 <AnimatePresence initial={false}>
-                    {selectedAddOns.map((addOn) => {
-                        const addOnTotal = period > 1 && addOn.period === "month"
-                            ? addOn.price * period
-                            : addOn.price;
-
+                    {addOnLines.map(({ addOn, quantity, totalCents }) => {
                         return (
                             <motion.div
                                 key={addOn.id}
@@ -95,13 +116,17 @@ export default function CheckoutSummarySection({
                                 transition={{ duration: 0.15 }}
                                 className="overflow-hidden"
                             >
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-slate-500">{addOn.label}</span>
-                                    <span className="font-medium text-slate-900">
-                                        {formatCurrency(addOnTotal, currency)}
-                                        {period > 1 && addOn.period === "month"
-                                            ? ` (${formatCurrency(addOn.price, currency)} × ${period} months)`
-                                            : `/${addOn.period}`}
+                                <div className="flex items-start justify-between gap-3 text-sm">
+                                    <span className="min-w-0 text-slate-500">
+                                        <span className="block">{addOn.label}</span>
+                                        <span className="block text-xs text-slate-400">
+                                            {quantity > 1
+                                                ? `${formatCurrency(addOn.price, currency)} × ${quantity} months`
+                                                : `${formatCurrency(addOn.price, currency)}/${addOn.period}`}
+                                        </span>
+                                    </span>
+                                    <span className="shrink-0 font-medium text-slate-900">
+                                        {formatCurrency(totalCents / 100, currency)}
                                     </span>
                                 </div>
                             </motion.div>

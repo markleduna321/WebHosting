@@ -42,19 +42,18 @@ export default function PlanDetailsSection({
   const periods = getPlanBillingPeriods(plan);
   const currency = plan?.currency ?? "PHP";
 
-  const fullTotalPrice = hasFixedPrice ? plan.monthlyPrice * period : null;
   const totalPrice = hasFixedPrice ? getPlanPeriodPrice(plan, period) : null;
+  const totalCents = totalPrice == null ? null : Math.round(totalPrice * 100);
+  const regularCents = hasFixedPrice
+    ? Math.round(Number(plan.monthlyPrice) * 100) * period
+    : null;
 
-  const perMonthPrice = !hasFixedPrice
+  const perMonthPrice = totalCents == null
     ? null
-    : totalPrice == null
-      ? null
-      : period > 1
-        ? Math.round((totalPrice / period) * 100) / 100
-        : plan.monthlyPrice;
+    : Math.round(totalCents / period) / 100;
 
-  const savings = hasFixedPrice && period > 1
-    ? Math.max(0, Math.round((fullTotalPrice - (totalPrice ?? fullTotalPrice)) * 100) / 100)
+  const savings = period > 1 && totalCents != null && regularCents != null
+    ? Math.max(0, regularCents - totalCents) / 100
     : 0;
 
   const discountPercent = getPlanPeriodDiscountPercent(plan, period);
@@ -113,12 +112,12 @@ export default function PlanDetailsSection({
                 : plan?.price ?? "Custom"}
             </span>
             <span className="text-sm font-medium text-slate-400">/mo</span>
-            {hasFixedPrice && period > 1 && (
+            {savings > 0 && (
               <p className="mt-0.5 text-xs text-slate-400 line-through">
                 {formatCurrency(plan.monthlyPrice, currency)}/mo
               </p>
             )}
-            {hasFixedPrice && savings > 0 && (
+            {savings > 0 && (
               <p className="mt-0.5 text-xs font-semibold text-emerald-600">
                 You save {formatCurrency(savings, currency)} ({discountPercent}%)
               </p>

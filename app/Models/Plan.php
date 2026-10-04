@@ -5,10 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Log;
 
 class Plan extends Model
 {
     use HasFactory;
+
+    /** @var array<string, bool> */
+    private array $reportedMalformedColumns = [];
 
     protected $fillable = [
         'slug',
@@ -60,11 +64,11 @@ class Plan extends Model
 
         $periods = [1];
         foreach (array_merge(
-            array_keys($this->prices ?? []),
-            array_keys($this->period_discounts ?? [])
+            array_keys($this->pricesByPeriod()),
+            array_keys($this->discountsByPeriod())
         ) as $period) {
-            if (filter_var($period, FILTER_VALIDATE_INT, ['options' => ['min_range' => 2]]) !== false) {
-                $periods[] = (int) $period;
+            if ($period >= 2) {
+                $periods[] = $period;
             }
         }
 
@@ -92,7 +96,7 @@ class Plan extends Model
             return (float) $this->monthly_price;
         }
 
-        $discounts = $this->period_discounts ?? [];
+        $discounts = $this->discountsByPeriod();
         if (array_key_exists($months, $discounts)) {
             $discount = $discounts[$months];
             if (! is_numeric($discount) || $discount < 0 || $discount > 100) {
@@ -105,12 +109,70 @@ class Plan extends Model
             );
         }
 
-        $prices = $this->prices ?? [];
+        $prices = $this->pricesByPeriod();
         if (array_key_exists($months, $prices)) {
             return is_numeric($prices[$months]) ? (float) $prices[$months] : null;
         }
 
         return null;
+    }
+
+    /**
+     * Saved period totals keyed by month count.
+     *
+     * @return array<int, mixed>
+     */
+    public function pricesByPeriod(): array
+    {
+        return $this->periodMap('prices');
+    }
+
+    /**
+     * Saved period discount percentages keyed by month count.
+     *
+     * @return array<int, mixed>
+     */
+    public function discountsByPeriod(): array
+    {
+        return $this->periodMap('period_discounts');
+    }
+
+    /**
+     * Only month-keyed maps are valid. A JSON list (e.g. [249, 2200]) would
+     * otherwise turn its array indexes into billing periods, so it is ignored.
+     *
+     * @return array<int, mixed>
+     */
+    private function periodMap(string $column): array
+    {
+        $value = $this->{$column};
+
+        if (! is_array($value) || $value === []) {
+            return [];
+        }
+
+        if (array_is_list($value)) {
+            if (! isset($this->reportedMalformedColumns[$column])) {
+                $this->reportedMalformedColumns[$column] = true;
+                Log::warning('Plan period map is a list instead of a month-keyed object; ignoring it.', [
+                    'plan' => $this->slug,
+                    'column' => $column,
+                ]);
+            }
+
+            return [];
+        }
+
+        $map = [];
+        foreach ($value as $months => $amount) {
+            $months = filter_var($months, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+            if ($months !== false) {
+                $map[$months] = $amount;
+            }
+        }
+        ksort($map);
+
+        return $map;
     }
 
     public function subscriptions(): HasMany

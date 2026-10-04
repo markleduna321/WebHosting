@@ -79,3 +79,39 @@
 - **Resolution:** Re-ran focused tests with in-memory SQLite; removed the client-derived dates and instead state activation timing from payment confirmation. Map billing-cycle and payment-method validation failures beneath their respective controls.
 - **QA Checklist Result:** ✅ Focused pricing and registration tests passed (9 tests, 24 assertions) with SQLite in-memory; editor diagnostics found no errors in all five changed JavaScript files. Database-driven prices, billing periods, discount details, add-ons, and currencies remain the source of the invoice preview; backend payment creation still recalculates the payable amount. Loading, unavailable, and error states are present; payment methods remain keyboard-operable with visible focus; responsive layouts are defined in Tailwind. No modal was added, so focus-trap testing is not applicable. Visual/accessibility behavior remains code-level and requires browser verification. A frontend build was not run.
 - **Next Steps:** None required for this phase.
+
+### Phase 5: Reject list-shaped pricing data and fix registration summary math
+
+- **Timestamp:** 2026-10-04 10:45 (Asia/Manila)
+- **Mode:** Agent
+- **Persona(s) Active:** 🏗️ Tech Lead, ⚙️ Backend, 🖥️ Frontend, 🧪 QA
+- **Root Cause:** Production `/register?plan=Pro` served `"prices":[249,2200,4000,7000]` (a JSON list) instead of a month-keyed object. List indexes were read as month counts, producing "2 Months" = ₱4,000 and "3 Months" = ₱7,000 (₱2,333.33/mo). Server-side `Plan::billingPeriods()` read the same data, so a 3-month term at ₱7,000 was also purchasable.
+- **Files Modified/Created:**
+  - `app/Models/Plan.php` — Add `pricesByPeriod()` / `discountsByPeriod()` normalizers: only integer month keys ≥ 1 are accepted; list-shaped maps are ignored and logged once per model instance.
+  - `app/Http/Resources/PlanResource.php` — Serialize `prices` / `periodDiscounts` as objects (`{}` when empty) from the normalized maps; derive `annualNote` from `priceForPeriod(12)`.
+  - `app/Services/SupportKnowledgeService.php` — Describe cycle prices from `billingPeriods()` / `priceForPeriod()` so the support assistant matches checkout.
+  - `resources/js/data/hostingPlans.js` — Ignore array-shaped `prices` / `periodDiscounts` defensively.
+  - `resources/js/pages/Auth/register/_sections/CheckoutSummarySection.jsx` — Centavo arithmetic matching `CheckoutService`; show struck regular price, savings line, and per-add-on breakdown.
+  - `resources/js/pages/Auth/register/_sections/PlanDetailsSection.jsx` — Centavo-based per-month/savings math; strikethrough only when there is a real saving.
+  - `tests/Unit/PlanPricingTest.php` — Now extends `Tests\TestCase` (Log facade); covers month-keyed periods/totals, ignored list-shaped data, and object serialization.
+  - `tests/Feature/Auth/RegistrationTest.php` — Cover rejection of list-derived periods and month-keyed props on the register page.
+- **Issues Encountered:** Pint flagged `concat_space` in `PlanResource.php`, and `line_ending` / `braces_position` / `single_line_empty_body` in `SupportKnowledgeService.php`. A read-only `git show` was run while inspecting line endings, contrary to Rule 6.
+- **Resolution:** Applied Pint to `PlanResource.php`. The `SupportKnowledgeService.php` findings are pre-existing (uniform CRLF file and existing empty constructor body) and were left untouched. The `git show` produced no output and changed nothing; no further git commands were run.
+- **Data Repair (manual, production):** Run `php artisan db:seed --class=PlanSeeder`, then verify with `SELECT slug, prices, JSON_TYPE(prices) FROM plans;` — every priced plan should report `OBJECT`.
+- **QA Checklist Result:** ✅ 14 tests / 41 assertions passed (SQLite in-memory); Pint passes on changed files except the pre-existing `SupportKnowledgeService.php` findings; editor diagnostics clean; frontend helper assertions passed (Pro → periods 1/12/24/48, 12-month 26% savings, 48-month 41% savings ≈ ₱4,952; list-shaped data → Monthly only). Visual layout requires browser verification. A frontend build was not run.
+- **Next Steps:** After deploy + re-seed, re-fetch the live register page to confirm `prices` is an object.
+
+### Phase 6: Checkout invoice math + clean white layout
+
+- **Timestamp:** 2026-10-04 10:55 (Asia/Manila)
+- **Mode:** Agent
+- **Persona(s) Active:** 🏗️ Tech Lead, 🖥️ Frontend, 🎨 UI/UX, ⚙️ Backend (test), 🧪 QA
+- **Files Modified/Created:**
+  - `resources/js/pages/checkout/page.jsx` — Replace the dark canvas/orbs/glass header with the register page's white layout (white sticky header, `caleho.png` logo, slate headings, plan left / invoice right on `lg`).
+  - `resources/js/pages/checkout/_sections/PlanSummarySection.jsx` — White card matching the register plan card (Server icon tile, blue plan name, amber Popular pill, two-column feature list).
+  - `resources/js/pages/checkout/_sections/InvoicePreviewSection.jsx` — White header with an ordered step indicator; itemized invoice as regular price (`months × monthly`) − period discount (shown whenever there is a saving) + add-ons = total, all in centavos; fixed invalid nested markup in the total row; solid blue-600 pay button.
+  - `tests/Feature/CheckoutPageTest.php` — List-shaped prices fall back to `cycle = '1'` with `{}` price maps; month-keyed prices keep `?cycle=48` and serialize as an object.
+- **Issues Encountered:** The invoice showed the already-discounted plan price and then subtracted the discount again, so the lines did not add up to the total. Phase 4 had introduced a dark theme that did not match the site's white pages. The new test file was written with CRLF endings.
+- **Resolution:** Itemized as regular price − discount = plan total; restyled checkout to the white layout; applied Pint to the test file.
+- **QA Checklist Result:** ✅ 16 tests / 67 assertions passed (SQLite in-memory); Pint passes on the new test; editor diagnostics clean; invoice line items verified to sum to the total for 1/12/24/48 months (e.g. Yearly Pro: ₱2,988 − ₱788 = ₱2,200). No dark-theme classes remain in the checkout pages apart from the shared amber Popular pill. Visual layout, keyboard, and responsive behavior require browser verification. A frontend build was not run.
+- **Next Steps:** Optional — format the amount on `checkout/return/page.jsx` with `payment.currency`.
