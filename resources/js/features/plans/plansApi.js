@@ -14,15 +14,18 @@ export const plansApi = api.injectEndpoints({
 			invalidatesTags: ["Plan"],
 		}),
 		updatePlan: builder.mutation({
-			query: ({ id, ...body }) => ({
-				url: `/admin/plans/${id}`,
+			query: ({ slug, ...body }) => ({
+				url: `/admin/plans/${encodeURIComponent(slug)}`,
 				method: "PUT",
 				body,
 			}),
 			invalidatesTags: ["Plan"],
 		}),
 		deletePlan: builder.mutation({
-			query: (id) => ({ url: `/admin/plans/${id}`, method: "DELETE" }),
+			query: (slug) => ({
+				url: `/admin/plans/${encodeURIComponent(slug)}`,
+				method: "DELETE",
+			}),
 			invalidatesTags: ["Plan"],
 		}),
 	}),

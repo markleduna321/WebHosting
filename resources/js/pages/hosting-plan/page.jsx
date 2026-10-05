@@ -16,7 +16,7 @@ export default function Page({ plans = [] }) {
         return (
             <div className="space-y-4">
                 <AdminHeaderSection href="/hosting" onAction={() => setCreatePlanOpen(true)} />
-                <HostPlanTableSection plans={plans} />
+                <HostPlanTableSection onCreate={() => setCreatePlanOpen(true)} />
 
                 <CreatePlanSection
                     open={createPlanOpen}

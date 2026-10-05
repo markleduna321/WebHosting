@@ -12,7 +12,7 @@ export default function DeletePlanModal({ plan, onClose }) {
 		setServerError(null);
 
 		try {
-			await deletePlan(plan.id).unwrap();
+			await deletePlan(plan.slug).unwrap();
 			message.success("Plan deleted");
 			onClose();
 		} catch (err) {

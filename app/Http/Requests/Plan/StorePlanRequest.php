@@ -6,6 +6,8 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StorePlanRequest extends FormRequest
 {
+    use ValidatesPlanPricing;
+
     public function authorize(): bool
     {
         return true;
@@ -18,16 +20,11 @@ class StorePlanRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:125', 'unique:plans,name'],
-            'slug' => ['sometimes', 'string', 'max:125', 'unique:plans,slug'],
+            'slug' => ['sometimes', 'string', 'max:125', 'alpha_dash', 'unique:plans,slug'],
             'subtitle' => ['nullable', 'string', 'max:255'],
             'monthly_price' => ['nullable', 'numeric', 'min:0'],
             'currency' => ['sometimes', 'string', 'size:3'],
-            'prices' => ['nullable', 'array'],
-            'prices.*' => ['numeric', 'min:0'],
-            'period_discounts' => ['nullable', 'array'],
-            'period_discounts.*' => ['numeric', 'min:0', 'max:100'],
-            'features' => ['nullable', 'array'],
-            'features.*' => ['string', 'max:255'],
+            ...$this->pricingRules(),
             'is_popular' => ['sometimes', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
             'sort_order' => ['sometimes', 'integer', 'min:0'],

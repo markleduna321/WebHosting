@@ -25,10 +25,10 @@ export const ADMIN_NAV_GROUPS = [
         description: 'Pricing, caps and feature flags',
     },
     {
-        name: 'Plans & Add-ons',
+        name: 'Add-ons',
         href: '/admin/plans-addons',
         icon: Package,
-        description: 'Create, edit and manage hosting plans and add-ons',
+        description: 'Create, edit and manage hosting add-ons',
     },
     {
         name: 'User Management',
@@ -113,10 +113,10 @@ const ADMIN_HEADER_META = {
         actionSecondaryLabel: '6 months',
     },
     '/admin/plans-addons': {
-        breadcrumb: 'Plans & Add-ons',
-        title: 'Plans & Add-ons',
+        breadcrumb: 'Add-ons',
+        title: 'Add-ons',
         subtitle:
-            'Create, edit, and manage hosting plans and add-on services. Changes publish to the public pricing page and checkout flow.',
+            'Create, edit, and manage hosting add-on services. Changes publish to registration and checkout. Plans are managed under Plans.',
         actionLabel: null,
         actionSecondaryLabel: null,
     },

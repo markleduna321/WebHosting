@@ -1,1 +1,0 @@
-import{f as s}from"./app-DnAwP_21.js";const o=s.injectEndpoints({endpoints:t=>({updateUser:t.mutation({query:e=>({url:"/user",method:"PUT",body:e}),invalidatesTags:["User"]})})}),{useUpdateUserMutation:i}=o;export{i as u};

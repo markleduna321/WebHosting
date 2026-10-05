@@ -146,7 +146,7 @@ export default function PlanFormModal({ open, plan, onClose }) {
 
 		try {
 			if (isEdit) {
-				await updatePlan({ id: plan.id, ...payload }).unwrap();
+				await updatePlan({ slug: plan.slug, ...payload }).unwrap();
 				message.success("Plan updated");
 			} else {
 				await createPlan(payload).unwrap();

@@ -1,135 +1,188 @@
-import { useEffect } from "react";
-import { useForm } from "@inertiajs/react";
+import {
+    getPlanBillingPeriods,
+    getPlanPeriodDiscountPercent,
+    getPlanPeriodPrice,
+} from "@/data/hostingPlans";
 
-export const PLAN_STATUS_OPTIONS = [
-    { label: "Active", value: "active" },
-    { label: "Draft", value: "draft" },
-    { label: "Archived", value: "archived" },
-];
+export const MAX_MONTHS = 120;
 
-export const SUPPORT_LEVEL_OPTIONS = [
-    { label: "Student", value: "student" },
-    { label: "Standard", value: "standard" },
-    { label: "Priority", value: "priority" },
-];
-
-export const DEFAULT_VALUES = {
-    plan_name: "",
-    tagline: "",
-    description: "",
-    monthly_price: "99",
-    yearly_price: "990",
-    promotional_price: "",
-    student_discount: "0",
-    trial_period: "14",
-    plan_status: "active",
-    storage_cap: "10240",
-    bandwidth: "100",
-    websites: "1",
-    domains: "1",
-    databases: "1",
-    email_accounts: "1",
-    support_level: "student",
-    ssl_included: true,
-    git_access: false,
-    deployment_access: true,
+export const JSON_FIELDS = {
+    prices: { label: "Period prices", minMonths: 1, maxValue: null, valueLabel: "Total" },
+    period_discounts: { label: "Period discounts (%)", minMonths: 2, maxValue: 100, valueLabel: "Discount %" },
 };
 
-export const REQUIRED_FIELDS = [
-    ["plan_name", "Plan name"],
-    ["tagline", "Tagline"],
-    ["description", "Description"],
-    ["monthly_price", "Monthly price"],
-    ["yearly_price", "Yearly price"],
-    ["student_discount", "Student discount"],
-    ["trial_period", "Trial period"],
-    ["storage_cap", "Storage cap"],
-    ["bandwidth", "Bandwidth"],
-    ["websites", "Websites"],
-    ["domains", "Domains"],
-    ["databases", "Databases"],
-    ["email_accounts", "Email accounts"],
-    ["support_level", "Support level"],
+export const LIMIT_FIELDS = [
+    { name: "max_websites", label: "Websites", helper: "Sites a subscriber can host" },
+    { name: "max_databases", label: "Databases", helper: "MySQL databases" },
+    { name: "disk_space_mb", label: "Storage (MB)", helper: "e.g. 50 or 200" },
+    { name: "db_size_mb", label: "Database size (MB)", helper: "Per database" },
 ];
 
-export const FIELD_GROUPS = [
-    {
-        title: "Pricing controls",
-        columns: "grid-cols-1 md:grid-cols-3",
-        fields: [
-            { name: "monthly_price", label: "Monthly price (₱)", placeholder: "99", helper: "e.g. 129" },
-            { name: "yearly_price", label: "Yearly price (₱)", placeholder: "990", helper: "e.g. 1,000" },
-            { name: "promotional_price", label: "Promotional price (₱)", placeholder: "None" },
-            { name: "student_discount", label: "Student discount (%)", placeholder: "0" },
-            { name: "trial_period", label: "Trial period (days)", placeholder: "14" },
-            { name: "plan_status", label: "Plan status", type: "select", options: PLAN_STATUS_OPTIONS },
-        ],
-    },
-    {
-        title: "Limits — use -1 for unlimited",
-        columns: "grid-cols-1 md:grid-cols-3",
-        fields: [
-            { name: "storage_cap", label: "Storage cap (MB)", placeholder: "10240", helper: "e.g. 50 or 200" },
-            { name: "bandwidth", label: "Bandwidth (GB)", placeholder: "100" },
-            { name: "websites", label: "Websites", placeholder: "1" },
-            { name: "domains", label: "Domains", placeholder: "1" },
-            { name: "databases", label: "Databases", placeholder: "1" },
-            { name: "email_accounts", label: "Email accounts", placeholder: "1" },
-        ],
-    },
-];
+const EMPTY_PLAN = {
+    name: "",
+    subtitle: "",
+    monthly_price: "",
+    currency: "PHP",
+    sort_order: "0",
+    is_popular: false,
+    is_active: true,
+    max_websites: "1",
+    max_databases: "1",
+    disk_space_mb: "50",
+    db_size_mb: "50",
+    prices: {},
+    period_discounts: {},
+    features: [],
+};
 
-export function createInitialValues(plan) {
-    if (!plan) return DEFAULT_VALUES;
+export function formatJson(value) {
+    return JSON.stringify(value ?? {}, null, 2);
+}
+
+/** Converts an admin plan resource into editable form state. JSON fields are kept as text. */
+export function planToForm(plan, { copy = false } = {}) {
+    const source = { ...EMPTY_PLAN, ...(plan ?? {}) };
 
     return {
-        ...DEFAULT_VALUES,
-        plan_name: plan.plan_name ?? plan.name ?? "",
-        tagline: plan.tagline ?? plan.subtitle ?? "",
-        description: plan.description ?? plan.subtitle ?? "",
-        monthly_price: String(plan.monthly_price ?? plan.monthlyPrice ?? "99"),
-        yearly_price: String(plan.yearly_price ?? plan.annual_price ?? plan.annualPrice ?? "990"),
-        promotional_price: String(plan.promotional_price ?? ""),
-        student_discount: String(plan.student_discount ?? "0"),
-        trial_period: String(plan.trial_period ?? "14"),
-        plan_status: plan.plan_status ?? "active",
-        storage_cap: String(plan.storage_cap ?? "10240"),
-        bandwidth: String(plan.bandwidth ?? "100"),
-        websites: String(plan.websites ?? "1"),
-        domains: String(plan.domains ?? "1"),
-        databases: String(plan.databases ?? "1"),
-        email_accounts: String(plan.email_accounts ?? "1"),
-        support_level: plan.support_level ?? "student",
-        ssl_included: Boolean(plan.ssl_included ?? true),
-        git_access: Boolean(plan.git_access ?? false),
-        deployment_access: Boolean(plan.deployment_access ?? true),
+        name: copy ? `${source.name} (Copy)` : source.name ?? "",
+        subtitle: source.subtitle ?? "",
+        monthly_price: source.monthly_price == null ? "" : String(source.monthly_price),
+        currency: source.currency ?? "PHP",
+        sort_order: String(source.sort_order ?? 0),
+        is_popular: copy ? false : Boolean(source.is_popular),
+        is_active: copy ? false : Boolean(source.is_active),
+        max_websites: String(source.max_websites ?? 1),
+        max_databases: String(source.max_databases ?? 1),
+        disk_space_mb: String(source.disk_space_mb ?? 50),
+        db_size_mb: String(source.db_size_mb ?? 50),
+        pricesText: formatJson(source.prices),
+        discountsText: formatJson(source.period_discounts),
+        featuresText: formatJson(source.features ?? []),
     };
 }
 
-export function normalizeFeatures(features) {
-    if (!Array.isArray(features)) {
+/** Parses a month-keyed JSON map, mirroring the server rules in ValidatesPlanPricing. */
+export function parseMonthMap(text, { minMonths = 1, maxValue = null } = {}) {
+    if (!String(text ?? "").trim()) {
+        return { value: {}, error: null };
+    }
+
+    let parsed;
+    try {
+        parsed = JSON.parse(text);
+    } catch (error) {
+        return { value: null, error: `Invalid JSON: ${error.message}` };
+    }
+
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+        return {
+            value: null,
+            error: 'Use an object keyed by months, e.g. {"12": 2200}. Lists like [249, 2200] are not allowed.',
+        };
+    }
+
+    const value = {};
+    for (const [key, raw] of Object.entries(parsed)) {
+        const months = Number(key);
+        if (!/^\d+$/.test(key) || months < minMonths || months > MAX_MONTHS) {
+            return { value: null, error: `Key "${key}" must be a month count from ${minMonths} to ${MAX_MONTHS}.` };
+        }
+
+        const amount = typeof raw === "string" && raw.trim() !== "" ? Number(raw) : raw;
+        if (typeof amount !== "number" || !Number.isFinite(amount) || amount < 0) {
+            return { value: null, error: `Value for "${key}" must be a number of 0 or more.` };
+        }
+        if (maxValue != null && amount > maxValue) {
+            return { value: null, error: `Value for "${key}" must be ${maxValue} or less.` };
+        }
+
+        value[months] = amount;
+    }
+
+    return { value, error: null };
+}
+
+export function parseFeatures(text) {
+    if (!String(text ?? "").trim()) {
+        return { value: [], error: null };
+    }
+
+    let parsed;
+    try {
+        parsed = JSON.parse(text);
+    } catch (error) {
+        return { value: null, error: `Invalid JSON: ${error.message}` };
+    }
+
+    if (!Array.isArray(parsed) || parsed.some((item) => typeof item !== "string")) {
+        return { value: null, error: 'Use a list of text values, e.g. ["3 Sites", "Free SSL"].' };
+    }
+
+    const value = parsed.map((item) => item.trim()).filter(Boolean);
+    if (value.some((item) => item.length > 255)) {
+        return { value: null, error: "Each feature must be 255 characters or fewer." };
+    }
+
+    return { value, error: null };
+}
+
+export function parseJsonFields(form) {
+    const prices = parseMonthMap(form.pricesText, JSON_FIELDS.prices);
+    const discounts = parseMonthMap(form.discountsText, JSON_FIELDS.period_discounts);
+    const features = parseFeatures(form.featuresText);
+
+    return {
+        prices,
+        period_discounts: discounts,
+        features,
+        hasErrors: Boolean(prices.error || discounts.error || features.error),
+    };
+}
+
+/** Same period/discount math as checkout, so the preview matches what customers are charged. */
+export function previewBillingPeriods(monthlyPrice, prices, discounts) {
+    if (monthlyPrice === "" || monthlyPrice == null || !Number.isFinite(Number(monthlyPrice))) {
         return [];
     }
 
-    return features
-        .map((feature) => {
-            if (typeof feature === "string") return feature;
-            if (feature?.label) return feature.label;
-            if (feature?.name) return feature.name;
-            return null;
-        })
-        .filter(Boolean);
+    const plan = {
+        monthlyPrice: Number(monthlyPrice),
+        prices: prices ?? {},
+        periodDiscounts: discounts ?? {},
+    };
+
+    return getPlanBillingPeriods(plan).map((months) => ({
+        months,
+        total: getPlanPeriodPrice(plan, months),
+        discountPercent: getPlanPeriodDiscountPercent(plan, months),
+        source: months === 1 ? "monthly" : plan.periodDiscounts[months] != null ? "discount" : "price",
+    }));
 }
 
-export function useHostingPlanForm(plan, open) {
-    const form = useForm(createInitialValues(plan));
+export function buildPayload(form, parsed) {
+    return {
+        name: form.name.trim(),
+        subtitle: form.subtitle.trim() || null,
+        monthly_price: form.monthly_price === "" ? null : Number(form.monthly_price),
+        currency: form.currency.trim().toUpperCase(),
+        sort_order: Number(form.sort_order || 0),
+        is_popular: form.is_popular,
+        is_active: form.is_active,
+        max_websites: Number(form.max_websites || 0),
+        max_databases: Number(form.max_databases || 0),
+        disk_space_mb: Number(form.disk_space_mb || 0),
+        db_size_mb: Number(form.db_size_mb || 0),
+        prices: parsed.prices.value,
+        period_discounts: parsed.period_discounts.value,
+        features: parsed.features.value,
+    };
+}
 
-    useEffect(() => {
-        if (!open) return;
-
-        form.setData(createInitialValues(plan));
-        form.clearErrors();
-    }, [open, plan]);
-
-    return form;
+/** Groups Laravel 422 keys such as "period_discounts.48" or "features.0" under their form field. */
+export function groupServerErrors(errors = {}) {
+    return Object.entries(errors).reduce((grouped, [key, messages]) => {
+        const field = key.split(".")[0];
+        grouped[field] = grouped[field] ?? messages?.[0];
+        return grouped;
+    }, {});
 }
