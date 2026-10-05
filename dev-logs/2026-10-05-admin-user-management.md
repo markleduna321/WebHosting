@@ -1,0 +1,21 @@
+### Phase 1: Admin user list (read-only)
+
+- **Timestamp:** 2026-10-05T20:20:00+08:00
+- **Mode:** Agent
+- **Persona(s) Active:** ⚙️ Backend + 🖥️ Frontend + 🎨 Designer + 🧪 QA
+- **Context:** `/admin/user-management` showed only hard-coded stat cards (Active 7, Inactive 1, Suspended 1, Pending 1), used a "Dashboard"/"Hosting Plan" layout title and hosting-plan imports, and its "Invite student" button opened a non-existent create-plan modal. There was no API for listing users, and the users table has no suspended/inactive status column.
+- **Files Modified/Created:**
+  - `app/Policies/UserPolicy.php` — Added `viewAny` (admin only); existing self-only `view`/`update` unchanged.
+  - `app/Http/Resources/AdminUserResource.php` — New admin directory resource: id, name, email, roles, email verification, 2FA flag, active-or-pending plan `{name, slug, status}`, joined date. No credentials, 2FA codes, or tokens.
+  - `app/Http/Controllers/Api/AdminUserController.php` — `index`: authorizes `viewAny`, searches name/email (trimmed, max 100 chars), newest first, 15 per page, eager-loads roles and subscriptions to avoid N+1.
+  - `routes/api.php` — `GET /api/admin/users` (`api.admin.users.index`) in the existing `auth:sanctum` + `role:admin` admin group.
+  - `resources/js/features/users/usersApi.js` — `useGetAdminUsersQuery({ page, search })`, `providesTags: ['AdminUser']`.
+  - `resources/js/store/index.js` — Registered the `AdminUser` tag type.
+  - `resources/js/pages/user-management/_sections/UsersTableSection.jsx` — Debounced search, user/roles/plan/email/2FA/joined columns, pagination, skeleton, error, and empty states with CTAs.
+  - `resources/js/pages/user-management/page.jsx` — Renders header + users table; removed fake stat cards and unrelated hosting imports; layout title "User Management".
+  - `resources/js/components/layout/navConfig.js` — Header subtitle describes the real page; removed the non-functional "Invite student" action.
+  - `tests/Feature/Admin/AdminUserListTest.php` — 5 tests: roles/plan/status mapping (active, pending, none), exact safe field list, search by name or email, pagination, 403 for non-admins and 401 for guests.
+- **Issues Encountered:** `CardSection.jsx` is now unused; deleting it is a guarded action (Rule 6). The full test suite shows 8 failures in tests unrelated to this phase.
+- **Resolution:** Left `CardSection.jsx` in place (nothing imports it). The 8 failures were present before this phase and have separate causes: missing Inertia page files `Auth/ConfirmPassword.jsx` and `Profile/Edit.jsx` (folder is `profile/`), `ExampleTest` lacks `RefreshDatabase`, `PasswordResetTest` expects Laravel's `ResetPassword` notification while the app sends its own, and `ProfileTest` delete requests lack the now-required `name`/`confirmation` fields. Not changed in this phase.
+- **QA Checklist Result:** ✅ New tests 5 passed (23 assertions); full suite 61 passed with 8 pre-existing unrelated failures; Pint passes; editor diagnostics clean; esbuild syntax check passes for all changed JS; route registered. Policy + `role:admin` guard the endpoint; Eloquent Resource collection with `meta`/`links`; no primary keys in URLs; RTK `providesTags` set (no mutations this phase); no `components/ui` component connects to Redux. Keyboard and responsive behavior are code-level ✅ — require browser verification. A frontend build was not run; run `npm run build` before committing.
+- **Next Steps:** None planned. Optional follow-ups: fix the 8 pre-existing test failures; delete the unused `CardSection.jsx`; add user actions (invite, change role, etc.) in later phases.

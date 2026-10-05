@@ -84,8 +84,8 @@ const ADMIN_HEADER_META = {
         breadcrumb: 'User Management',
         title: 'User management',
         subtitle:
-            'Global directory of every registered student and standard user — suspend accounts, override resource quotas, or reset credentials.',
-        actionLabel: 'Invite student',
+            'Directory of every registered user — roles, current plan, email verification and two-factor status.',
+        actionLabel: null,
         actionSecondaryLabel: null,
     },
     '/admin/permissions': {
