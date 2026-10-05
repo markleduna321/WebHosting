@@ -1,5 +1,0 @@
-<<<<<<<< HEAD:public/build/assets/Badge-BaK2H_b8.js
-import{j as l}from"./app-BNPb0z9o.js";const e={success:"bg-green-100 text-green-800",warning:"bg-yellow-100 text-yellow-800",error:"bg-red-100 text-red-800",info:"bg-blue-100 text-blue-800",neutral:"bg-gray-100 text-gray-800"};function x({variant:t="neutral",children:r,className:n=""}){const s=e[t]||e.neutral;return l.jsx("span",{className:`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${s} ${n}`,children:r})}export{x as B};
-========
-import{j as l}from"./app-KjrAut2L.js";const e={success:"bg-green-100 text-green-800",warning:"bg-yellow-100 text-yellow-800",error:"bg-red-100 text-red-800",info:"bg-blue-100 text-blue-800",neutral:"bg-gray-100 text-gray-800"};function x({variant:t="neutral",children:r,className:n=""}){const s=e[t]||e.neutral;return l.jsx("span",{className:`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${s} ${n}`,children:r})}export{x as B};
->>>>>>>> e0ce42bb99a78222bd0cad039b0cd6eaea452621:public/build/assets/Badge-C5pL64zZ.js

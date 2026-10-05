@@ -1,5 +1,0 @@
-<<<<<<<< HEAD:public/build/assets/colors-BGZaUUMo.js
-import{P as t,_ as n}from"./useZIndex-N8vFBvM-.js";function f(r,e){return t.reduce((o,s)=>{const u=r[`${s}1`],i=r[`${s}3`],a=r[`${s}6`],c=r[`${s}7`];return{...o,...e(s,{lightColor:u,lightBorderColor:i,darkColor:a,textColor:c})}},{})}const l=t.map(r=>`${r}-inverse`),C=["success","processing","error","default","warning"];function g(r,e=!0){return e?[].concat(n(l),n(t)).includes(r):t.includes(r)}function P(r){return C.includes(r)}export{P as a,f as g,g as i};
-========
-import{P as t,_ as n}from"./useZIndex-D3AMIk4F.js";function f(r,e){return t.reduce((o,s)=>{const u=r[`${s}1`],i=r[`${s}3`],a=r[`${s}6`],c=r[`${s}7`];return{...o,...e(s,{lightColor:u,lightBorderColor:i,darkColor:a,textColor:c})}},{})}const l=t.map(r=>`${r}-inverse`),C=["success","processing","error","default","warning"];function g(r,e=!0){return e?[].concat(n(l),n(t)).includes(r):t.includes(r)}function P(r){return C.includes(r)}export{P as a,f as g,g as i};
->>>>>>>> e0ce42bb99a78222bd0cad039b0cd6eaea452621:public/build/assets/colors-CVgeajhU.js
