@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AdminAddonController;
+use App\Http\Controllers\Api\AdminPlanController;
 use App\Http\Controllers\Api\GithubRepositoryController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\PayMongoWebhookController;
@@ -130,4 +132,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Domains
     Route::post('domains/{domain}/verify', [\App\Http\Controllers\Api\DomainController::class, 'verify'])->name('api.domains.verify');
     Route::apiResource('domains', \App\Http\Controllers\Api\DomainController::class)->only(['index', 'store', 'destroy']);
+
+    // Admin — Plans & Add-ons
+    Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::apiResource('plans', AdminPlanController::class);
+        Route::apiResource('addons', AdminAddonController::class);
+    });
 });

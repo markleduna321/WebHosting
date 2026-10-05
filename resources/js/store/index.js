@@ -23,7 +23,7 @@ export const api = createApi({
 			return headers;
 		},
 	}),
-	tagTypes: ['User', 'Role', 'Permission', 'GithubRepository', 'Website', 'WebsiteFile', 'StudentDatabase', 'Payment', 'TwoFactor', 'Domain', 'SupportConversation'],
+	tagTypes: ['User', 'Role', 'Permission', 'GithubRepository', 'Website', 'WebsiteFile', 'StudentDatabase', 'Payment', 'TwoFactor', 'Domain', 'SupportConversation', 'Plan', 'Addon'],
 	endpoints: (builder) => ({
 		getUser: builder.query({
 			query: () => '/user',

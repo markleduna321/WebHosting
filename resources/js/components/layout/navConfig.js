@@ -7,6 +7,7 @@ import {
     Database,
     Globe,
     BookOpen,
+    Package,
 } from 'lucide-react';
 
 export const DASHBOARD_LINK = {
@@ -22,6 +23,12 @@ export const ADMIN_NAV_GROUPS = [
         href: '/hosting',
         icon: Server,
         description: 'Pricing, caps and feature flags',
+    },
+    {
+        name: 'Plans & Add-ons',
+        href: '/admin/plans-addons',
+        icon: Package,
+        description: 'Create, edit and manage hosting plans and add-ons',
     },
     {
         name: 'User Management',
@@ -104,6 +111,14 @@ const ADMIN_HEADER_META = {
             'Business growth intelligence — MRR trends, referral conversion, storage consumption and churn, read together.',
         actionLabel: '12 months',
         actionSecondaryLabel: '6 months',
+    },
+    '/admin/plans-addons': {
+        breadcrumb: 'Plans & Add-ons',
+        title: 'Plans & Add-ons',
+        subtitle:
+            'Create, edit, and manage hosting plans and add-on services. Changes publish to the public pricing page and checkout flow.',
+        actionLabel: null,
+        actionSecondaryLabel: null,
     },
 };
 
